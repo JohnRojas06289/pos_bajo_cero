@@ -1,120 +1,144 @@
-﻿<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="dark">
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="Portal de empleados para POS Arepas" />
-    <meta name="author" content="Bajo Cero" />
-    <title>Bajo Cero - Acceso Empleados</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-    <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
-    <style>
-        .hero-section {
-            padding: 5rem 0;
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            color: white;
-            text-align: center;
-            border-bottom: 4px solid #3b82f6; /* Blue accent */
-        }
-        .accordion-button:not(.collapsed) {
-            background-color: #3b82f6;
-            color: #fff;
-        }
-        .accordion-button:focus {
-            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
-            border-color: #3b82f6;
-        }
-    </style>
-</head>
-<body class="d-flex flex-column min-vh-100 bg-dark text-light">
+﻿@extends('layouts.public')
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-md navbar-dark bg-secondary bg-opacity-25">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="{{route('panel')}}">
-                ❄️ Bajo Cero POS
-            </a>
-            <div class="ms-auto">
-                <form class="d-flex" action="{{route('login.index')}}" method="get">
-                    <button class="btn btn-outline-light" type="submit">Iniciar Sesión</button>
-                </form>
+@section('title', 'Bajo Cero | Inicio')
+
+@section('content')
+<!-- Hero Section -->
+<header class="hero-section">
+    <div class="container px-5">
+        <div class="row gx-5 align-items-center justify-content-center">
+            <div class="col-lg-8 col-xl-7 col-xxl-6">
+                <div class="my-5 text-center text-xl-start">
+                    <h1 class="hero-title mb-2">
+                        Estilo que <br><span>Desafía</span>
+                    </h1>
+                    <p class="lead fw-normal text-white-50 mb-4">Descubre la nueva colección de chaquetas y gorras diseñadas para la vida urbana. Calidad premium, diseño exclusivo y la actitud que necesitas.</p>
+                    <div class="d-grid gap-3 d-sm-flex justify-content-sm-center justify-content-xl-start">
+                        <a class="btn-neon px-4 me-sm-3" href="{{ route('collection') }}">Ver Colección</a>
+                        <a class="btn btn-outline-light btn-lg px-4" href="{{ route('contact') }}">Contactar</a>
+                    </div>
+                </div>
             </div>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <h1 class="display-4 fw-bold mb-3">Sistema de Gestión - Bajo Cero</h1>
-            <p class="lead mb-4 text-light text-opacity-75">Control de inventario y ventas para tienda de ropa.</p>
-            <a href="{{route('login.index')}}" class="btn btn-primary btn-lg px-5 fw-bold">Ingresar al Sistema</a>
-        </div>
-    </section>
-
-    <!-- Features Accordion -->
-    <div class="container my-5 flex-grow-1">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <h4 class="text-center mb-4 text-secondary">Herramientas Disponibles</h4>
-                <div class="accordion" id="featuresAccordion">
-                    <div class="accordion-item bg-secondary bg-opacity-10 border-secondary">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
-                                🧥 Gestión de Ventas
-                            </button>
-                        </h2>
-                        <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#featuresAccordion">
-                            <div class="accordion-body text-light text-opacity-75">
-                                Registra ventas de prendas (chaquetas, buzos) de forma rápida. Controla tallas y colores.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item bg-secondary bg-opacity-10 border-secondary">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
-                                📊 Informes y Reportes
-                            </button>
-                        </h2>
-                        <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#featuresAccordion">
-                            <div class="accordion-body text-light text-opacity-75">
-                                Visualiza el rendimiento diario y mensual. Controla las ganancias y productos más vendidos.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item bg-secondary bg-opacity-10 border-secondary">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
-                                📦 Inventario
-                            </button>
-                        </h2>
-                        <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#featuresAccordion">
-                            <div class="accordion-body text-light text-opacity-75">
-                                Control total del stock de prendas. Alertas automáticas de stock bajo.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item bg-secondary bg-opacity-10 border-secondary">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
-                                👥 Gestión de Personal
-                            </button>
-                        </h2>
-                        <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#featuresAccordion">
-                            <div class="accordion-body text-light text-opacity-75">
-                                Administración de usuarios y permisos dentro del sistema POS.
-                            </div>
-                        </div>
+            <div class="col-xl-5 col-xxl-6 d-none d-xl-block text-center">
+                <!-- Placeholder for Hero Image -->
+                <div style="width: 100%; height: 500px; background: radial-gradient(circle, #00f2ff40 0%, transparent 70%); position: relative; border: 1px solid #333; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-snowflake fa-5x" style="color: var(--primary-color); opacity: 0.8; filter: drop-shadow(0 0 10px var(--primary-color));"></i>
+                    <div style="position: absolute; bottom: 20px; right: 20px; color: #fff;">
+                        <i class="fas fa-star fa-spin"></i> Nueva Colección
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</header>
 
-    <!-- Footer -->
+<!-- Features Section -->
+<section class="py-5 bg-darker" style="background-color: #0a0a0a;">
+    <div class="container px-5 my-5">
+        <div class="row gx-5">
+            <div class="col-lg-4 mb-5 mb-lg-0">
+                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-collection"></i></div>
+                <h2 class="h4 fw-bold text-white"><i class="fas fa-check-circle text-primary me-2"></i>Calidad Premium</h2>
+                <p class="text-white-50">Materiales seleccionados rigurosamente para garantizar durabilidad y confort en cada prenda.</p>
+            </div>
+            <div class="col-lg-4 mb-5 mb-lg-0">
+                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-building"></i></div>
+                <h2 class="h4 fw-bold text-white"><i class="fas fa-bolt text-warning me-2"></i>Diseño Exclusivo</h2>
+                <p class="text-white-50">Ediciones limitadas y diseños únicos que no encontrarás en ningún otro lugar.</p>
+            </div>
+            <div class="col-lg-4">
+                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-toggles2"></i></div>
+                <h2 class="h4 fw-bold text-white"><i class="fas fa-box text-success me-2"></i>Envío Seguro</h2>
+                <p class="text-white-50">Recibe tus productos en la puerta de tu casa con total garantía y seguimiento en tiempo real.</p>
+            </div>
+        </div>
+    </div>
+</section>
 
+<!-- Featured Products -->
+<section class="py-5">
+    <div class="container px-5 my-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bolder text-white">Tendencias <span style="color: var(--primary-color);">Destacadas</span></h2>
+            <p class="lead fw-normal text-muted mb-0">Lo más buscado de la temporada</p>
+        </div>
+        <div class="row gx-5">
+            @forelse($featuredProducts as $product)
+                <div class="col-lg-3 col-md-6 mb-5">
+                    <div class="card product-card h-100 border-0">
+                        <!-- Product image-->
+                        @if($product->image_path)
+                            <img class="card-img-top" src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->nombre }}" />
+                        @else
+                           <div style="height: 300px; background-color: #222; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-tshirt fa-3x text-muted"></i>
+                           </div>
+                        @endif
+                        
+                        <div class="badge-new">Nuevo</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
-</body>
-</html>
+                        <!-- Product details-->
+                        <div class="product-info text-center">
+                            <div class="product-brand">{{ $product->marca->nombre ?? 'Bajo Cero' }}</div>
+                            <h5 class="product-title text-white text-truncate">{{ $product->nombre }}</h5>
+                            <div class="d-flex justify-content-center small text-warning mb-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="product-price">${{ number_format($product->precio_venta, 0) }}</div>
+                        </div>
+                        <!-- Product actions-->
+                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                            <div class="text-center">
+                                <a class="btn btn-outline-light mt-auto w-100" href="{{ route('product.show', $product->id) }}">Ver Detalles</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col-12 text-center text-white-50">
+                    <p>No hay productos destacados por el momento.</p>
+                </div>
+            @endforelse
+        </div>
+    </div>
+</section>
 
+<!-- Banner / Call to Action -->
+<section class="py-5" style="background: linear-gradient(90deg, #000 0%, #0d1a1b 100%); border-top: 1px solid #333;">
+    <div class="container px-5 my-5">
+        <div class="row gx-5 justify-content-center">
+            <div class="col-lg-8 col-xl-6 text-center">
+                <h2 class="display-5 fw-bold text-white mb-3">¿LISTO PARA EL SIGUIENTE NIVEL?</h2>
+                <p class="lead fw-normal text-muted mb-4">Explora nuestro catálogo completo y encuentra tu estilo. La colección Neon Edition ya está disponible.</p>
+                <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                    <a class="btn-neon px-5" href="{{ route('collection') }}">IR AL CATÁLOGO</a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-xl-4 text-center mt-4 mt-lg-0">
+                 <!-- Banner Image Placeholder -->
+                 <div style="border: 2px solid var(--primary-color); padding: 10px; transform: rotate(3deg);">
+                    <div style="background-color: #111; height: 200px; display: flex; align-items: center; justify-content: center;">
+                         <span class="text-white h5">NEON <br> EDITION</span>
+                    </div>
+                 </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- TikTok Section -->
+<section class="py-5 bg-black">
+    <div class="container text-center">
+         <h2 class="fw-bold mb-5 text-white">SÍGUENOS EN <span style="color: #00f2ff;">TIKTOK</span></h2>
+         <div style="border: 1px dashed #333; padding: 3rem; display: inline-block;">
+             <i class="fab fa-tiktok fa-3x text-white mb-3"></i>
+             <p class="text-white">Descubre nuestro contenido exclusivo</p>
+             <a href="#" class="btn btn-danger btn-sm">Seguir en TikTok</a>
+         </div>
+    </div>
+</section>
+@endsection

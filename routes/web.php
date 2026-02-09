@@ -40,7 +40,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [homeController::class, 'index'])->name('panel');
+use App\Http\Controllers\PublicController;
+
+Route::get('/', [PublicController::class, 'home'])->name('home');
+Route::get('/coleccion', [PublicController::class, 'collection'])->name('collection');
+Route::get('/producto/{id}', [PublicController::class, 'show'])->name('product.show');
+Route::get('/contacto', [PublicController::class, 'contact'])->name('contact');
+Route::get('/nosotros', [PublicController::class, 'about'])->name('about');
+
+Route::middleware('auth')->get('/panel', [homeController::class, 'index'])->name('panel');
 
 
 

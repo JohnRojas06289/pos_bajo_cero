@@ -1,12 +1,11 @@
 {
     "version": 2,
     "framework": null,
-    "builds": [
-        {
-            "src": "api/index.php",
-            "use": "vercel-php@0.7.4"
+    "functions": {
+        "api/index.php": {
+            "runtime": "vercel-php@0.7.4"
         }
-    ],
+    },
     "routes": [
         {
             "src": "/(css|js|images|storage|build|assets)/(.*)",
@@ -29,6 +28,8 @@
         "VIEW_COMPILED_PATH": "/tmp",
         "CACHE_DRIVER": "array",
         "LOG_CHANNEL": "stderr",
-        "SESSION_DRIVER": "cookie"
+        "SESSION_DRIVER": "cookie",
+        "DB_CONNECTION": "sqlite",
+        "DB_DATABASE": "database/database_bajocero.sqlite"
     }
 }
