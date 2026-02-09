@@ -1,0 +1,90 @@
+﻿@extends('layouts.app')
+
+@section('title','Crear empleado')
+
+@push('css')
+@endpush
+
+@section('content')
+<div class="container-fluid px-2">
+    <h1 class="mt-1 text-center">Crear Empleado</h1>
+
+    <x-breadcrumb.template>
+        <x-breadcrumb.item :href="route('panel')" content="Inicio" />
+        <x-breadcrumb.item :href="route('empleados.index')" content="Empleados" />
+        <x-breadcrumb.item active='true' content="Crear empleado" />
+    </x-breadcrumb.template>
+
+    <x-forms.template :action="route('empleados.store')" method='post' file='true'>
+
+        <div class="row g-4">
+
+            <div class="col-md-6">
+                <x-forms.input id="razon_social" required='true' labelText='Nombres y Apellidos' />
+            </div>
+
+            <div class="col-md-6">
+                <x-forms.input id="cargo" required='true' />
+            </div>
+
+            <div class="col-md-6">
+                <x-forms.input id="img" type='file' labelText='Seleccione una imagen'/>
+            </div>
+
+            <div class="col-md-6">
+                <p>Imagen seleccionada:</p>
+
+                <img id="img-default"
+                    class="img-fluid"
+                    src="{{ asset('assets/img/paisaje.png') }}"
+                    alt="Imagen por defecto">
+
+                <img src="" alt="Ha cargado un archivo no compatible"
+                    id="img-preview"
+                    class="img-fluid img-thumbnail" style="display: none;">
+            </div>
+
+
+        </div>
+
+        <x-slot name='footer'>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+        </x-slot>
+
+    </x-forms.template>
+
+
+</div>
+@endsection
+
+@push('js')
+<script>
+    const inputImagen = document.getElementById('img');
+    const imagenPreview = document.getElementById('img-preview');
+    const imagenDefault = document.getElementById('img-default');
+
+    inputImagen.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            // Validar tamaño del archivo (4MB)
+            if (this.files[0].size > 4 * 1024 * 1024) {
+                alert('El archivo es demasiado grande. El tamaño máximo permitido es 4MB.');
+                this.value = ''; // Limpiar el input
+                imagenPreview.style.display = 'none';
+                imagenDefault.style.display = 'block';
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                imagenPreview.src = e.target.result;
+                imagenPreview.style.display = 'block';
+                imagenDefault.style.display = 'none';
+            }
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+</script>
+@endpush
+
+
