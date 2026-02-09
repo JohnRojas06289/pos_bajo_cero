@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DISK', env('APP_ENV') === 'production' ? 'cloudinary' : 'local'),
+    'default' => env('FILESYSTEM_DISK', env('CLOUDINARY_URL') ? 'cloudinary' : 'local'),
 
     /*
     |--------------------------------------------------------------------------
