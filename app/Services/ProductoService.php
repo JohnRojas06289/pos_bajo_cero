@@ -58,7 +58,19 @@ class ProductoService
     {
         // FORCE Cloudinary if properly configured (Vercel Fix)
         // We use config() because env() returns null if config is cached
-        $disk = config('filesystems.disks.cloudinary.cloud_name') ? 'cloudinary' : config('filesystems.default');
+        $isCloudinaryConfigured = config('filesystems.disks.cloudinary.cloud_name');
+        $defaultDisk = config('filesystems.default');
+        
+        $disk = $isCloudinaryConfigured ? 'cloudinary' : $defaultDisk;
+
+        // DEBUG: Throw exception if we are about to use 'local' or 'public' in an environment that should use Cloudinary
+        // This helps identify WHY it's falling back
+        if ($disk !== 'cloudinary' && (env('APP_ENV') === 'production' || env('VERCEL'))) {
+             throw new \Exception("CRITICAL ERROR: Attempting to use disk '{$disk}' in production. " . 
+                "Cloudinary Configured: " . ($isCloudinaryConfigured ? 'YES' : 'NO') . ". " . 
+                "Default Disk: {$defaultDisk}. " .
+                "Env Cloudinary: " . (isset($_ENV['CLOUDINARY_URL']) ? 'Present' : 'Missing'));
+        }
 
         if ($img_path) {
             // Check if file exists before deleting
