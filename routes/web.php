@@ -57,7 +57,16 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
         \Illuminate\Support\Facades\Artisan::call('migrate:fresh --force');
         return 'Database migrated successfully!';
     });
-    Route::resource('categorias', categoriaController::class)->except('show');
+    Route::get('/debug-config', function () {
+        return [
+            'db_connection' => config('database.default'),
+            'current_db_host' => config('database.connections.'.config('database.default').'.host'),
+            'env_postgres_url' => env('POSTGRES_URL') ? 'Found' : 'Missing',
+            'env_db_connection' => env('DB_CONNECTION'),
+            'available_drivers' => \PDO::getAvailableDrivers(),
+            'postgres_driver_loaded' => extension_loaded('pdo_pgsql') ? 'Yes' : 'No',
+        ];
+    });
     Route::resource('presentaciones', presentacioneController::class)->except('show');
     Route::resource('marcas', marcaController::class)->except('show');
     Route::get('productos/export', [ProductoController::class, 'export'])->name('productos.export');
