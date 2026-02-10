@@ -49,8 +49,12 @@ Route::get('/contacto', [PublicController::class, 'contact'])->name('contact');
 Route::get('/nosotros', [PublicController::class, 'about'])->name('about');
 
 Route::get('/migrate-db-secret-key-12345', function () {
-    \Illuminate\Support\Facades\Artisan::call('migrate:fresh --force');
-    return 'Database migrated successfully!';
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate:fresh --force');
+        return 'Database migrated successfully! Output: ' . \Illuminate\Support\Facades\Artisan::output();
+    } catch (\Exception $e) {
+        return 'Error migrating: ' . $e->getMessage() . ' Trace: ' . $e->getTraceAsString();
+    }
 });
 
 Route::get('/debug-config', function () {
