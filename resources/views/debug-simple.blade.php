@@ -1,6 +1,16 @@
-@extends('layouts.app')
-@section('title', 'Debug View')
-@section('content')
-<h1>Layout is working!</h1>
-<p>If you see this, the layout (header, sidebar, scripts) is fine.</p>
-@endsection
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Manual</title>
+</head>
+<body>
+    <h1>Manual Layout Test</h1>
+    
+    <h2>1. Include Header</h2>
+    @include('layouts.include.navigation-header')
+    
+    <h2>2. Include Nav Menu</h2>
+    @include('layouts.include.navigation-menu')
+
+</body>
+</html>
