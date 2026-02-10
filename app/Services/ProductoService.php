@@ -63,16 +63,18 @@ class ProductoService
         
         $disk = $isCloudinaryConfigured ? 'cloudinary' : $defaultDisk;
 
-        // DEBUG: Capture all possible env sources
+        // Capture all possible env sources
         $envVar = $_ENV['CLOUDINARY_URL'] ?? 'null';
         $serverVar = $_SERVER['CLOUDINARY_URL'] ?? 'null';
         $getenvVar = getenv('CLOUDINARY_URL') !== false ? 'Present' : 'null';
 
         if ($disk !== 'cloudinary' && (env('APP_ENV') === 'production' || env('VERCEL'))) {
-             throw new \Exception("CRITICAL ERROR: Attempting to '{$disk}'. " . 
-                "Configured: " . ($isCloudinaryConfigured ? 'YES' : 'NO') . ". " . 
-                "SOURCES -> ENV: {$envVar}, SERVER: {$serverVar}, getenv: {$getenvVar}. " . 
-                "Please verify 'CLOUDINARY_URL' in Vercel Settings.");
+             // More graceful error handling: Log the issue and throw a validation error
+             \Illuminate\Support\Facades\Log::critical("CLOUDINARY MISSING. Env: {$envVar}, Server: {$serverVar}, getenv: {$getenvVar}");
+             
+             throw \Illuminate\Validation\ValidationException::withMessages([
+                 'img_path' => 'Error de configuración del servidor: La variable CLOUDINARY_URL no está definida en Vercel.'
+             ]);
         }
 
         if ($img_path) {
