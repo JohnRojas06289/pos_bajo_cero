@@ -56,37 +56,24 @@ class ProductoService
      */
     private function handleUploadImage(UploadedFile $image, $img_path = null): string
     {
-        \Illuminate\Support\Facades\Log::info('Inicio de subida de imagen', [
-            'original_name' => $image->getClientOriginalName(),
-            'size' => $image->getSize(),
-            'disk' => config('filesystems.default'),
-            'cloudinary_config' => config('filesystems.disks.cloudinary'),
-        ]);
+        $disk = config('filesystems.default');
 
         if ($img_path) {
-            // Remove 'storage/' prefix if it exists for backward compatibility
-            $relative_path = str_replace('storage/', '', $img_path);
-
-            if (Storage::disk(config('filesystems.default'))->exists($relative_path)) {
-                Storage::disk(config('filesystems.default'))->delete($relative_path);
-                \Illuminate\Support\Facades\Log::info('Imagen anterior eliminada', ['path' => $relative_path]);
+            // Check if file exists before deleting
+            if (Storage::disk($disk)->exists($img_path)) {
+                Storage::disk($disk)->delete($img_path);
             }
         }
 
         $name = uniqid() . '.' . $image->getClientOriginalExtension();
-        // Store only the relative path without 'storage/' prefix
-        try {
-            $path = $image->storeAs('productos', $name, config('filesystems.default'));
-            
-            if ($path === false) {
-                throw new \Exception('El almacenamiento devolvió false. Verifique permisos de escritura en el bucket.');
-            }
+        
+        // Store in 'productos' folder
+        $path = $image->storeAs('productos', $name, $disk);
 
-            \Illuminate\Support\Facades\Log::info('Imagen subida exitosamente', ['path' => $path]);
-            return $path;
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error al subir imagen', ['error' => $e->getMessage()]);
-            throw $e;
+        if (!$path) {
+             throw new \Exception('Error al subir la imagen al disco: ' . $disk);
         }
+
+        return $path;
     }
 }

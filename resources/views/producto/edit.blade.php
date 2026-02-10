@@ -206,6 +206,13 @@
 
     inputImagen.addEventListener('change', function() {
         if (this.files && this.files[0]) {
+             // Validate size (Max 4MB for Vercel)
+             if (this.files[0].size > 4 * 1024 * 1024) {
+                alert('⚠️ La imagen es demasiado pesada.\n\nPor favor, sube una imagen de menos de 4MB para evitar errores en el servidor.');
+                this.value = ''; // Reset input
+                return;
+            }
+
             const reader = new FileReader();
 
             reader.onload = function(e) {

@@ -68,7 +68,7 @@
                     <div class="card product-card h-100 border-0">
                         <!-- Product image-->
                         @if($product->image_path)
-                            <img class="card-img-top" src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->nombre }}" />
+                            <img class="card-img-top" src="{{ Storage::url($product->image_path) }}" alt="{{ $product->nombre }}" />
                         @else
                            <div style="height: 300px; background-color: #222; display: flex; align-items: center; justify-content: center;">
                                 <i class="fas fa-tshirt fa-3x text-muted"></i>
