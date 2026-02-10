@@ -28,9 +28,10 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        // VERCEL FIX: Force Runtime Cloudinary Config if Env Var exists
-        if (isset($_ENV['CLOUDINARY_URL'])) {
-            $cloudinaryUrl = $_ENV['CLOUDINARY_URL'];
+        // VERCEL FIX: Force Runtime Cloudinary Config if Env Var exists (Check all sources)
+        $cloudinaryUrl = $_ENV['CLOUDINARY_URL'] ?? $_SERVER['CLOUDINARY_URL'] ?? getenv('CLOUDINARY_URL');
+
+        if ($cloudinaryUrl) {
             $components = parse_url($cloudinaryUrl);
 
             if ($components) {
@@ -41,9 +42,9 @@ class AppServiceProvider extends ServiceProvider
                         'api_key' => $components['user'],
                         'api_secret' => $components['pass'],
                         'secure' => true,
-                        'url' => 'https://res.cloudinary.com/' . $components['host'], // Ensure URL generation works
+                        'url' => 'https://res.cloudinary.com/' . $components['host'], 
                     ],
-                    'filesystems.default' => 'cloudinary', // Force as default
+                    'filesystems.default' => 'cloudinary', 
                 ]);
             }
         }

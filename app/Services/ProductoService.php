@@ -63,13 +63,16 @@ class ProductoService
         
         $disk = $isCloudinaryConfigured ? 'cloudinary' : $defaultDisk;
 
-        // DEBUG: Throw exception if we are about to use 'local' or 'public' in an environment that should use Cloudinary
-        // This helps identify WHY it's falling back
+        // DEBUG: Capture all possible env sources
+        $envVar = $_ENV['CLOUDINARY_URL'] ?? 'null';
+        $serverVar = $_SERVER['CLOUDINARY_URL'] ?? 'null';
+        $getenvVar = getenv('CLOUDINARY_URL') !== false ? 'Present' : 'null';
+
         if ($disk !== 'cloudinary' && (env('APP_ENV') === 'production' || env('VERCEL'))) {
-             throw new \Exception("CRITICAL ERROR: Attempting to use disk '{$disk}' in production. " . 
-                "Cloudinary Configured: " . ($isCloudinaryConfigured ? 'YES' : 'NO') . ". " . 
-                "Default Disk: {$defaultDisk}. " .
-                "Env Cloudinary: " . (isset($_ENV['CLOUDINARY_URL']) ? 'Present' : 'Missing'));
+             throw new \Exception("CRITICAL ERROR: Attempting to '{$disk}'. " . 
+                "Configured: " . ($isCloudinaryConfigured ? 'YES' : 'NO') . ". " . 
+                "SOURCES -> ENV: {$envVar}, SERVER: {$serverVar}, getenv: {$getenvVar}. " . 
+                "Please verify 'CLOUDINARY_URL' in Vercel Settings.");
         }
 
         if ($img_path) {
