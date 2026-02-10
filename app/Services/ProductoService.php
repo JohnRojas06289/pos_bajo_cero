@@ -56,8 +56,9 @@ class ProductoService
      */
     private function handleUploadImage(UploadedFile $image, $img_path = null): string
     {
-        // FORCE Cloudinary if the URL is set (Vercel Fix)
-        $disk = env('CLOUDINARY_URL') ? 'cloudinary' : config('filesystems.default');
+        // FORCE Cloudinary if properly configured (Vercel Fix)
+        // We use config() because env() returns null if config is cached
+        $disk = config('filesystems.disks.cloudinary.cloud_name') ? 'cloudinary' : config('filesystems.default');
 
         if ($img_path) {
             // Check if file exists before deleting
