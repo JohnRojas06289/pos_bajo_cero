@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', env('POSTGRES_URL') ? 'pgsql' : 'mysql'),
+    'default' => env('POSTGRES_URL') ? 'pgsql' : env('DB_CONNECTION', 'mysql'),
 
     /*
     |--------------------------------------------------------------------------
