@@ -57,16 +57,19 @@ Route::get('/migrate-db-secret-key-12345', function () {
     }
 });
 
-Route::get('/debug-config', function () {
-    return [
-        'db_connection' => config('database.default'),
-        'current_db_host' => config('database.connections.'.config('database.default').'.host'),
-        'env_postgres_url' => env('POSTGRES_URL') ? 'Found' : 'Missing',
-        'env_db_connection' => env('DB_CONNECTION'),
-        'available_drivers' => \PDO::getAvailableDrivers(),
-        'postgres_driver_loaded' => extension_loaded('pdo_pgsql') ? 'Yes' : 'No',
-        'db_config_url' => config('database.connections.pgsql.url'),
-    ];
+Route::get('/create-admin-user-secret', function () {
+    try {
+        $user = \App\Models\User::create([
+            'name' => 'Admin Bajo Cero',
+            'email' => 'admin@bajocero.com',
+            'password' => bcrypt('admin123'),
+            'role_id' => 1, // Assuming role 1 is Admin
+            'estado' => 1
+        ]);
+        return "User created! Email: {$user->email}, Password: admin123";
+    } catch (\Exception $e) {
+        return 'Error creating user: ' . $e->getMessage();
+    }
 });
 
 Route::middleware('auth')->get('/panel', [homeController::class, 'index'])->name('panel');
