@@ -85,6 +85,14 @@ Route::get('/debug-query', function () {
     }
 })->middleware('auth');
 
+Route::get('/debug-view-simple', function () {
+    try {
+        return view('debug-simple');
+    } catch (\Exception $e) {
+        return "View Error: " . $e->getMessage();
+    }
+})->middleware('auth');
+
 Route::middleware('auth')->get('/panel', [homeController::class, 'index'])->name('panel');
 
 
