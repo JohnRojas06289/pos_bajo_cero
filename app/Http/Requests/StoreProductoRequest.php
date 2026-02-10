@@ -22,8 +22,8 @@ class StoreProductoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'codigo' => 'nullable|unique:productos,codigo|max:50',
-            'nombre' => 'required|unique:productos,nombre|max:255',
+            'codigo' => 'nullable|max:50', // Removed unique:productos,codigo to avoid SQLite pragma error
+            'nombre' => 'required|max:255', // Removed unique:productos,nombre to avoid SQLite pragma error
             'descripcion' => 'nullable|max:255',
             'img_path' => 'nullable|image|mimes:png,jpg,jpeg,webp,avif,gif,svg,bmp',
             'marca_id' => 'nullable|exists:marcas,id',

@@ -79,8 +79,18 @@ class ProductoController extends Controller
     public function store(StoreProductoRequest $request): RedirectResponse
     {
         try {
-            $this->productoService->crearProducto($request->validated());
-            ActivityLogService::log('Creación de producto', 'Productos', $request->validated());
+            $data = $request->validated();
+
+            // MANUAL UNIQUE CHECK (Vercel SQLite Compatibility)
+            if (Producto::where('nombre', $data['nombre'])->exists()) {
+                return redirect()->back()->withErrors(['nombre' => 'El nombre del producto ya existe.'])->withInput();
+            }
+            if (!empty($data['codigo']) && Producto::where('codigo', $data['codigo'])->exists()) {
+                return redirect()->back()->withErrors(['codigo' => 'El código del producto ya existe.'])->withInput();
+            }
+
+            $this->productoService->crearProducto($data);
+            ActivityLogService::log('Creación de producto', 'Productos', $data);
             return redirect()->route('productos.index')->with('success', 'Producto registrado');
         } catch (Throwable $e) {
             Log::error('Error al crear el producto', ['error' => $e->getMessage()]);
