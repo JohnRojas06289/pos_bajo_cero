@@ -168,24 +168,40 @@
 
 @push('js')
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <script>
     const inputImagen = document.getElementById('img_path');
     const imagenPreview = document.getElementById('img-preview');
     const imagenDefault = document.getElementById('img-default');
 
-    inputImagen.addEventListener('change', function() {
+    inputImagen.addEventListener('change', async function() {
         if (this.files && this.files[0]) {
-            // Validate size (Max 4MB for Vercel)
-            if (this.files[0].size > 4 * 1024 * 1024) {
-                alert('⚠️ La imagen es demasiado pesada.\n\nPor favor, sube una imagen de menos de 4MB para evitar errores en el servidor.');
-                this.value = ''; // Reset input
-                imagenPreview.style.display = 'none';
-                imagenDefault.style.display = 'block';
-                return;
+            const file = this.files[0];
+            
+            // Si la imagen es mayor a 1MB, intentar comprimirla
+            if (file.size > 1024 * 1024) {
+                try {
+                    const options = {
+                        maxSizeMB: 1,
+                        maxWidthOrHeight: 1920,
+                        useWebWorker: true
+                    };
+                    
+                    const compressedFile = await imageCompression(file, options);
+                    
+                    // Reemplazar el archivo en el input con la versión comprimida
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(new File([compressedFile], file.name, { type: file.type }));
+                    inputImagen.files = dataTransfer.files;
+                    
+                    console.log(`Imagen comprimida: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+                } catch (error) {
+                    console.error('Error al comprimir la imagen:', error);
+                }
             }
 
+            // Mostrar vista previa (usando el archivo posiblemente comprimido)
             const reader = new FileReader();
-
             reader.onload = function(e) {
                 imagenPreview.src = e.target.result;
                 imagenPreview.style.display = 'block';
