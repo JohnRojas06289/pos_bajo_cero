@@ -117,6 +117,7 @@ if (!$empresa) {
     <!-- Navbar-->
     <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
         <!-- Notifications Dropdown -->
+        {{-- 
         <li class="nav-item dropdown me-3">
             <a class="nav-link dropdown-toggle" href="#" role="button" id="notificationsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fas fa-bell fa-lg"></i>
@@ -158,6 +159,7 @@ if (!$empresa) {
                 @endif
             </ul>
         </li>
+        --}}
 
         <!-- User Dropdown -->
         <li class="nav-item dropdown">
