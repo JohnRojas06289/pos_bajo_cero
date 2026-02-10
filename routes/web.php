@@ -93,6 +93,34 @@ Route::get('/debug-view-simple', function () {
     }
 })->middleware('auth');
 
+Route::get('/debug-layout-data', function () {
+    try {
+        $data = [];
+        
+        // 1. Test Empresa Access
+        try {
+            $empresa = \App\Models\Empresa::first();
+            $data['empresa'] = $empresa ? "Found: " . $empresa->nombre : "Not Found (Handled OK)";
+        } catch (\Exception $e) {
+            $data['empresa_error'] = $e->getMessage();
+        }
+
+        // 2. Test Notifications Access
+        try {
+            $user = \Illuminate\Support\Facades\Auth::user();
+            $count = $user->unreadNotifications->count();
+            $data['notifications'] = "Count: " . $count;
+        } catch (\Exception $e) {
+            $data['notifications_error'] = $e->getMessage();
+        }
+
+        return $data;
+
+    } catch (\Exception $e) {
+        return "General Error: " . $e->getMessage();
+    }
+})->middleware('auth');
+
 Route::middleware('auth')->get('/panel', [homeController::class, 'index'])->name('panel');
 
 
