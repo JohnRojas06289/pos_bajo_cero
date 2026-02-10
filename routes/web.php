@@ -57,18 +57,26 @@ Route::get('/migrate-db-secret-key-12345', function () {
     }
 });
 
-Route::get('/create-admin-user-secret', function () {
+Route::get('/fix-permissions-secret', function () {
     try {
-        $user = \App\Models\User::create([
-            'name' => 'Admin Bajo Cero',
-            'email' => 'admin@bajocero.com',
-            'password' => bcrypt('admin123'),
-            'role_id' => 1, // Assuming role 1 is Admin
-            'estado' => 1
-        ]);
-        return "User created! Email: {$user->email}, Password: admin123";
+        // 1. Ensure Admin Role exists
+        $role = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'administrador', 'guard_name' => 'web']);
+        
+        // 2. Run Permission Seeder to fill table and sync to role
+        $seeder = new \Database\Seeders\PermissionSeeder();
+        $seeder->run();
+
+        // 3. Assign Role to Admin User
+        $user = \App\Models\User::where('email', 'admin@bajocero.com')->first();
+        if (!$user) {
+            return "User admin@bajocero.com not found. PLease create it first.";
+        }
+        
+        $user->assignRole($role);
+        
+        return "Permissions fixed! Role 'administrador' assigned to {$user->email}. Permissions count: " . $role->permissions()->count();
     } catch (\Exception $e) {
-        return 'Error creating user: ' . $e->getMessage();
+        return 'Error fixing permissions: ' . $e->getMessage() . ' Trace: ' . $e->getTraceAsString();
     }
 });
 
