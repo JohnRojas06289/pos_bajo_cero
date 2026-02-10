@@ -23,13 +23,13 @@ class UpdateProductoRequest extends FormRequest
     {
         $producto = $this->route('producto');
         return [
-            'codigo' => 'nullable|unique:productos,codigo,'.$producto->id.'|max:50',
-            'nombre' => 'required|unique:productos,nombre,'.$producto->id.'|max:255',
+            'codigo' => 'nullable|max:50', // Removed unique
+            'nombre' => 'required|max:255', // Removed unique
             'descripcion' => 'nullable|max:255',
             'img_path' => 'nullable|image|mimes:png,jpg,jpeg,webp,avif,gif,svg,bmp',
-            'marca_id' => 'nullable|exists:marcas,id',
-            'presentacione_id' => 'nullable|exists:presentaciones,id',
-            'categoria_id' => 'nullable|exists:categorias,id'
+            'marca_id' => 'nullable', // Removed exists
+            'presentacione_id' => 'nullable', // Removed exists
+            'categoria_id' => 'nullable' // Removed exists
         ];
     }
 

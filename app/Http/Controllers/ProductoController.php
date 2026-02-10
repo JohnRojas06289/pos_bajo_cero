@@ -135,6 +135,27 @@ class ProductoController extends Controller
     public function update(UpdateProductoRequest $request, Producto $producto): RedirectResponse
     {
         try {
+            $data = $request->validated();
+
+             // MANUAL VALIDATION (Vercel SQLite Compatibility) - Check Unique
+            if (Producto::where('nombre', $data['nombre'])->where('id', '!=', $producto->id)->exists()) {
+                return redirect()->back()->withErrors(['nombre' => 'El nombre ya existe.'])->withInput();
+            }
+            if (!empty($data['codigo']) && Producto::where('codigo', $data['codigo'])->where('id', '!=', $producto->id)->exists()) {
+                 return redirect()->back()->withErrors(['codigo' => 'El código ya existe.'])->withInput();
+            }
+
+            // Verify Foreign Keys (Manual 'exists')
+            if (!empty($data['marca_id']) && !\App\Models\Marca::where('id', $data['marca_id'])->exists()) {
+                 return redirect()->back()->withErrors(['marca_id' => 'La marca seleccionada no existe.'])->withInput();
+            }
+             if (!empty($data['categoria_id']) && !\App\Models\Categoria::where('id', $data['categoria_id'])->exists()) {
+                 return redirect()->back()->withErrors(['categoria_id' => 'La categoría seleccionada no existe.'])->withInput();
+            }
+             if (!empty($data['presentacione_id']) && !\App\Models\Presentacione::where('id', $data['presentacione_id'])->exists()) {
+                 return redirect()->back()->withErrors(['presentacione_id' => 'La presentación seleccionada no existe.'])->withInput();
+            }
+            
             \Illuminate\Support\Facades\Log::info('Producto update request', [
                 'has_file' => $request->hasFile('img_path'),
                 'file_valid' => $request->hasFile('img_path') ? $request->file('img_path')->isValid() : false,
