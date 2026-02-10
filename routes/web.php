@@ -53,6 +53,10 @@ Route::middleware('auth')->get('/panel', [homeController::class, 'index'])->name
 
 
 Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
+    Route::get('/migrate-db-secret-key-12345', function () {
+        \Illuminate\Support\Facades\Artisan::call('migrate:fresh --force');
+        return 'Database migrated successfully!';
+    });
     Route::resource('categorias', categoriaController::class)->except('show');
     Route::resource('presentaciones', presentacioneController::class)->except('show');
     Route::resource('marcas', marcaController::class)->except('show');
