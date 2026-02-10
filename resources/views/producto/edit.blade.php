@@ -204,30 +204,38 @@
     const inputImagen = document.getElementById('img_path');
     const imagenPreview = document.getElementById('img-preview');
     const imagenDefault = document.getElementById('img-default');
+    const submitBtn = document.querySelector('button[type="submit"]');
 
     inputImagen.addEventListener('change', async function() {
         if (this.files && this.files[0]) {
             const file = this.files[0];
             
-            // Si la imagen es mayor a 1MB, intentar comprimirla
+            // Si la imagen es mayor a 1MB, comprimir
             if (file.size > 1024 * 1024) {
+                submitBtn.disabled = true;
+                const originalText = submitBtn.innerText;
+                submitBtn.innerText = '⏳ Comprimiendo imagen...';
+
                 try {
                     const options = {
-                        maxSizeMB: 1,
-                        maxWidthOrHeight: 1920,
+                        maxSizeMB: 0.5,
+                        maxWidthOrHeight: 1280,
                         useWebWorker: true
                     };
                     
                     const compressedFile = await imageCompression(file, options);
                     
-                    // Reemplazar el archivo en el input con la versión comprimida
                     const dataTransfer = new DataTransfer();
                     dataTransfer.items.add(new File([compressedFile], file.name, { type: file.type }));
                     inputImagen.files = dataTransfer.files;
 
                      console.log(`Imagen comprimida: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
                 } catch (error) {
-                    console.error('Error al comprimir la imagen:', error);
+                    console.error('Error al comprimir:', error);
+                    alert('Error al procesar la imagen.');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = originalText;
                 }
             }
 
