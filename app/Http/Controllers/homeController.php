@@ -116,7 +116,23 @@ class homeController extends Controller
                 'ultimasVentas',
                 'fechaInicio',
                 'fechaFin'
-            ));
+                return view('panel.index', compact(
+                'ventasHoy', 
+                'ventasMes', 
+                'totalClientes', 
+                'totalProductos', 
+                'totalCompras', 
+                'totalUsuarios',
+                'totalVentasPorDia', 
+                'productosMasVendidos', 
+                'productosMenosVendidos',
+                'productosMasStock',
+                'productosMenosStock',
+                'productosStockBajo',
+                'ultimasVentas',
+                'fechaInicio',
+                'fechaFin'
+            ))->render();
         } catch (\Exception $e) {
             return response("Error en Dashboard: " . $e->getMessage() . " | File: " . $e->getFile() . " | Line: " . $e->getLine());
         }
