@@ -57,28 +57,33 @@ Route::get('/migrate-db-secret-key-12345', function () {
     }
 });
 
-Route::get('/fix-permissions-secret', function () {
+Route::get('/debug-spatie', function () {
     try {
-        // 1. Ensure Admin Role exists
-        $role = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'administrador', 'guard_name' => 'web']);
-        
-        // 2. Run Permission Seeder to fill table and sync to role
-        $seeder = new \Database\Seeders\PermissionSeeder();
-        $seeder->run();
-
-        // 3. Assign Role to Admin User
-        $user = \App\Models\User::where('email', 'admin@bajocero.com')->first();
-        if (!$user) {
-            return "User admin@bajocero.com not found. PLease create it first.";
-        }
-        
-        $user->assignRole($role);
-        
-        return "Permissions fixed! Role 'administrador' assigned to {$user->email}. Permissions count: " . $role->permissions()->count();
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user) return "Not logged in";
+        $can = $user->can('ver-panel');
+        return "Can ver-panel? " . ($can ? 'YES' : 'NO');
     } catch (\Exception $e) {
-        return 'Error fixing permissions: ' . $e->getMessage() . ' Trace: ' . $e->getTraceAsString();
+        return "Spatie Error: " . $e->getMessage();
     }
-});
+})->middleware('auth');
+
+Route::get('/debug-query', function () {
+    try {
+        $fechaInicio = \Carbon\Carbon::now()->subDays(7)->format('Y-m-d');
+        $fechaFin = \Carbon\Carbon::now()->format('Y-m-d');
+        
+        $results = \Illuminate\Support\Facades\DB::table('ventas')
+            ->selectRaw('CAST(created_at AS DATE) as fecha, SUM(total) as total')
+            ->whereBetween('created_at', [$fechaInicio . ' 00:00:00', $fechaFin . ' 23:59:59'])
+            ->groupBy(\Illuminate\Support\Facades\DB::raw('CAST(created_at AS DATE)'))
+            ->orderBy('fecha', 'asc')
+            ->get();
+        return "Query OK. Count: " .Count($results);
+    } catch (\Exception $e) {
+        return "Query Error: " . $e->getMessage();
+    }
+})->middleware('auth');
 
 Route::middleware('auth')->get('/panel', [homeController::class, 'index'])->name('panel');
 
