@@ -145,6 +145,7 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
     Route::resource('empleados', EmpleadoController::class)->except('show');
     Route::resource('cajas', CajaController::class)->except('edit', 'update', 'show');
     Route::resource('movimientos', MovimientoController::class)->except('show', 'edit', 'update', 'destroy');
+    Route::resource('categorias', categoriaController::class)->except('show');
 
 
     //Reportes

@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 
 class homeController extends Controller
 {
-    public function index(Request $request): View|RedirectResponse
+    public function index(Request $request): View|RedirectResponse|\Illuminate\Http\Response
     {
         if (!Auth::check()) {
             return view('welcome');
@@ -116,7 +116,7 @@ class homeController extends Controller
                 'ultimasVentas',
                 'fechaInicio',
                 'fechaFin'
-            ))->render();
+            ));
         } catch (\Exception $e) {
             return response("Error en Dashboard: " . $e->getMessage() . " | File: " . $e->getFile() . " | Line: " . $e->getLine());
         }
