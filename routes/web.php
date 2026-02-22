@@ -118,4 +118,18 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
 Route::get('/login', [loginController::class, 'index'])->name('login.index');
 Route::post('/login', [loginController::class, 'login'])->name('login.login')->middleware('throttle:10,1');
 
+// TEMPORARY: one-time migration runner — remove after use
+Route::get('/run-migrations-9x7k2p', function () {
+    if (request('key') !== env('APP_KEY')) {
+        abort(403);
+    }
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        return response()->json(['status' => 'ok', 'output' => $output]);
+    } catch (\Throwable $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    }
+});
+
 
