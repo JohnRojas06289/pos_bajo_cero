@@ -118,23 +118,4 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
 Route::get('/login', [loginController::class, 'index'])->name('login.index');
 Route::post('/login', [loginController::class, 'login'])->name('login.login')->middleware('throttle:10,1');
 
-// TEMPORARY: one-time migration/seed runner — remove after use
-Route::get('/run-migrations-9x7k2p', function () {
-    if (request('key') !== env('APP_KEY')) {
-        abort(403);
-    }
-    try {
-        $out = [];
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-        $out[] = \Illuminate\Support\Facades\Artisan::output();
-        if (request('seed')) {
-            \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => request('seed'), '--force' => true]);
-            $out[] = \Illuminate\Support\Facades\Artisan::output();
-        }
-        return response()->json(['status' => 'ok', 'output' => implode("\n", $out)]);
-    } catch (\Throwable $e) {
-        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
-    }
-});
-
 
