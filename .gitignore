@@ -17,6 +17,7 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+/.claude
 /setup_bajo_cero.bat
 /full_php.ini
 /php.ini
