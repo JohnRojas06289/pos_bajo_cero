@@ -118,4 +118,20 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
 Route::get('/login', [loginController::class, 'index'])->name('login.index');
 Route::post('/login', [loginController::class, 'login'])->name('login.login')->middleware('throttle:10,1');
 
+// TEMP diagnostic
+Route::get('/diag-9x7k2p', function () {
+    if (request('key') !== env('APP_KEY')) abort(403);
+    $out = [];
+    try {
+        $out['tables'] = \Illuminate\Support\Facades\DB::select("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name");
+    } catch (\Throwable $e) { $out['tables_error'] = $e->getMessage(); }
+    try {
+        $out['ventas_cols'] = \Illuminate\Support\Facades\DB::select("SELECT column_name FROM information_schema.columns WHERE table_name = 'ventas'");
+    } catch (\Throwable $e) { $out['ventas_cols_error'] = $e->getMessage(); }
+    try {
+        $out['migrations'] = \Illuminate\Support\Facades\DB::select("SELECT migration FROM migrations WHERE migration LIKE '%2026%'");
+    } catch (\Throwable $e) { $out['migrations_error'] = $e->getMessage(); }
+    return response()->json($out);
+});
+
 
