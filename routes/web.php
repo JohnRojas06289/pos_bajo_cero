@@ -123,14 +123,15 @@ Route::get('/diag-9x7k2p', function () {
     if (request('key') !== env('APP_KEY')) abort(403);
     $out = [];
     try {
-        $out['tables'] = \Illuminate\Support\Facades\DB::select("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name");
-    } catch (\Throwable $e) { $out['tables_error'] = $e->getMessage(); }
+        $ventas = \App\Models\Venta::with('cliente.persona')->latest()->limit(3)->get();
+        $out['ventas_count'] = $ventas->count();
+        $out['ventas_sample'] = $ventas->map(fn($v) => ['id'=>$v->id,'numero_comprobante'=>$v->numero_comprobante,'cliente'=>$v->cliente?->persona?->nombre]);
+    } catch (\Throwable $e) { $out['ventas_error'] = $e->getMessage(); }
     try {
-        $out['ventas_cols'] = \Illuminate\Support\Facades\DB::select("SELECT column_name FROM information_schema.columns WHERE table_name = 'ventas'");
-    } catch (\Throwable $e) { $out['ventas_cols_error'] = $e->getMessage(); }
-    try {
-        $out['migrations'] = \Illuminate\Support\Facades\DB::select("SELECT migration FROM migrations WHERE migration LIKE '%2026%'");
-    } catch (\Throwable $e) { $out['migrations_error'] = $e->getMessage(); }
+        $view = view('devolucion.create', ['venta'=>null, 'ventas'=>collect([])]);
+        $out['view_ok'] = true;
+        $out['view_html_len'] = strlen($view->render());
+    } catch (\Throwable $e) { $out['view_error'] = $e->getMessage(); $out['view_trace'] = substr($e->getTraceAsString(), 0, 500); }
     return response()->json($out);
 });
 
