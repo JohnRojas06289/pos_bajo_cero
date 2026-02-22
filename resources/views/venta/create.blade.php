@@ -301,6 +301,33 @@
     }
     
     footer { display: none !important; }
+
+    /* Botones de método de pago */
+    .pay-method-btn {
+        border: 2px solid #dee2e6;
+        background: #fff;
+        color: #495057;
+        font-size: 0.78rem;
+        padding: 5px 8px;
+        border-radius: 8px;
+        transition: all 0.15s ease;
+        white-space: nowrap;
+    }
+    .pay-method-btn:hover {
+        border-color: #6c757d;
+        background: #f8f9fa;
+    }
+    .pay-method-btn.active {
+        background: #1a1d23;
+        color: #fff;
+        border-color: #1a1d23;
+        font-weight: 700;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .pay-method-btn[data-method="NEQUI"].active   { background:#7b2ff7; border-color:#7b2ff7; }
+    .pay-method-btn[data-method="DAVIPLATA"].active{ background:#e3000b; border-color:#e3000b; }
+    .pay-method-btn[data-method="TARJETA"].active  { background:#1565c0; border-color:#1565c0; }
+    .pay-method-btn[data-method="DIGITAL"].active  { background:#00897b; border-color:#00897b; }
     
     /* Indicador de atajo de teclado */
     .keyboard-hint {
@@ -429,12 +456,12 @@
                 <h5 class="m-0"><i class="fa-solid fa-cart-shopping me-2"></i>Carrito</h5>
                 <span class="badge bg-warning text-dark" id="cartCount">0</span>
             </div>
-            
+
             <div class="d-none">
                 <select name="cliente_id"><option value="{{$clientes->first()->id ?? ''}}" selected></option></select>
                 <select name="comprobante_id"><option value="{{$comprobantes->first()->id ?? ''}}" selected></option></select>
-                <select name="metodo_pago"><option value="{{$optionsMetodoPago[0]->value ?? ''}}" selected></option></select>
             </div>
+            <input type="hidden" name="metodo_pago" id="inputMetodoPago" value="EFECTIVO">
 
             <div class="cart-items" id="cartItemsContainer">
                 <div class="text-center text-muted mt-5" id="emptyCartMessage">
@@ -445,48 +472,91 @@
             </div>
 
             <div class="cart-footer">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+                <!-- Total -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="fs-6 fw-bold text-secondary">TOTAL:</span>
                     <span class="total-display">{{$empresa->moneda->simbolo ?? '$'}} <span id="totalDisplay">0</span></span>
                 </div>
-                
-                <input type="hidden" name="subtotal" id="inputSubtotal" value="0">
 
+                <input type="hidden" name="subtotal" id="inputSubtotal" value="0">
                 <input type="hidden" name="total" id="inputTotal" value="0">
 
+                <!-- Método de pago -->
                 <div class="mb-2">
-                    <label class="form-label small text-muted mb-1">Pago Rápido:</label>
-                    <div class="row g-1">
-                        <div class="col-3"><button type="button" class="btn btn-outline-secondary w-100 smart-cash-btn" onclick="setExactCash()">Exacto</button></div>
-                        <div class="col-3"><button type="button" class="btn btn-outline-secondary w-100 smart-cash-btn" onclick="addCash(10000)">$10k</button></div>
-                        <div class="col-3"><button type="button" class="btn btn-outline-secondary w-100 smart-cash-btn" onclick="addCash(20000)">$20k</button></div>
-                        <div class="col-3"><button type="button" class="btn btn-outline-secondary w-100 smart-cash-btn" onclick="addCash(50000)">$50k</button></div>
+                    <label class="form-label small text-muted mb-1 fw-semibold">Método de pago:</label>
+                    <div class="d-flex flex-wrap gap-1">
+                        <button type="button" class="btn btn-sm pay-method-btn active" data-method="EFECTIVO" onclick="selectPayMethod('EFECTIVO', this)">
+                            <i class="fa-solid fa-money-bill-wave me-1"></i>Efectivo
+                        </button>
+                        <button type="button" class="btn btn-sm pay-method-btn" data-method="NEQUI" onclick="selectPayMethod('NEQUI', this)">
+                            <i class="fa-solid fa-mobile-screen me-1"></i>Nequi
+                        </button>
+                        <button type="button" class="btn btn-sm pay-method-btn" data-method="DAVIPLATA" onclick="selectPayMethod('DAVIPLATA', this)">
+                            <i class="fa-solid fa-mobile-screen me-1"></i>Daviplata
+                        </button>
+                        <button type="button" class="btn btn-sm pay-method-btn" data-method="TARJETA" onclick="selectPayMethod('TARJETA', this)">
+                            <i class="fa-solid fa-credit-card me-1"></i>Tarjeta
+                        </button>
+                        <button type="button" class="btn btn-sm pay-method-btn" data-method="DIGITAL" onclick="selectPayMethod('DIGITAL', this)">
+                            <i class="fa-solid fa-qrcode me-1"></i>Digital
+                        </button>
                     </div>
                 </div>
 
-                <div class="row g-2 mb-3">
-                    <div class="col-6">
-                        <label class="small text-muted">Recibido</label>
-                        <input type="text" id="dinero_recibido_display" class="form-control fw-bold" placeholder="0" oninput="updateReceived(this)">
-                        <input type="hidden" id="dinero_recibido" name="monto_recibido">
+                <!-- Sección efectivo -->
+                <div id="cashSection">
+                    <div class="mb-1">
+                        <label class="form-label small text-muted mb-1">Pago Rápido:</label>
+                        <div class="row g-1">
+                            <div class="col-3"><button type="button" class="btn btn-outline-secondary w-100 smart-cash-btn" onclick="setExactCash()">Exacto</button></div>
+                            <div class="col-3"><button type="button" class="btn btn-outline-secondary w-100 smart-cash-btn" onclick="addCash(10000)">$10k</button></div>
+                            <div class="col-3"><button type="button" class="btn btn-outline-secondary w-100 smart-cash-btn" onclick="addCash(20000)">$20k</button></div>
+                            <div class="col-3"><button type="button" class="btn btn-outline-secondary w-100 smart-cash-btn" onclick="addCash(50000)">$50k</button></div>
+                        </div>
                     </div>
-                    <div class="col-6">
-                        <label class="small text-muted">Vuelto</label>
-                        <input type="text" id="vuelto_display" class="form-control fw-bold text-success bg-white" readonly placeholder="0">
-                        <input type="hidden" id="vuelto" name="vuelto_entregado">
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label class="small text-muted">Recibido</label>
+                            <input type="text" id="dinero_recibido_display" class="form-control fw-bold" placeholder="0" oninput="updateReceived(this)">
+                        </div>
+                        <div class="col-6">
+                            <label class="small text-muted">Vuelto</label>
+                            <input type="text" id="vuelto_display" class="form-control fw-bold text-success bg-white" readonly placeholder="0">
+                        </div>
                     </div>
                 </div>
 
-                <div class="d-grid gap-2">
+                <!-- Sección digital: sin vuelto -->
+                <div id="digitalSection" class="d-none mb-2">
+                    <div class="alert alert-info py-2 px-3 mb-0 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-success fs-5"></i>
+                        <div>
+                            <div class="fw-bold small">Pago digital exacto</div>
+                            <div class="text-muted" style="font-size:0.78rem">Sin vuelto — monto total registrado</div>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" id="dinero_recibido" name="monto_recibido" value="0">
+                <input type="hidden" id="vuelto" name="vuelto_entregado" value="0">
+
+                <!-- Botones de acción -->
+                <div class="d-grid gap-1">
                     <button type="submit" class="btn btn-success btn-lg fw-bold py-3" id="btnPay" disabled>
                         <i class="fa-solid fa-cash-register me-2"></i> COBRAR <i class="fa-solid fa-check ms-2"></i>
                     </button>
-                    <button type="button" class="btn btn-light btn-sm text-danger" onclick="cancelarVenta()">
-                        <i class="fa-solid fa-times me-1"></i> Cancelar Venta
-                    </button>
+                    <div class="d-flex gap-1">
+                        @can('crear-devolucion')
+                        <a href="{{ route('devoluciones.create') }}" class="btn btn-warning btn-sm flex-grow-1 text-dark fw-semibold">
+                            <i class="fa-solid fa-rotate-left me-1"></i>Devolución
+                        </a>
+                        @endcan
+                        <button type="button" class="btn btn-light btn-sm flex-grow-1 text-danger" onclick="cancelarVenta()">
+                            <i class="fa-solid fa-times me-1"></i>Cancelar
+                        </button>
+                    </div>
                 </div>
-                
-                <!-- Indicador de atajos de teclado -->
+
                 <div class="keyboard-hint" id="keyboardHint"></div>
             </div>
         </div>
@@ -919,6 +989,29 @@
         calculateChange();
     }
 
+    var esEfectivo = true; // true = efectivo, false = digital
+
+    function selectPayMethod(method, btn) {
+        document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('inputMetodoPago').value = method;
+
+        esEfectivo = (method === 'EFECTIVO');
+        document.getElementById('cashSection').classList.toggle('d-none', !esEfectivo);
+        document.getElementById('digitalSection').classList.toggle('d-none', esEfectivo);
+
+        if (!esEfectivo) {
+            // Pago digital: monto = total, vuelto = 0, habilitamos cobrar si hay productos
+            document.getElementById('dinero_recibido').value = total;
+            document.getElementById('vuelto').value = 0;
+            document.getElementById('btnPay').disabled = (total === 0);
+            playSound(800, 0.1);
+        } else {
+            // Volvemos a efectivo: recalcular con lo que haya en recibido
+            calculateChange();
+        }
+    }
+
     function setExactCash() {
         if(total === 0) return;
         document.getElementById('dinero_recibido').value = total;
@@ -938,7 +1031,6 @@
     function updateReceived(input) {
         var val = input.value.replace(/\D/g, '');
         var num = parseFloat(val);
-        
         if(isNaN(num)) {
             document.getElementById('dinero_recibido').value = 0;
             input.value = '';
@@ -950,8 +1042,14 @@
     }
 
     function calculateChange() {
+        if (!esEfectivo) {
+            // Siempre habilitado para digital si hay productos
+            document.getElementById('dinero_recibido').value = total;
+            document.getElementById('vuelto').value = 0;
+            document.getElementById('btnPay').disabled = (total === 0);
+            return;
+        }
         var received = parseFloat(document.getElementById('dinero_recibido').value) || 0;
-        
         if (received >= total && total > 0) {
             var change = received - total;
             document.getElementById('vuelto').value = change;
@@ -959,7 +1057,7 @@
             document.getElementById('btnPay').disabled = false;
             playSound(1000, 0.1);
         } else {
-            document.getElementById('vuelto').value = '';
+            document.getElementById('vuelto').value = 0;
             document.getElementById('vuelto_display').value = '';
             document.getElementById('btnPay').disabled = true;
         }
@@ -967,10 +1065,18 @@
 
     function cancelarVenta() {
         cart = [];
-        document.getElementById('dinero_recibido').value = '';
+        esEfectivo = true;
+        document.getElementById('dinero_recibido').value = 0;
         document.getElementById('dinero_recibido_display').value = '';
-        document.getElementById('vuelto').value = '';
+        document.getElementById('vuelto').value = 0;
         document.getElementById('vuelto_display').value = '';
+        // Resetear método de pago a efectivo
+        document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('active'));
+        var efectivoBtn = document.querySelector('.pay-method-btn[data-method="EFECTIVO"]');
+        if (efectivoBtn) efectivoBtn.classList.add('active');
+        document.getElementById('inputMetodoPago').value = 'EFECTIVO';
+        document.getElementById('cashSection').classList.remove('d-none');
+        document.getElementById('digitalSection').classList.add('d-none');
         renderCart();
         document.getElementById('searchInput').focus();
     }
