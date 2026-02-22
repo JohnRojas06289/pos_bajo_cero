@@ -26,7 +26,8 @@ class Producto extends Model
         'categoria_id',
         'color',
         'material',
-        'genero'
+        'genero',
+        'origen',
     ];
 
     public function compras(): BelongsToMany
@@ -66,6 +67,40 @@ class Producto extends Model
     public function kardex(): HasMany
     {
         return $this->hasMany(Kardex::class);
+    }
+
+    public function variantes(): HasMany
+    {
+        return $this->hasMany(ProductoVariante::class);
+    }
+
+    public function variantesActivas(): HasMany
+    {
+        return $this->hasMany(ProductoVariante::class)->where('estado', 1);
+    }
+
+    public function tieneVariantes(): bool
+    {
+        return $this->variantes()->exists();
+    }
+
+    public function getStockTotalAttribute(): int
+    {
+        if ($this->tieneVariantes()) {
+            return (int) $this->variantes()->sum('stock');
+        }
+        return (int) ($this->inventario->cantidad ?? 0);
+    }
+
+    public function getTallasDisponiblesAttribute(): array
+    {
+        return $this->variantesActivas()
+            ->whereNotNull('talla')
+            ->where('stock', '>', 0)
+            ->pluck('talla')
+            ->unique()
+            ->values()
+            ->toArray();
     }
 
     protected static function booted()

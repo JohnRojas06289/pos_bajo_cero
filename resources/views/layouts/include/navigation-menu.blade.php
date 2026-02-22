@@ -186,6 +186,27 @@
                 </x-nav.link-collapsed>
                 @endcan
 
+                <!----Devoluciones---->
+                @can('ver-devolucion')
+                <x-nav.nav-link content='Devoluciones'
+                    icon='fa-solid fa-rotate-left'
+                    :href="route('devoluciones.index')" />
+                @endcan
+
+                <!----Importaciones---->
+                @can('ver-importacion')
+                <x-nav.nav-link content='Importaciones'
+                    icon='fa-solid fa-plane-arrival'
+                    :href="route('importaciones.index')" />
+                @endcan
+
+                <!----Reportes---->
+                @can('ver-reporte')
+                <x-nav.nav-link content='Rentabilidad'
+                    icon='fa-solid fa-chart-line'
+                    :href="route('reportes.rentabilidad')" />
+                @endcan
+
                 @hasrole('administrador')
                 <x-nav.heading>Administración</x-nav.heading>
                 @endhasrole

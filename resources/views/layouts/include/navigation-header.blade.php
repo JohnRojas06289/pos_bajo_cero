@@ -117,19 +117,30 @@ if (!$empresa) {
     <!-- Navbar-->
     <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
         <!-- Notifications Dropdown -->
-        {{-- 
+        @php
+            try {
+                $unreadNotifications = Auth::user()->unreadNotifications()->take(5)->get();
+                $unreadCount = $unreadNotifications->count();
+            } catch (\Throwable $e) {
+                $unreadNotifications = collect();
+                $unreadCount = 0;
+            }
+        @endphp
         <li class="nav-item dropdown me-3">
             <a class="nav-link dropdown-toggle" href="#" role="button" id="notificationsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fas fa-bell fa-lg"></i>
-                @if(Auth::user()->unreadNotifications->count() > 0)
-                    <span class="notification-badge">{{ Auth::user()->unreadNotifications->count() }}</span>
+                @if($unreadCount > 0)
+                    <span class="notification-badge">{{ $unreadCount }}</span>
                 @endif
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown" style="min-width: 320px;">
-                <li class="px-3 py-2 border-bottom">
+                <li class="px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
                     <strong class="text-dark">Notificaciones</strong>
+                    @if($unreadCount > 0)
+                    <button class="btn btn-sm btn-outline-secondary py-0" id="markAllRead">Marcar leídas</button>
+                    @endif
                 </li>
-                @forelse (Auth::user()->unreadNotifications->take(5) as $notification)
+                @forelse ($unreadNotifications as $notification)
                 <li>
                     <a href="#" class="dropdown-item notification-item">
                         <div class="d-flex align-items-start">
@@ -149,17 +160,24 @@ if (!$empresa) {
                     </div>
                 </li>
                 @endforelse
-                @if(Auth::user()->unreadNotifications->count() > 0)
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                    <a class="dropdown-item text-center text-primary fw-semibold" href="#">
-                        <i class="fas fa-eye me-1"></i> Ver todas
-                    </a>
-                </li>
-                @endif
             </ul>
         </li>
-        --}}
+        @if($unreadCount > 0)
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const btn = document.getElementById('markAllRead');
+            if (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    fetch('{{ route("notifications.markAsRead") }}', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' }
+                    }).then(() => location.reload()).catch(() => {});
+                });
+            }
+        });
+        </script>
+        @endif
 
         <!-- User Dropdown -->
         <li class="nav-item dropdown">

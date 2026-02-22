@@ -394,10 +394,12 @@
 
             <div class="row g-3" id="productsContainer">
                 @foreach ($productos as $item)
-                <div class="col-6 col-md-3 col-lg-20 product-item" 
+                <div class="col-6 col-md-3 col-lg-20 product-item"
                      data-category="{{$item->categoria_id}}"
                      data-search="{{ strtolower($item->nombre . ' ' . $item->codigo) }}">
-                    <div class="card h-100 product-card shadow-sm border-0" onclick="addToCart('{{$item->id}}', '{{addslashes($item->nombre)}}', {{$item->precio}}, {{$item->cantidad}}, '{{$item->sigla ?? 'UND'}}')">
+                    @php $tieneVariantes = $item->variantes_data->isNotEmpty(); @endphp
+                    <div class="card h-100 product-card shadow-sm border-0"
+                         onclick="{{ $tieneVariantes ? 'abrirSelectorVariante(' . json_encode($item->id) . ',' . json_encode($item->nombre) . ',' . json_encode($item->variantes_data) . ',' . json_encode($item->sigla ?? 'UND') . ')' : 'addToCart(' . json_encode($item->id) . ',' . json_encode($item->nombre) . ',' . $item->precio . ',' . $item->cantidad . ',' . json_encode($item->sigla ?? 'UND') . ')' }}">
                         <div class="product-img-container">
                             @if($item->img_path)
                                 <img src="{{ $item->image_url }}" class="product-img" alt="{{$item->nombre}}" onerror="this.parentElement.innerHTML='<div class=\'text-muted text-center p-3\'><i class=\'fa-solid fa-image fa-3x mb-2 opacity-25\'></i><br><small>Sin imagen</small></div>'">
@@ -490,6 +492,20 @@
         </div>
     </div>
 </form>
+
+<!-- Modal selector de variantes -->
+<div class="modal fade" id="varianteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-tags me-2"></i><span id="varianteModalTitulo"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="varianteModalBody"></div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('js')
@@ -680,9 +696,72 @@
         setTimeout(() => document.getElementById('searchInput').focus(), 100);
     }
 
+    function abrirSelectorVariante(productoId, productoNombre, variantes, sigla) {
+        document.getElementById('varianteModalTitulo').textContent = productoNombre;
+
+        // Agrupar por talla
+        const tallasMap = {};
+        variantes.forEach(v => {
+            const talla = v.talla || '—';
+            if (!tallasMap[talla]) tallasMap[talla] = [];
+            tallasMap[talla].push(v);
+        });
+
+        let html = '';
+        Object.entries(tallasMap).forEach(([talla, vars]) => {
+            html += `<div class="mb-3"><h6 class="fw-bold text-muted mb-2">Talla ${talla}</h6><div class="d-flex flex-wrap gap-2">`;
+            vars.forEach(v => {
+                const precio = v.precio ?? null;
+                const agotado = v.stock <= 0;
+                const label = v.color || 'Sin color';
+                const precioLabel = precio ? '$ ' + precio.toLocaleString('es-CO') : '';
+                html += `<button type="button"
+                    class="btn ${agotado ? 'btn-secondary disabled' : 'btn-outline-primary'} px-3 py-2"
+                    onclick="seleccionarVariante('${v.id}','${productoId}','${productoNombre}',${v.precio ?? 'null'},${v.stock},'${sigla}','${talla}','${label}')"
+                    ${agotado ? 'disabled' : ''}>
+                    <strong>${label}</strong><br>
+                    <small>${agotado ? 'Agotado' : 'Stock: ' + v.stock}</small>
+                    ${precioLabel ? '<br><small class="text-success">' + precioLabel + '</small>' : ''}
+                </button>`;
+            });
+            html += `</div></div>`;
+        });
+
+        document.getElementById('varianteModalBody').innerHTML = html;
+        new bootstrap.Modal(document.getElementById('varianteModal')).show();
+    }
+
+    function seleccionarVariante(varianteId, productoId, nombre, precioVariante, stock, sigla, talla, color) {
+        bootstrap.Modal.getInstance(document.getElementById('varianteModal')).hide();
+        // Usar precio de variante si existe
+        addToCartConVariante(productoId, varianteId, nombre + ' (' + talla + ' - ' + color + ')', precioVariante, stock, sigla);
+    }
+
+    function addToCartConVariante(productoId, varianteId, nombre, precio, stock, sigla) {
+        var key = productoId + '_' + varianteId;
+        var existingItem = cart.find(i => i.key === key);
+        var currentQty = existingItem ? existingItem.cantidad : 0;
+
+        if (currentQty + 1 > stock) {
+            playSound(200, 0.2);
+            Swal.fire({ icon: 'error', title: 'Stock insuficiente', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+            return;
+        }
+
+        playSound(800, 0.1);
+        if (existingItem) {
+            existingItem.cantidad++;
+            existingItem.subtotal = existingItem.cantidad * existingItem.precio;
+        } else {
+            cart.push({ key: key, id: productoId, varianteId: varianteId, nombre: nombre, precio: parseFloat(precio), cantidad: 1, sigla: sigla, stock: parseInt(stock), subtotal: parseFloat(precio), isNew: true });
+        }
+        renderCart();
+        Swal.fire({ icon: 'success', title: 'Agregado', text: nombre, toast: true, position: 'top-end', showConfirmButton: false, timer: 1200, timerProgressBar: true });
+    }
+
     function addToCart(id, nombre, precio, stock, sigla) {
         id = id.toString();
-        var existingItem = cart.find(function(item) { return item.id === id; });
+        var existingItem = cart.find(function(item) { return item.id === id && !item.varianteId; });
         var currentQty = existingItem ? existingItem.cantidad : 0;
         
         if (currentQty + 1 > stock) {
@@ -706,12 +785,14 @@
             existingItem.cantidad++;
             existingItem.subtotal = existingItem.cantidad * existingItem.precio;
         } else {
-            cart.push({ 
-                id: id, 
-                nombre: nombre, 
-                precio: parseFloat(precio), 
-                cantidad: 1, 
-                sigla: sigla, 
+            cart.push({
+                key: id,
+                id: id,
+                varianteId: null,
+                nombre: nombre,
+                precio: parseFloat(precio),
+                cantidad: 1,
+                sigla: sigla,
                 stock: parseInt(stock),
                 subtotal: parseFloat(precio),
                 isNew: true
@@ -732,38 +813,24 @@
         });
     }
 
-    function updateQuantityManual(id, newQty, maxStock) {
+    function updateQuantityManual(key, newQty, maxStock) {
         newQty = parseInt(newQty);
-        
+
         if (isNaN(newQty) || newQty < 1) {
             playSound(200, 0.2);
-            Swal.fire({ 
-                icon: 'warning', 
-                title: 'Cantidad mínima: 1', 
-                toast: true, 
-                position: 'top-end', 
-                showConfirmButton: false, 
-                timer: 2000 
-            });
-            renderCart();
-            return;
-        }
-        
-        if (newQty > maxStock) {
-            playSound(200, 0.2);
-            Swal.fire({ 
-                icon: 'error', 
-                title: 'Stock insuficiente (máx: ' + maxStock + ')', 
-                toast: true, 
-                position: 'top-end', 
-                showConfirmButton: false, 
-                timer: 2000 
-            });
+            Swal.fire({ icon: 'warning', title: 'Cantidad mínima: 1', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
             renderCart();
             return;
         }
 
-        var item = cart.find(function(i) { return i.id === id; });
+        if (newQty > maxStock) {
+            playSound(200, 0.2);
+            Swal.fire({ icon: 'error', title: 'Stock insuficiente (máx: ' + maxStock + ')', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+            renderCart();
+            return;
+        }
+
+        var item = cart.find(function(i) { return i.key === key; });
         if (item) {
             item.cantidad = newQty;
             item.subtotal = item.cantidad * item.precio;
@@ -772,7 +839,7 @@
         }
     }
 
-    function removeFromCart(id) {
+    function removeFromCart(key) {
         playSound(400, 0.15);
         Swal.fire({
             title: '¿Eliminar producto?',
@@ -784,7 +851,7 @@
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
-                cart = cart.filter(function(i) { return i.id !== id; });
+                cart = cart.filter(function(i) { return i.key !== key; });
                 renderCart();
                 Swal.fire({
                     icon: 'success',
@@ -812,28 +879,29 @@
             cart.forEach(function(item) {
                 total += item.subtotal;
                 var itemClass = item.isNew ? 'cart-item cart-item-new' : 'cart-item';
-                item.isNew = false; // Resetear flag
-                
+                item.isNew = false;
+
                 var row = '<div class="' + itemClass + '">' +
                     '<div class="flex-grow-1">' +
-                        '<div class="fw-bold text-truncate" style="max-width: 140px;">' + item.nombre + '</div>' +
+                        '<div class="fw-bold text-truncate" style="max-width: 140px;" title="' + item.nombre + '">' + item.nombre + '</div>' +
                         '<div class="d-flex align-items-center gap-2 mt-1">' +
                             '<small class="text-muted">Cantidad:</small>' +
                             '<input type="number" class="form-control form-control-sm" style="width: 60px;" ' +
                                 'value="' + item.cantidad + '" ' +
                                 'min="1" max="' + item.stock + '" ' +
-                                'onchange="updateQuantityManual(\'' + item.id + '\', this.value, ' + item.stock + ')" ' +
+                                'onchange="updateQuantityManual(\'' + item.key + '\', this.value, ' + item.stock + ')" ' +
                                 'onclick="this.select()">' +
                             '<small class="text-muted">' + item.sigla + '</small>' +
                         '</div>' +
                         '<small class="text-muted">' + formatNumber(item.precio) + ' c/u</small>' +
                         '<input type="hidden" name="arrayidproducto[]" value="' + item.id + '">' +
+                        '<input type="hidden" name="arrayvarianteid[]" value="' + (item.varianteId || '') + '">' +
                         '<input type="hidden" name="arraycantidad[]" value="' + item.cantidad + '">' +
                         '<input type="hidden" name="arrayprecioventa[]" value="' + item.precio + '">' +
                     '</div>' +
                     '<div class="text-end ms-2">' +
                         '<div class="fw-bold mb-2 text-primary">' + formatNumber(item.subtotal) + '</div>' +
-                        '<button type="button" class="btn btn-sm btn-outline-danger px-2" onclick="removeFromCart(\'' + item.id + '\')" title="Eliminar">' +
+                        '<button type="button" class="btn btn-sm btn-outline-danger px-2" onclick="removeFromCart(\'' + item.key + '\')" title="Eliminar">' +
                             '<i class="fa-solid fa-trash"></i>' +
                         '</button>' +
                     '</div>' +

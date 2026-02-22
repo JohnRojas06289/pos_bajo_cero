@@ -66,7 +66,6 @@ class ventaController extends Controller
         }
 
         // Verificar productos (sin bloquear si está vacío)
-        // Verificar productos (sin bloquear si está vacío)
         $productos = Producto::leftJoin('inventario as i', function ($join) {
             $join->on('i.producto_id', '=', 'productos.id');
         })
@@ -84,7 +83,20 @@ class ventaController extends Controller
                 'productos.categoria_id'
             )
             ->where('productos.estado', 1)
-            ->get();
+            ->get()
+            ->each(function ($producto) {
+                // Cargar variantes activas con stock disponible
+                $producto->variantes_data = \App\Models\ProductoVariante::where('producto_id', $producto->id)
+                    ->where('estado', 1)
+                    ->select('id', 'talla', 'color', 'stock', 'precio', 'sku')
+                    ->orderBy('talla')
+                    ->get();
+
+                // Si tiene variantes, el stock total es la suma de variantes
+                if ($producto->variantes_data->isNotEmpty()) {
+                    $producto->cantidad = $producto->variantes_data->sum('stock');
+                }
+            });
 
         // ELIMINADO EL BLOQUEO DE INVENTARIO VACÍO POR SOLICITUD DEL USUARIO
         
