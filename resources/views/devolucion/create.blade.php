@@ -4,10 +4,10 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <x-breadcrumb.breadcrumb>
+    <x-breadcrumb.template>
         <x-breadcrumb.item href="{{ route('devoluciones.index') }}">Devoluciones</x-breadcrumb.item>
         <x-breadcrumb.item active>Nueva</x-breadcrumb.item>
-    </x-breadcrumb.breadcrumb>
+    </x-breadcrumb.template>
 
     <h2 class="fw-bold mb-4"><i class="fa-solid fa-rotate-left me-2 text-warning"></i>Registrar Devolución / Cambio</h2>
 

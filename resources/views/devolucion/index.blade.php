@@ -4,9 +4,9 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <x-breadcrumb.breadcrumb>
+    <x-breadcrumb.template>
         <x-breadcrumb.item active>Devoluciones</x-breadcrumb.item>
-    </x-breadcrumb.breadcrumb>
+    </x-breadcrumb.template>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0"><i class="fa-solid fa-rotate-left me-2 text-warning"></i>Devoluciones y Cambios</h2>

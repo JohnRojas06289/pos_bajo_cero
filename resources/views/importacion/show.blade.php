@@ -4,10 +4,10 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <x-breadcrumb.breadcrumb>
+    <x-breadcrumb.template>
         <x-breadcrumb.item href="{{ route('importaciones.index') }}">Importaciones</x-breadcrumb.item>
         <x-breadcrumb.item active>{{ $importacion->numero }}</x-breadcrumb.item>
-    </x-breadcrumb.breadcrumb>
+    </x-breadcrumb.template>
 
     <div class="row g-4">
         <div class="col-lg-4">

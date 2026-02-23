@@ -4,10 +4,10 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <x-breadcrumb.breadcrumb>
+    <x-breadcrumb.template>
         <x-breadcrumb.item href="{{ route('productos.index') }}">Productos</x-breadcrumb.item>
         <x-breadcrumb.item active>Variantes: {{ $producto->nombre }}</x-breadcrumb.item>
-    </x-breadcrumb.breadcrumb>
+    </x-breadcrumb.template>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>

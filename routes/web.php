@@ -118,21 +118,4 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
 Route::get('/login', [loginController::class, 'index'])->name('login.index');
 Route::post('/login', [loginController::class, 'login'])->name('login.login')->middleware('throttle:10,1');
 
-// TEMP diagnostic
-Route::get('/diag-9x7k2p', function () {
-    if (request('key') !== env('APP_KEY')) abort(403);
-    $out = [];
-    try {
-        $ventas = \App\Models\Venta::with('cliente.persona')->latest()->limit(3)->get();
-        $out['ventas_count'] = $ventas->count();
-        $out['ventas_sample'] = $ventas->map(fn($v) => ['id'=>$v->id,'numero_comprobante'=>$v->numero_comprobante,'cliente'=>$v->cliente?->persona?->nombre]);
-    } catch (\Throwable $e) { $out['ventas_error'] = $e->getMessage(); }
-    try {
-        $view = view('devolucion.create', ['venta'=>null, 'ventas'=>collect([])]);
-        $out['view_ok'] = true;
-        $out['view_html_len'] = strlen($view->render());
-    } catch (\Throwable $e) { $out['view_error'] = $e->getMessage(); $out['view_trace'] = substr($e->getTraceAsString(), 0, 500); }
-    return response()->json($out);
-});
-
 

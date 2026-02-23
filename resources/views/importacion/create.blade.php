@@ -8,10 +8,10 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <x-breadcrumb.breadcrumb>
+    <x-breadcrumb.template>
         <x-breadcrumb.item href="{{ route('importaciones.index') }}">Importaciones</x-breadcrumb.item>
         <x-breadcrumb.item active>Nueva</x-breadcrumb.item>
-    </x-breadcrumb.breadcrumb>
+    </x-breadcrumb.template>
 
     <h2 class="fw-bold mb-4"><i class="fa-solid fa-plane-arrival me-2 text-primary"></i>Registrar Importación</h2>
 
