@@ -11304,15 +11304,76 @@ body {
   color: #fff !important;
 }
 
-/* Override for sb-nav-fixed layout to completely hide sidebar */
-.sb-nav-fixed.sb-sidenav-toggled #layoutSidenav #layoutSidenav_nav {
-    width: 0 !important;
-    transform: translateX(-225px);
+/* ============================================
+   ADMIN SIDEBAR - DESKTOP TOGGLE OVERRIDE (>=992px)
+   When toggled on desktop, completely hide the sidebar
+   ============================================ */
+@media (min-width: 992px) {
+    .sb-nav-fixed.sb-sidenav-toggled #layoutSidenav #layoutSidenav_nav {
+        width: 0 !important;
+        transform: translateX(-225px);
+    }
+
+    .sb-nav-fixed.sb-sidenav-toggled #layoutSidenav #layoutSidenav_content {
+        padding-left: 0 !important;
+        margin-left: 0 !important;
+    }
 }
 
-.sb-nav-fixed.sb-sidenav-toggled #layoutSidenav #layoutSidenav_content {
-    padding-left: 0 !important;
-    margin-left: 0 !important;
+/* ============================================
+   ADMIN SIDEBAR - MOBILE/TABLET (<992px)
+   Sidebar hidden by default, shown when toggled
+   ============================================ */
+@media (max-width: 991.98px) {
+    /* Ensure sidebar is hidden by default */
+    #layoutSidenav #layoutSidenav_nav {
+        transform: translateX(-225px);
+        position: fixed;
+        top: 56px;
+        left: 0;
+        height: calc(100vh - 56px);
+        z-index: 1038;
+    }
+
+    /* Show sidebar when hamburger is clicked */
+    .sb-sidenav-toggled #layoutSidenav #layoutSidenav_nav {
+        transform: translateX(0) !important;
+        width: 225px !important;
+    }
+
+    /* Content takes full width */
+    #layoutSidenav #layoutSidenav_content {
+        margin-left: 0;
+        padding-left: 0;
+    }
+
+    .sb-topnav .navbar-brand {
+        width: auto;
+        font-size: 1rem !important;
+    }
+}
+
+/* ============================================
+   ADMIN PANEL - MOBILE RESPONSIVE (< 768px)
+   ============================================ */
+@media (max-width: 767px) {
+    .sb-topnav .navbar-brand {
+        width: auto;
+        font-size: 0.95rem !important;
+    }
+
+    .sb-nav-fixed #layoutSidenav #layoutSidenav_content {
+        padding-left: 0;
+    }
+
+    #layoutSidenav #layoutSidenav_content main {
+        padding: 0.5rem;
+    }
+
+    .container-fluid {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
 }
 
 /* ========================================
