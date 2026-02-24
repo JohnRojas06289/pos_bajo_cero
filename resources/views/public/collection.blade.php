@@ -12,66 +12,69 @@
     </div>
 
     <div class="row gx-5">
+        <!-- Filter Toggle Button (Mobile/Tablet Only) -->
+        <div class="col-12 d-lg-none mb-4">
+            <button class="btn btn-neon w-100 py-3" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+                <i class="fas fa-filter me-2"></i> VER FILTROS
+            </button>
+        </div>
+
         <!-- Sidebar Filters -->
-        <div class="col-lg-3 mb-5">
-            <div class="card bg-dark border-secondary text-white p-4">
-                <h4 class="fw-bold mb-4"><i class="fas fa-sliders-h me-2"></i>FILTROS</h4>
-                
-                <form action="{{ route('collection') }}" method="GET">
-                    <!-- Text Search -->
-                    <div class="mb-4">
-                        <label class="form-label text-muted small fw-bold">BUSCAR</label>
-                        <input type="text" name="search" class="form-control form-control-dark" placeholder="Nombre del producto..." value="{{ request('search') }}">
+        <div class="col-lg-3">
+            <div class="collapse d-lg-block mb-5" id="filterCollapse">
+                <div class="card bg-dark border-secondary text-white p-4 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold mb-0 text-primary"><i class="fas fa-sliders-h me-2"></i>FILTROS</h4>
                     </div>
-
-                    <!-- Categories -->
-                    <div class="mb-4">
-                        <label class="form-label text-muted small fw-bold">CATEGORÍA</label>
-                        <select name="categoria" class="form-select form-control-dark">
-                            <option value="all">Todas las categorías</option>
-                            @foreach($categorias as $cat)
-                                <option value="{{ $cat->nombre }}" {{ request('categoria') == $cat->nombre ? 'selected' : '' }}>
-                                    {{ $cat->nombre }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Brands -->
-                    <div class="mb-4">
-                        <label class="form-label text-muted small fw-bold">MARCA</label>
-                        <select name="marca" class="form-select form-control-dark">
-                            <option value="all">Todas las marcas</option>
-                            @foreach($marcas as $marca)
-                                <option value="{{ $marca->nombre }}" {{ request('marca') == $marca->nombre ? 'selected' : '' }}>
-                                    {{ $marca->nombre }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Price Range (Visual only for now) -->
-                    <div class="mb-4">
-                         <label class="form-label text-muted small fw-bold">PRECIO MÁXIMO</label>
-                         <input type="range" class="form-range" min="0" max="500000" step="10000" id="priceRange">
-                         <div class="d-flex justify-content-between text-muted small">
-                             <span>$0</span>
-                             <span>$500k+</span>
-                         </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-neon w-100 text-center">APLICAR FILTROS</button>
                     
-                    @if(request()->hasAny(['search', 'categoria', 'marca']))
-                        <a href="{{ route('collection') }}" class="btn btn-link text-white-50 w-100 mt-2">Limpiar Filtros</a>
-                    @endif
-                </form>
+                    <form action="{{ route('collection') }}" method="GET">
+                        <!-- Text Search -->
+                        <div class="mb-4">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Buscar</label>
+                            <input type="text" name="search" class="form-control form-control-dark" placeholder="¿Qué buscas?" value="{{ request('search') }}">
+                        </div>
+
+                        <!-- Categories -->
+                        <div class="mb-4">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Categoría</label>
+                            <select name="categoria" class="form-select form-control-dark">
+                                <option value="all">Todas las categorías</option>
+                                @foreach($categorias as $cat)
+                                    <option value="{{ $cat->nombre }}" {{ request('categoria') == $cat->nombre ? 'selected' : '' }}>
+                                        {{ $cat->nombre }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Brands -->
+                        <div class="mb-4">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Marca</label>
+                            <select name="marca" class="form-select form-control-dark">
+                                <option value="all">Todas las marcas</option>
+                                @foreach($marcas as $marca)
+                                    <option value="{{ $marca->nombre }}" {{ request('marca') == $marca->nombre ? 'selected' : '' }}>
+                                        {{ $marca->nombre }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-neon w-100 py-2">APLICAR</button>
+                        
+                        @if(request()->hasAny(['search', 'categoria', 'marca']))
+                            <a href="{{ route('collection') }}" class="btn btn-link text-white-50 w-100 mt-2 text-decoration-none small">
+                                <i class="fas fa-times me-1"></i> Limpiar Filtros
+                            </a>
+                        @endif
+                    </form>
+                </div>
             </div>
         </div>
 
         <!-- Product Grid -->
         <div class="col-lg-9">
-            <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-3 justify-content-center">
+            <div class="row gx-3 gx-md-4 row-cols-2 row-cols-md-3 row-cols-xl-3 justify-content-center">
                 @forelse($products as $product)
                     <div class="col mb-5">
                         <div class="card product-card h-100 border-0">

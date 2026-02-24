@@ -91,7 +91,7 @@
     <div class="row mt-5">
         <div class="col-12">
             <div class="card bg-dark border-secondary overflow-hidden">
-                <div style="width: 100%; height: 400px; background-color: #222; display: flex; align-items: center; justify-content: center; position: relative;">
+                <div class="map-placeholder" style="height: 400px;">
                     <!-- Simulating darker map -->
                     <div style="position: absolute; top:0; left:0; width:100%; height:100%; background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/World_map_blank_without_borders.svg/2000px-World_map_blank_without_borders.svg.png'); opacity: 0.1;"></div>
                     <div class="text-center z-index-1">

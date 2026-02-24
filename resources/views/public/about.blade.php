@@ -28,7 +28,7 @@
             </div>
             <div class="col-lg-6 mt-5 mt-lg-0">
                 <!-- Image Placeholder -->
-                <div style="width: 100%; height: 500px; background-color: #222; border: 1px solid #333; position: relative; overflow: hidden;">
+                <div class="map-placeholder" style="height: 500px;">
                     <i class="fas fa-city fa-10x" style="position: absolute; bottom: -20px; right: -20px; color: #111;"></i>
                     <div style="display: flex; height: 100%; align-items: center; justify-content: center; flex-direction: column;">
                          <i class="fas fa-camera-retro fa-4x text-muted mb-3"></i>
