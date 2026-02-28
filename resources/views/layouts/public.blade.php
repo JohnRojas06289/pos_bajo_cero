@@ -7,7 +7,7 @@
     <meta name="author" content="Bajo Cero" />
     <title>@yield('title', 'Bajo Cero | Estilo Urbano')</title>
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome -->
@@ -55,9 +55,12 @@
     <!-- Slide Menu Panel -->
     <div id="slideMenu" class="slide-menu">
         <div class="slide-menu-header">
-            <span style="color: var(--primary-color); font-weight: 800; text-transform: uppercase; letter-spacing: 2px; font-size: 1.25rem;">
-                Bajo<span style="color: var(--text-color);">Cero</span>
-            </span>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+                <i class="fas fa-snowflake" style="color: var(--primary-color); font-size: 1rem; opacity: 0.8;"></i>
+                <span style="color: var(--primary-color); font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; font-size: 1.1rem;">
+                    Bajo<span style="color: var(--text-color);">Cero</span>
+                </span>
+            </div>
             <button id="menuCloseBtn" class="btn-close-menu">
                 <i class="fas fa-times"></i>
             </button>
@@ -69,9 +72,9 @@
                 <li><a class="nav-link-custom {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}"><i class="fas fa-envelope me-2"></i>Contacto</a></li>
                 <li><a class="nav-link-custom {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}"><i class="fas fa-info-circle me-2"></i>Nosotros</a></li>
             </ul>
-            <hr style="border-color: var(--card-border);">
-            <a href="{{ route('login.index') }}" class="btn-login d-block text-center">
-                <i class="fas fa-user me-2"></i> Login
+            <hr style="border-color: var(--card-border); margin: 0.75rem 0;">
+            <a href="{{ route('login.index') }}" class="btn-login d-block text-center" style="font-size:0.75rem;">
+                <i class="fas fa-sign-in-alt me-2"></i> Acceder al panel
             </a>
         </div>
     </div>
@@ -118,14 +121,17 @@
                     </div>
                 </div>
             </div>
-            <div class="text-center mt-5 pt-4 border-top border-secondary">
-                <small class="text-muted">&copy; 2026 Bajo Cero. Todos los derechos reservados.</small>
+            <div class="text-center mt-5 pt-4" style="border-top: 1px solid rgba(255,255,255,0.08);">
+                <small style="color: rgba(255,255,255,0.3); font-size: 0.75rem;">&copy; 2026 Bajo Cero. Todos los derechos reservados.</small>
             </div>
         </div>
     </footer>
 
     <!-- Whatsapp Floating Button -->
-    <a href="https://wa.me/573001234567" target="_blank" style="position: fixed; bottom: 20px; right: 20px; background-color: #25d366; color: white; width: 60px; height: 60px; border-radius: 50%; text-align: center; line-height: 60px; font-size: 30px; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
+    <a href="https://wa.me/573001234567" target="_blank" title="Escríbenos por WhatsApp"
+       style="position:fixed;bottom:24px;right:24px;background:#25d366;color:white;width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;z-index:1000;box-shadow:0 4px 16px rgba(37,211,102,0.35);transition:transform 0.2s ease,box-shadow 0.2s ease;"
+       onmouseenter="this.style.transform='scale(1.08)';this.style.boxShadow='0 6px 20px rgba(37,211,102,0.45)'"
+       onmouseleave="this.style.transform='scale(1)';this.style.boxShadow='0 4px 16px rgba(37,211,102,0.35)'">
         <i class="fab fa-whatsapp"></i>
     </a>
 

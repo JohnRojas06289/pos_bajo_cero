@@ -13,7 +13,10 @@ class Persona extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $guarded = ['id'];
+    protected $guarded = ['id', 'created_at', 'updated_at'];
+    
+    // es_mayorista is handled by guarded. Let me just ensure it's not excluded if guarded is used.
+
 
     protected $casts = [
         'tipo' => TipoPersonaEnum::class

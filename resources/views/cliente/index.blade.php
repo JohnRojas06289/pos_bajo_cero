@@ -33,15 +33,22 @@
     <!-- Clients List -->
     <div id="clientsList">
         @forelse ($clientes as $item)
-        <div class="item-card" data-search="{{ strtolower($item->persona->razon_social . ' ' . $item->persona->numero_documento) }}">
+        <div class="item-card" data-search="{{ strtolower($item->persona->razon_social . ' ' . $item->persona->numero_documento . ($item->persona->es_mayorista ? ' mayorista' : '')) }}">
             <!-- Client Icon -->
-            <div class="item-image d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);">
-                <i class="fas fa-user fa-3x text-white"></i>
+            <div class="item-image d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, {{ $item->persona->es_mayorista ? '#db2777, #ec4899' : '#0ea5e9, #38bdf8' }} 100%);">
+                <i class="fas {{ $item->persona->es_mayorista ? 'fa-handshake' : 'fa-user' }} fa-3x text-white"></i>
             </div>
 
             <!-- Client Info -->
             <div class="item-info">
-                <h3>{{ $item->persona->razon_social }}</h3>
+                <h3>
+                    {{ $item->persona->razon_social }}
+                    @if($item->persona->es_mayorista)
+                    <span class="badge bg-pink-light text-pink ms-2" style="background: #fdf2f8; color: #db2777; border: 1px solid #fbcfe8; font-size: 0.7rem;">
+                        <i class="fas fa-star me-1"></i>MAYORISTA
+                    </span>
+                    @endif
+                </h3>
                 <div class="d-flex gap-4 mt-2">
                     <span class="text-muted">
                         <i class="fas fa-id-card me-1"></i>
@@ -143,6 +150,18 @@
                                 <div class="form-group-large">
                                     <label>Email</label>
                                     <div class="p-3 bg-light rounded">{{ $item->persona->email ?? 'No registrado' }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-large">
+                                    <label>Tipo Cliente</label>
+                                    <div class="p-3 bg-light rounded">
+                                        @if($item->persona->es_mayorista)
+                                        <span class="text-pink fw-bold" style="color: #db2777;"><i class="fas fa-handshake me-2"></i>Mayorista</span>
+                                        @else
+                                        <span class="text-primary fw-bold"><i class="fas fa-user me-2"></i>Minorista</span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-12">

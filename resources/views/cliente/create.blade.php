@@ -93,6 +93,16 @@
                         <small class="text-danger">{{'*'.$message}}</small>
                         @enderror
                     </div>
+
+                    <!-------Es Mayorista------>
+                    <div class="col-md-6 d-flex align-items-end mb-3">
+                        <div class="form-check form-switch p-3 bg-white rounded border w-100">
+                            <input class="form-check-input ms-0 me-3" type="checkbox" role="switch" name="es_mayorista" id="es_mayorista" value="1" {{ old('es_mayorista') ? 'checked' : '' }} style="width: 3rem; height: 1.5rem;">
+                            <label class="form-check-label fw-bold text-primary" for="es_mayorista">
+                                <i class="fas fa-handshake me-2"></i>¿Es Cliente Mayorista?
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
             </div>

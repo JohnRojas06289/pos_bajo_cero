@@ -11,28 +11,23 @@
 <div class="container-fluid px-2">
     <!-- Page Header -->
     <div class="page-header">
-        <h1><i class="fas fa-box-open"></i> Productos</h1>
-        <div class="d-flex gap-2">
+        <h1><i class="fas fa-box-open me-2"></i> Productos</h1>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
             @can('ver-producto')
-            <a href="{{route('productos.export')}}">
-                <button type="button" class="btn-action-large btn-primary">
-                    <i class="fas fa-file-excel"></i>
-                    <span>Exportar a Excel</span>
-                </button>
+            <a href="{{route('productos.export')}}" class="btn btn-sm btn-ghost" style="border-color:rgba(255,255,255,0.3);color:white;">
+                <i class="fas fa-file-excel"></i>
+                <span class="d-none d-sm-inline">Exportar</span>
             </a>
             @endcan
             @can('crear-producto')
-            <button type="button" class="btn-action-large btn-info" data-bs-toggle="modal" data-bs-target="#importModal">
+            <button type="button" class="btn btn-sm btn-ghost" style="border-color:rgba(255,255,255,0.3);color:white;" data-bs-toggle="modal" data-bs-target="#importModal">
                 <i class="fas fa-file-upload"></i>
-                <span>Importar desde Excel</span>
+                <span class="d-none d-sm-inline">Importar</span>
             </button>
             @endcan
             @can('crear-producto')
-            <a href="{{route('productos.create')}}">
-                <button type="button" class="btn-action-large btn-success">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Nuevo Producto</span>
-                </button>
+            <a href="{{route('productos.create')}}" class="btn btn-sm" style="background:white;color:#2563eb;font-weight:700;border:none;">
+                <i class="fas fa-plus me-1"></i> Nuevo Producto
             </a>
             @endcan
         </div>
@@ -90,16 +85,19 @@
                     </select>
                 </div>
 
-                <!-- View Toggle -->
-                <div class="col-md-2 text-end">
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-outline-secondary active" id="gridViewBtn" onclick="setView('grid')" title="Vista cuadrícula">
+                <!-- View Toggle + Clear -->
+                <div class="col-md-2 d-flex gap-2 align-items-center justify-content-end">
+                    <button type="button" class="btn-ghost btn-sm" onclick="clearFilters()" title="Limpiar filtros" style="font-size:0.78rem;padding:0.3rem 0.65rem;">
+                        <i class="fas fa-times me-1"></i>Limpiar
+                    </button>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-secondary active" id="gridViewBtn" onclick="setView('grid')" title="Grid">
                             <i class="fas fa-th"></i>
                         </button>
-                        <button type="button" class="btn btn-outline-secondary" id="listViewBtn" onclick="setView('list')" title="Vista lista">
+                        <button type="button" class="btn btn-outline-secondary" id="listViewBtn" onclick="setView('list')" title="Lista">
                             <i class="fas fa-list"></i>
                         </button>
-                        <button type="button" class="btn btn-outline-warning" id="familyViewBtn" onclick="setView('familia')" title="Vista por familia de tallas">
+                        <button type="button" class="btn btn-outline-warning" id="familyViewBtn" onclick="setView('familia')" title="Familias">
                             <i class="fas fa-layer-group"></i>
                         </button>
                     </div>
@@ -313,6 +311,14 @@
 @push('js')
 <script>
     let currentView = 'grid';
+
+    function clearFilters() {
+        document.getElementById('searchProducts').value = '';
+        document.getElementById('filterCategory').value = '';
+        document.getElementById('filterMarca').value = '';
+        document.getElementById('filterStatus').value = '';
+        filterProducts();
+    }
 
     function filterProducts() {
         const searchTerm = document.getElementById('searchProducts').value.toLowerCase();

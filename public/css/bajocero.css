@@ -745,3 +745,250 @@ footer {
         gap: 0.75rem !important;
     }
 }
+
+/* ============================================
+   REFINEMENTS v2 — UX/UI UPDATE
+   ============================================ */
+
+/* Navbar: altura 64px, mejor estructura */
+.navbar-custom {
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="light"] .navbar-custom {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06) !important;
+}
+
+.nav-container {
+    min-height: 64px;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Brand: más limpio, sin text-transform agresivo */
+.navbar-brand {
+    letter-spacing: 1.5px !important;
+    font-size: 1.3rem !important;
+}
+
+/* Hamburger: borde más sutil */
+.hamburger-btn {
+    border-width: 1.5px !important;
+    border-radius: 10px !important;
+    padding: 0.5rem 0.65rem !important;
+}
+
+.hamburger-btn:hover {
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.25) !important;
+}
+
+/* ── Login btn en navbar ── */
+.btn-login {
+    border-radius: 10px !important;
+    font-size: 0.78rem !important;
+    padding: 0.5rem 1.25rem !important;
+    letter-spacing: 0.8px !important;
+}
+
+.btn-login:hover {
+    box-shadow: 0 0 12px rgba(0, 242, 255, 0.3) !important;
+}
+
+/* ── Theme toggle ── */
+.theme-toggle-btn {
+    border-radius: 10px !important;
+    width: 38px !important;
+    height: 38px !important;
+}
+
+/* ── Slide menu: espaciado uniforme, hover más limpio ── */
+.slide-menu-header {
+    padding: 1rem 1.25rem !important;
+    background: rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-theme="light"] .slide-menu-header {
+    background: #f8fafc !important;
+}
+
+.slide-menu-body {
+    padding: 1rem 1rem !important;
+}
+
+.navbar-nav-custom {
+    display: flex;
+    flex-direction: column;
+    gap: 2px !important;
+}
+
+.navbar-nav-custom li {
+    margin-bottom: 0 !important;
+}
+
+.nav-link-custom {
+    padding: 0.7rem 0.875rem !important;
+    border-radius: 8px !important;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.8px !important;
+    color: rgba(255, 255, 255, 0.65) !important;
+}
+
+[data-theme="light"] .nav-link-custom {
+    color: #475569 !important;
+}
+
+.nav-link-custom:hover {
+    background-color: rgba(0, 242, 255, 0.07) !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    transform: translateX(3px) !important;
+}
+
+[data-theme="light"] .nav-link-custom:hover {
+    background-color: rgba(0, 140, 149, 0.08) !important;
+    color: #1e293b !important;
+}
+
+.nav-link-custom.active {
+    background-color: rgba(0, 242, 255, 0.1) !important;
+    color: var(--primary-color) !important;
+    text-shadow: none !important;
+    font-weight: 600 !important;
+}
+
+/* ── Product cards: sombra más natural, hover más sutil ── */
+.product-card {
+    border-radius: 14px !important;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+
+.product-card:hover {
+    transform: translateY(-4px) !important;
+    border-color: rgba(0, 242, 255, 0.35) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 242, 255, 0.15) !important;
+}
+
+[data-theme="light"] .product-card:hover {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 8px 24px rgba(0, 140, 149, 0.1) !important;
+}
+
+.product-info {
+    padding: 1rem 1.25rem 1.25rem !important;
+}
+
+.product-brand {
+    font-size: 0.68rem !important;
+    letter-spacing: 0.8px !important;
+    font-weight: 500 !important;
+}
+
+.product-title {
+    font-size: 0.9rem !important;
+    letter-spacing: 0.3px !important;
+    margin: 0.35rem 0 0.5rem !important;
+}
+
+.product-price {
+    font-size: 1.1rem !important;
+    font-weight: 800 !important;
+}
+
+/* Badge nuevo */
+.badge-new {
+    border-radius: 6px !important;
+    font-size: 0.65rem !important;
+    letter-spacing: 0.5px !important;
+    padding: 0.2rem 0.6rem !important;
+    top: 0.625rem !important;
+    right: 0.625rem !important;
+}
+
+/* ── Formularios del sitio público ── */
+.form-control-dark {
+    border-radius: 10px !important;
+    border: 1.5px solid var(--card-border) !important;
+    font-size: 0.9rem !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.form-control-dark:focus {
+    box-shadow: 0 0 0 3px rgba(0, 242, 255, 0.08) !important;
+}
+
+[data-theme="light"] .form-control-dark:focus {
+    box-shadow: 0 0 0 3px rgba(0, 140, 149, 0.08) !important;
+}
+
+/* ── Botón neon: más sutil, radius uniforme ── */
+.btn-neon {
+    border-radius: 10px !important;
+    font-size: 0.85rem !important;
+    letter-spacing: 0.8px !important;
+    padding: 0.75rem 1.5rem !important;
+}
+
+.btn-neon:hover {
+    box-shadow: 0 4px 16px rgba(0, 242, 255, 0.25) !important;
+}
+
+/* ── Footer: tipografía más refinada ── */
+.footer-heading {
+    font-size: 0.78rem !important;
+    letter-spacing: 1.2px !important;
+    border-left-width: 2px !important;
+    padding-left: 0.75rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.footer-links a {
+    font-size: 0.82rem !important;
+    margin-bottom: 0.45rem !important;
+    color: rgba(255, 255, 255, 0.45) !important;
+    transition: color 0.2s ease, padding-left 0.2s ease !important;
+}
+
+.footer-links a:hover {
+    color: var(--primary-color) !important;
+    padding-left: 4px !important;
+}
+
+[data-theme="light"] .footer-links a {
+    color: rgba(255, 255, 255, 0.55) !important;
+}
+
+/* ── Scrollbar: más delgado ── */
+::-webkit-scrollbar {
+    width: 6px !important;
+    height: 6px !important;
+}
+
+/* ── Pagination: radius más limpio ── */
+.page-link {
+    border-radius: 8px !important;
+    font-size: 0.85rem !important;
+    padding: 0.4rem 0.75rem !important;
+    margin: 0 2px !important;
+}
+
+/* ── Dropdown en sitio público ── */
+.dropdown-item {
+    border-radius: 6px !important;
+    font-size: 0.875rem !important;
+    transition: all 0.15s ease !important;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+    transform: translateX(3px) !important;
+}
+
+/* ── Cart badge ── */
+.cart-badge {
+    font-size: 0.6rem !important;
+    width: 17px !important;
+    height: 17px !important;
+    top: -5px !important;
+    right: -7px !important;
+}

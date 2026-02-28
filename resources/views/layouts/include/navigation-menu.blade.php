@@ -217,9 +217,14 @@
 
             </div>
         </div>
-        <div class="sb-sidenav-footer">
-            <div class="small">Bienvenido:</div>
-            <strong>{{ auth()->user()->name }}</strong>
+        <div class="sb-sidenav-footer" style="padding: 0.75rem 0.5rem 1rem;">
+            <div class="sidebar-user-footer">
+                <div class="user-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 2)) }}</div>
+                <div class="user-info">
+                    <div class="user-name">{{ auth()->user()->name }}</div>
+                    <div class="user-role">{{ auth()->user()->getRoleNames()->first() ?? 'Usuario' }}</div>
+                </div>
+            </div>
         </div>
     </nav>
 </div>

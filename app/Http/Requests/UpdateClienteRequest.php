@@ -27,8 +27,9 @@ class UpdateClienteRequest extends FormRequest
             'direccion' => 'nullable|max:255',
             'telefono' => 'nullable|max:15',
             'email' => 'nullable|max:255|email',
-            'documento_id' => 'required|integer|exists:documentos,id',
-            'numero_documento' => 'required|max:20|unique:personas,numero_documento,' . $cliente->persona->id
+            'documento_id' => 'required|exists:documentos,id',
+            'numero_documento' => 'required|max:20|unique:personas,numero_documento,' . $cliente->persona->id,
+            'es_mayorista' => 'boolean|nullable'
         ];
     }
 }

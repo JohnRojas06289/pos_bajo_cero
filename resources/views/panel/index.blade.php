@@ -25,132 +25,88 @@
     /* Modern KPI Cards */
     .kpi-card {
         background: white;
-        border-radius: 16px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+        border: 1px solid #e2e8f0;
         border-left: 4px solid;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
+        transition: all 0.25s ease;
         height: 100%;
     }
 
-    .kpi-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 100px;
-        height: 100px;
-        border-radius: 0 0 0 100%;
-        opacity: 0.1;
-    }
-
     .kpi-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        border-color: #cbd5e1;
     }
 
-    .kpi-card.primary {
-        border-left-color: #f59e0b;
-    }
-
-    .kpi-card.primary::before {
-        background: #f59e0b;
-    }
-
-    .kpi-card.success {
-        border-left-color: #059669;
-    }
-
-    .kpi-card.success::before {
-        background: #059669;
-    }
-
-    .kpi-card.info {
-        border-left-color: #0ea5e9;
-    }
-
-    .kpi-card.info::before {
-        background: #0ea5e9;
-    }
-
-    .kpi-card.warning {
-        border-left-color: #eab308;
-    }
-
-    .kpi-card.warning::before {
-        background: #eab308;
-    }
+    .kpi-card.primary  { border-left-color: #f59e0b; }
+    .kpi-card.success  { border-left-color: #059669; }
+    .kpi-card.info     { border-left-color: #0ea5e9; }
+    .kpi-card.warning  { border-left-color: #eab308; }
 
     .kpi-label {
-        font-size: 0.75rem;
+        font-size: 0.62rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #6b7280;
-        margin-bottom: 0.5rem;
+        letter-spacing: 0.1em;
+        color: #64748b;
+        margin-bottom: 0.35rem;
     }
 
     .kpi-value {
-        font-size: 2rem;
-        font-weight: 900;
+        font-size: 1.75rem;
+        font-weight: 800;
         color: #111827;
         line-height: 1;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
+        letter-spacing: -0.02em;
     }
 
     .kpi-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 12px;
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.75rem;
+        font-size: 1.25rem;
         color: white;
+        flex-shrink: 0;
+        opacity: 0.92;
     }
 
-    .kpi-icon.primary {
-        background: var(--color-primary);
-    }
-
-    .kpi-icon.success {
-        background: var(--color-success);
-    }
-
-    .kpi-icon.info {
-        background: var(--color-info);
-    }
-
-    .kpi-icon.warning {
-        background: var(--color-warning);
-    }
+    .kpi-icon.primary { background: linear-gradient(135deg, #f59e0b, #f97316); }
+    .kpi-icon.success { background: linear-gradient(135deg, #059669, #10b981); }
+    .kpi-icon.info    { background: linear-gradient(135deg, #0284c7, #0ea5e9); }
+    .kpi-icon.warning { background: linear-gradient(135deg, #ca8a04, #eab308); }
 
     /* Date Filter Card */
     .filter-card {
         background: white;
-        border-radius: 16px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        margin-bottom: 2rem;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        margin-bottom: 1.5rem;
     }
 
     .preset-btn {
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        border: 2px solid #e5e7eb;
+        padding: 0.35rem 0.875rem;
+        border-radius: 20px;
+        border: 1.5px solid #e2e8f0;
         background: white;
-        color: #6b7280;
+        color: #64748b;
         font-weight: 600;
-        font-size: 0.875rem;
+        font-size: 0.78rem;
         transition: all 0.2s ease;
         cursor: pointer;
+        white-space: nowrap;
     }
 
     .preset-btn:hover {
         border-color: #f59e0b;
-        color: #f59e0b;
+        color: #d97706;
         background: #fffbeb;
     }
 
@@ -158,32 +114,34 @@
         border-color: #f59e0b;
         background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
         color: white;
+        box-shadow: 0 2px 8px rgba(245,158,11,0.3);
     }
 
     /* Chart Cards */
     .chart-card {
         background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         overflow: hidden;
         height: 100%;
     }
 
     .chart-card-header {
-        padding: 1.5rem;
-        border-bottom: 1px solid #e5e7eb;
-        background: linear-gradient(180deg, white 0%, #f9fafb 100%);
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
     }
 
     .chart-card-header h6 {
         font-weight: 700;
-        color: #111827;
+        color: #1e293b;
         margin: 0;
-        font-size: 1.125rem;
+        font-size: 0.9rem;
     }
 
     .chart-card-body {
-        padding: 1.5rem;
+        padding: 1.25rem;
     }
 
     @media (min-width: 1200px) {
@@ -240,17 +198,17 @@
         </form>
     </div>
 
-    <!-- Métricas Principales (KPIs) -->
+    <!-- Primera Fila: Resumen de Ventas -->
     <div class="row g-4 mb-4">
         <!-- Ventas Hoy -->
         <div class="col-xl-3 col-md-6">
-            <div class="kpi-card primary">
+            <div class="kpi-card primary shadow-sm">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="flex-grow-1">
                         <div class="kpi-label">Ventas Hoy</div>
                         <div class="kpi-value">${{ number_format($ventasHoy, 0, ',', '.') }}</div>
-                        <div class="small text-success fw-semibold">
-                            <i class="fas fa-arrow-up me-1"></i>+12.5% vs ayer
+                        <div class="small text-muted fw-semibold">
+                            Corte del día
                         </div>
                     </div>
                     <div class="kpi-icon primary">
@@ -260,15 +218,33 @@
             </div>
         </div>
 
-        <!-- Ventas Mes -->
+        <!-- Ventas Semana -->
         <div class="col-xl-3 col-md-6">
-            <div class="kpi-card success">
+            <div class="kpi-card info shadow-sm">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="flex-grow-1">
-                        <div class="kpi-label">Ventas del Mes</div>
+                        <div class="kpi-label">Ventas Semana</div>
+                        <div class="kpi-value">${{ number_format($ventasSemana, 0, ',', '.') }}</div>
+                        <div class="small text-muted fw-semibold">
+                            Semana actual
+                        </div>
+                    </div>
+                    <div class="kpi-icon info">
+                        <i class="fas fa-calendar-week"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ventas Mes -->
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card success shadow-sm">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="flex-grow-1">
+                        <div class="kpi-label">Ventas Mes</div>
                         <div class="kpi-value">${{ number_format($ventasMes, 0, ',', '.') }}</div>
-                        <div class="small text-success fw-semibold">
-                            <i class="fas fa-arrow-up me-1"></i>+8.2% vs mes anterior
+                        <div class="small text-muted fw-semibold">
+                            Periodo mensual
                         </div>
                     </div>
                     <div class="kpi-icon success">
@@ -278,37 +254,86 @@
             </div>
         </div>
 
-        <!-- Total Clientes -->
+        <!-- Ventas Año -->
         <div class="col-xl-3 col-md-6">
-            <div class="kpi-card info">
+            <div class="kpi-card warning shadow-sm">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="flex-grow-1">
-                        <div class="kpi-label">Total Clientes</div>
-                        <div class="kpi-value">{{ number_format($totalClientes, 0, ',', '.') }}</div>
-                        <div class="small text-info fw-semibold">
-                            <i class="fas fa-user-plus me-1"></i>Clientes activos
+                        <div class="kpi-label">Ventas Año</div>
+                        <div class="kpi-value">${{ number_format($ventasYear, 0, ',', '.') }}</div>
+                        <div class="small text-muted fw-semibold">
+                            Acumulado anual
                         </div>
                     </div>
-                    <div class="kpi-icon info">
-                        <i class="fas fa-users"></i>
+                    <div class="kpi-icon warning">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Segunda Fila: Métricas Detalladas -->
+    <div class="row g-4 mb-4">
+        <!-- Unidades Vendidas -->
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card shadow-sm" style="border-left-color: #8b5cf6;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="flex-grow-1">
+                        <div class="kpi-label">Unidades Vendidas</div>
+                        <div class="kpi-value" style="color: #6d28d9;">{{ number_format($unidadesVendidas, 0, ',', '.') }}</div>
+                        <div class="small text-muted fw-semibold">Prendas totales</div>
+                    </div>
+                    <div class="kpi-icon" style="background: #8b5cf6;">
+                        <i class="fas fa-tshirt"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Total Productos -->
+        <!-- Efectivo -->
         <div class="col-xl-3 col-md-6">
-            <div class="kpi-card warning">
+            <div class="kpi-card shadow-sm" style="border-left-color: #10b981;">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="flex-grow-1">
-                        <div class="kpi-label">Productos</div>
-                        <div class="kpi-value">{{ number_format($totalProductos, 0, ',', '.') }}</div>
-                        <div class="small text-warning fw-semibold">
-                            <i class="fas fa-boxes me-1"></i>En inventario
-                        </div>
+                        <div class="kpi-label">Caja (Efectivo)</div>
+                        <div class="kpi-value" style="color: #059669;">${{ number_format($ventasEfectivo, 0, ',', '.') }}</div>
+                        <div class="small text-muted fw-semibold">Total en físico</div>
                     </div>
-                    <div class="kpi-icon warning">
-                        <i class="fas fa-box-open"></i>
+                    <div class="kpi-icon" style="background: #10b981;">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transferencias -->
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card shadow-sm" style="border-left-color: #3b82f6;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="flex-grow-1">
+                        <div class="kpi-label">Transferencias</div>
+                        <div class="kpi-value" style="color: #2563eb;">${{ number_format($ventasTransferencia, 0, ',', '.') }}</div>
+                        <div class="small text-muted fw-semibold">Nequi / Davi / Transf.</div>
+                    </div>
+                    <div class="kpi-icon" style="background: #3b82f6;">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mayoristas -->
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card shadow-sm" style="border-left-color: #ec4899;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="flex-grow-1">
+                        <div class="kpi-label">Venta Mayoristas</div>
+                        <div class="kpi-value" style="color: #db2777;">${{ number_format($ventasMayoristas, 0, ',', '.') }}</div>
+                        <div class="small text-muted fw-semibold">Clientes identificados</div>
+                    </div>
+                    <div class="kpi-icon" style="background: #ec4899;">
+                        <i class="fas fa-handshake"></i>
                     </div>
                 </div>
             </div>
