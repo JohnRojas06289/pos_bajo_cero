@@ -48,7 +48,7 @@ class homeController extends Controller
             
             // Clientes Mayoristas
             $ventasMayoristas = Venta::whereHas('cliente.persona', function($q) {
-                $q->where('es_mayorista', true);
+                $q->whereRaw('"es_mayorista" = TRUE');
             })->sum('total');
 
             $totalClientes = Cliente::count();
