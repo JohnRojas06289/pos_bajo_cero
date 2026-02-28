@@ -162,7 +162,7 @@
 
         // Slide Menu Toggle (pure JS)
         (function() {
-            const openBtn = document.getElementById('menuToggleBtn');
+            const openBtn = document.getElementById('hamburgerBtn');
             const closeBtn = document.getElementById('menuCloseBtn');
             const backdrop = document.getElementById('menuBackdrop');
             const menu = document.getElementById('slideMenu');
