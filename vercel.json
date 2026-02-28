@@ -1,7 +1,7 @@
 {
     "version": 2,
     "framework": null,
-    "buildCommand": "php composer.phar install --no-dev --optimize-autoloader --ignore-platform-reqs",
+    "buildCommand": "echo 'vendor pre-installed'",
     "functions": {
         "api/index.php": {
             "runtime": "vercel-php@0.7.4"

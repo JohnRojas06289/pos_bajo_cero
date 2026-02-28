@@ -1,5 +1,8 @@
-/vendor
 /node_modules
 .env
 .git
 /storage/*.key
+/.claude
+/tests
+/database/factories
+/database/seeders
