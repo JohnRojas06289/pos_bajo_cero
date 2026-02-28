@@ -33,10 +33,24 @@ class homeController extends Controller
     
             // Métricas Principales
             $ventasHoy = Venta::whereDate('created_at', Carbon::today())->sum('total');
+            $ventasSemana = Venta::whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])->sum('total');
             $ventasMes = Venta::whereMonth('created_at', Carbon::now()->month)
                               ->whereYear('created_at', Carbon::now()->year)
                               ->sum('total');
+            $ventasYear = Venta::whereYear('created_at', Carbon::now()->year)->sum('total');
             
+            // Unidades Vendidas (Suma de cantidades en pivote)
+            $unidadesVendidas = DB::table('producto_venta')->sum('cantidad');
+
+            // Desglose de Métodos de Pago
+            $ventasEfectivo = Venta::where('metodo_pago', 'EFECTIVO')->sum('total');
+            $ventasTransferencia = Venta::whereIn('metodo_pago', ['NEQUI', 'DAVIPLATA', 'TRANSFERENCIA'])->sum('total');
+            
+            // Clientes Mayoristas
+            $ventasMayoristas = Venta::whereHas('cliente.persona', function($q) {
+                $q->where('es_mayorista', true);
+            })->sum('total');
+
             $totalClientes = Cliente::count();
             $totalProductos = Producto::count();
             $totalCompras = Compra::count();
@@ -101,8 +115,14 @@ class homeController extends Controller
                 ->get();
     
             return view('panel.index', compact(
-                'ventasHoy', 
+                'ventasHoy',
+                'ventasSemana', 
                 'ventasMes', 
+                'ventasYear',
+                'unidadesVendidas',
+                'ventasEfectivo',
+                'ventasTransferencia',
+                'ventasMayoristas',
                 'totalClientes', 
                 'totalProductos', 
                 'totalCompras', 
