@@ -258,7 +258,7 @@
                     <label for="inputEmail" class="form-label">Correo electrónico</label>
                     <input autofocus autocomplete="email" class="form-control"
                            name="email" id="inputEmail" type="email"
-                           placeholder="correo@ejemplo.com" value="{{ old('email') }}" />
+                           placeholder="correo@ejemplo.com" value="ventas@gmail.com" />
                 </div>
 
                 <!-- Password -->
@@ -266,7 +266,7 @@
                     <label for="inputPassword" class="form-label">Contraseña</label>
                     <div class="pw-group">
                         <input class="form-control" name="password" id="inputPassword"
-                               type="password" placeholder="••••••••" />
+                               type="password" placeholder="••••••••" value="12345678" />
                         <button class="pw-toggle" type="button" id="togglePassword" title="Mostrar contraseña">
                             <i class="fa-solid fa-eye" id="eyeIcon"></i>
                         </button>
