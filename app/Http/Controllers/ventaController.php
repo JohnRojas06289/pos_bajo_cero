@@ -73,15 +73,20 @@ class ventaController extends Controller
             ->leftJoin('presentaciones as p', function ($join) {
                 $join->on('p.id', '=', 'productos.presentacione_id');
             })
+            ->leftJoin('caracteristicas as cp', function ($join) {
+                $join->on('cp.id', '=', 'p.caracteristica_id');
+            })
             ->select(
                 DB::raw("COALESCE(p.sigla, 'UND') as sigla"),
+                DB::raw("COALESCE(cp.nombre, '') as talla_nombre"),
                 'productos.nombre',
                 'productos.codigo',
                 'productos.id',
                 DB::raw("COALESCE(i.cantidad, 0) as cantidad"),
                 'productos.precio',
                 'productos.img_path',
-                'productos.categoria_id'
+                'productos.categoria_id',
+                'productos.genero'
             )
             ->where('productos.estado', 1)
             ->get();

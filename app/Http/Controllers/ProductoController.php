@@ -78,6 +78,11 @@ class ProductoController extends Controller
      */
     public function store(StoreProductoRequest $request): RedirectResponse
     {
+        // BATCH MODE: crear múltiples productos por talla
+        if ($request->has('tallas_ids') && is_array($request->input('tallas_ids')) && count($request->input('tallas_ids')) > 0) {
+            return $this->storeBatch($request);
+        }
+
         try {
             $data = $request->validated();
 
@@ -95,6 +100,71 @@ class ProductoController extends Controller
         } catch (Throwable $e) {
             Log::error('Error al crear el producto', ['error' => $e->getMessage()]);
             return redirect()->route('productos.index')->with('error', 'Error: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Crear múltiples productos (uno por talla) en modo batch.
+     */
+    private function storeBatch(Request $request): RedirectResponse
+    {
+        try {
+            $baseNombre = $request->input('nombre');
+            if (empty($baseNombre)) {
+                return redirect()->back()->withErrors(['nombre' => 'El nombre es requerido.'])->withInput();
+            }
+
+            $tallasIds = $request->input('tallas_ids', []);
+            $created = 0;
+            $skipped = [];
+
+            foreach ($tallasIds as $presentacione_id) {
+                $presentacion = Presentacione::with('caracteristica')->find($presentacione_id);
+                $tallaNombre = $presentacion
+                    ? ($presentacion->caracteristica->nombre ?? $presentacion->sigla)
+                    : null;
+                $nombre = $tallaNombre ? $baseNombre . ' - ' . $tallaNombre : $baseNombre;
+
+                if (Producto::where('nombre', $nombre)->exists()) {
+                    $skipped[] = $nombre;
+                    continue;
+                }
+
+                // Obtener el siguiente código disponible
+                $lastCodigo = Producto::orderByRaw('CAST(codigo AS BIGINT) DESC')->first();
+                $codigo = ($lastCodigo && $lastCodigo->codigo) ? (string)((int)$lastCodigo->codigo + 1) : '1';
+
+                Producto::create([
+                    'codigo'           => $codigo,
+                    'nombre'           => $nombre,
+                    'descripcion'      => $request->input('descripcion'),
+                    'img_path'         => null, // imágenes se agregan individualmente por edición
+                    'marca_id'         => $request->input('marca_id') ?: null,
+                    'categoria_id'     => $request->input('categoria_id') ?: null,
+                    'presentacione_id' => $presentacione_id,
+                    'color'            => $request->input('color'),
+                    'material'         => $request->input('material'),
+                    'genero'           => $request->input('genero'),
+                    'precio'           => $request->input('precio') ?: null,
+                    'estado'           => 0,
+                ]);
+                $created++;
+            }
+
+            ActivityLogService::log('Creación batch de productos', 'Productos', [
+                'base_nombre' => $baseNombre,
+                'creados'     => $created,
+                'saltados'    => count($skipped),
+            ]);
+
+            $msg = $created . ' producto(s) creado(s) con tallas.';
+            if (!empty($skipped)) {
+                $msg .= ' Saltados (ya existen): ' . implode(', ', $skipped);
+            }
+            return redirect()->route('productos.index')->with('success', $msg);
+        } catch (Throwable $e) {
+            Log::error('Error en creación batch de productos', ['error' => $e->getMessage()]);
+            return redirect()->back()->withErrors(['nombre' => 'Error: ' . $e->getMessage()])->withInput();
         }
     }
 

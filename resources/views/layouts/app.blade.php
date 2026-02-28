@@ -5,10 +5,10 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="Sistema de ventas de abarrotes" />
-    <meta name="author" content="SakCode" />
+    <meta name="description" content="Sistema POS - Bajo Cero" />
+    <meta name="author" content="Bajo Cero" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Sistema ventas - @yield('title')</title>
+    <title>Bajo Cero | @yield('title')</title>
     @stack('css-datatable')
     <!--link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous"--->
     <link href="{{ asset('css/styles.css') }}" rel="stylesheet" />

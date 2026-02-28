@@ -93,11 +93,14 @@
                 <!-- View Toggle -->
                 <div class="col-md-2 text-end">
                     <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-outline-secondary active" id="gridViewBtn" onclick="setView('grid')">
+                        <button type="button" class="btn btn-outline-secondary active" id="gridViewBtn" onclick="setView('grid')" title="Vista cuadrícula">
                             <i class="fas fa-th"></i>
                         </button>
-                        <button type="button" class="btn btn-outline-secondary" id="listViewBtn" onclick="setView('list')">
+                        <button type="button" class="btn btn-outline-secondary" id="listViewBtn" onclick="setView('list')" title="Vista lista">
                             <i class="fas fa-list"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" id="familyViewBtn" onclick="setView('familia')" title="Vista por familia de tallas">
+                            <i class="fas fa-layer-group"></i>
                         </button>
                     </div>
                 </div>
@@ -105,14 +108,21 @@
         </div>
     </div>
 
+    <!-- Family View Container (hidden by default) -->
+    <div id="familyContainer" class="row g-3" style="display:none;"></div>
+
     <!-- Products Grid -->
     <div id="productsGrid" class="products-grid">
         @forelse ($productos as $item)
-        <div class="product-card" 
+        <div class="product-card"
              data-search="{{ strtolower($item->nombreCompleto) }}"
              data-category="{{ $item->categoria->caracteristica->nombre ?? '' }}"
              data-marca="{{ $item->marca->caracteristica->nombre ?? '' }}"
-             data-status="{{ $item->estado }}">
+             data-status="{{ $item->estado }}"
+             data-talla="{{ $item->presentacione->sigla ?? '' }}"
+             data-talla-nombre="{{ $item->presentacione->caracteristica->nombre ?? '' }}"
+             data-stock="{{ $item->inventario->cantidad ?? 0 }}"
+             data-edit-href="{{ route('productos.edit', ['producto' => $item]) }}">
             
             <!-- Product Image -->
             <div class="product-image-container">
@@ -132,8 +142,15 @@
 
             <!-- Product Info -->
             <div class="product-info">
-                <h5 class="product-name" title="{{ $item->nombreCompleto }}">{{ $item->nombreCompleto }}</h5>
-                
+                <div class="d-flex align-items-start gap-2 mb-1 flex-wrap">
+                    <h5 class="product-name mb-0" title="{{ $item->nombreCompleto }}">{{ $item->nombre }}</h5>
+                    @if($item->presentacione && $item->presentacione->sigla)
+                    <span class="badge" style="background:#f59e0b;color:#fff;font-size:0.75rem;white-space:nowrap;align-self:center;">
+                        {{ $item->presentacione->sigla }}
+                    </span>
+                    @endif
+                </div>
+
                 <div class="product-meta">
                     <span class="product-code">
                         <i class="fas fa-barcode me-1"></i>
@@ -141,7 +158,7 @@
                     </span>
                     <span class="product-presentation">
                         <i class="fas fa-box me-1"></i>
-                        {{ $item->presentacion->caracteristica->nombre ?? 'N/A' }}
+                        {{ $item->presentacione->caracteristica->nombre ?? 'Sin talla' }}
                     </span>
                 </div>
 
@@ -332,19 +349,92 @@
     function setView(view) {
         currentView = view;
         const grid = document.getElementById('productsGrid');
+        const familyContainer = document.getElementById('familyContainer');
         const gridBtn = document.getElementById('gridViewBtn');
         const listBtn = document.getElementById('listViewBtn');
+        const familyBtn = document.getElementById('familyViewBtn');
+
+        [gridBtn, listBtn, familyBtn].forEach(b => b && b.classList.remove('active'));
+
+        if (view === 'familia') {
+            grid.style.display = 'none';
+            familyContainer.style.display = '';
+            familyBtn.classList.add('active');
+            buildFamilyView();
+            return;
+        }
+
+        familyContainer.style.display = 'none';
+        grid.style.display = '';
 
         if (view === 'grid') {
             grid.classList.remove('products-list');
             grid.classList.add('products-grid');
             gridBtn.classList.add('active');
-            listBtn.classList.remove('active');
         } else {
             grid.classList.remove('products-grid');
             grid.classList.add('products-list');
             listBtn.classList.add('active');
-            gridBtn.classList.remove('active');
+        }
+    }
+
+    function buildFamilyView() {
+        const cards = document.querySelectorAll('#productsGrid .product-card');
+        const families = {};
+
+        cards.forEach(card => {
+            const rawName = card.querySelector('.product-name') ? card.querySelector('.product-name').textContent.trim() : '';
+            const talla = card.dataset.talla || '';
+            const tallaNombre = card.dataset.tallaNombre || '';
+            const stock = parseInt(card.dataset.stock) || 0;
+            const editHref = card.dataset.editHref || '#';
+            const status = card.dataset.status;
+
+            // Derive base name: remove " - TALLA" suffix
+            let baseName = rawName;
+            if (tallaNombre && rawName.endsWith(' - ' + tallaNombre)) {
+                baseName = rawName.slice(0, rawName.length - (' - ' + tallaNombre).length).trim();
+            } else if (talla && rawName.endsWith(' - ' + talla)) {
+                baseName = rawName.slice(0, rawName.length - (' - ' + talla).length).trim();
+            }
+
+            if (!families[baseName]) families[baseName] = [];
+            families[baseName].push({ talla, tallaNombre, stock, editHref, active: status == '1' });
+        });
+
+        const container = document.getElementById('familyContainer');
+        container.innerHTML = '';
+
+        Object.entries(families).sort((a,b) => a[0].localeCompare(b[0])).forEach(([baseName, variants]) => {
+            const col = document.createElement('div');
+            col.className = 'col-md-4 col-lg-3 col-sm-6';
+
+            const variantBadges = variants.map(v => {
+                let bg = '#059669'; // green for ok stock
+                if (!v.active) bg = '#9ca3af';
+                else if (v.stock <= 0) bg = '#dc2626';
+                else if (v.stock <= 3) bg = '#f59e0b';
+                const displayTalla = v.talla || 'T.U.';
+                return `<a href="${v.editHref}" class="d-inline-flex flex-column align-items-center text-decoration-none me-1 mb-1"
+                           style="background:${bg};color:#fff;border-radius:8px;padding:4px 10px;font-size:0.8rem;font-weight:700;min-width:42px;">
+                    <span>${displayTalla}</span>
+                    <span style="font-size:0.65rem;font-weight:400;opacity:0.9;">${v.stock} uds</span>
+                </a>`;
+            }).join('');
+
+            col.innerHTML = `
+                <div class="card shadow-sm h-100">
+                    <div class="card-body p-3">
+                        <h6 class="fw-bold mb-2" style="font-size:0.9rem;">${baseName}</h6>
+                        <div class="d-flex flex-wrap">${variantBadges}</div>
+                        <small class="text-muted mt-1 d-block">${variants.length} talla(s)</small>
+                    </div>
+                </div>`;
+            container.appendChild(col);
+        });
+
+        if (container.childElementCount === 0) {
+            container.innerHTML = '<div class="col-12 text-center text-muted py-4"><i class="fas fa-layer-group fa-3x mb-2 opacity-25"></i><p>No hay productos con variantes de talla</p></div>';
         }
     }
 </script>

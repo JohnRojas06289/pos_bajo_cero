@@ -71,8 +71,19 @@
                 <hr>
 
                 <div class="row g-4">
-                    <!---Talla (Antes Presentación)---->
-                    <div class="col-md-3">
+                    <!---Modo Tallas---->
+                    <div class="col-12">
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="modoTallas" onchange="toggleModoTallas(this)">
+                            <label class="form-check-label fw-semibold" for="modoTallas">
+                                <i class="fas fa-layer-group me-1 text-primary"></i>
+                                Crear con múltiples tallas (crea un producto por cada talla seleccionada)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!---Talla SIMPLE (Antes Presentación)---->
+                    <div class="col-md-3" id="singleTallaSection">
                         <label for="presentacione_id" class="form-label">Talla (Opcional):</label>
                         <select data-size="4"
                             title="Seleccione una talla"
@@ -90,6 +101,28 @@
                         @error('presentacione_id')
                         <small class="text-danger">{{'*'.$message}}</small>
                         @enderror
+                    </div>
+
+                    <!---Tallas MÚLTIPLES---->
+                    <div class="col-12" id="multiTallaSection" style="display:none;">
+                        <label class="form-label fw-semibold">Selecciona las tallas a crear:</label>
+                        <div class="d-flex gap-3 flex-wrap p-3 border rounded bg-light">
+                            @foreach ($presentaciones as $item)
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="tallas_ids[]"
+                                       id="talla_{{ $item->id }}" value="{{ $item->id }}">
+                                <label class="form-check-label badge fs-6 fw-bold"
+                                       for="talla_{{ $item->id }}"
+                                       style="background:#f59e0b;color:#fff;cursor:pointer;padding:6px 14px;border-radius:8px;">
+                                    {{ $item->nombre }}
+                                </label>
+                            </div>
+                            @endforeach
+                        </div>
+                        <small class="text-muted mt-1 d-block">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Se creará un producto por cada talla seleccionada. Ej: "Chaqueta Negra - S", "Chaqueta Negra - M"
+                        </small>
                     </div>
 
                     <!---Color---->
@@ -207,6 +240,24 @@
 @push('js')
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+<script>
+    function toggleModoTallas(checkbox) {
+        var single = document.getElementById('singleTallaSection');
+        var multi = document.getElementById('multiTallaSection');
+        if (checkbox.checked) {
+            single.style.display = 'none';
+            // Clear single talla select
+            var sel = document.getElementById('presentacione_id');
+            if (sel) sel.value = '';
+            multi.style.display = '';
+        } else {
+            multi.style.display = 'none';
+            // Uncheck all talla checkboxes
+            document.querySelectorAll('input[name="tallas_ids[]"]').forEach(function(cb) { cb.checked = false; });
+            single.style.display = '';
+        }
+    }
+</script>
 <script>
     const inputImagen = document.getElementById('img_path');
     const imagenPreview = document.getElementById('img-preview');

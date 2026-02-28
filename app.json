@@ -1,6 +1,6 @@
 {
-    "name": "POS Arepas Boyacenses",
-    "description": "Sistema POS para Arepas Boyacenses",
+    "name": "Bajo Cero POS",
+    "description": "Sistema POS para Bajo Cero",
     "buildpacks": [
         {
             "url": "heroku/php"

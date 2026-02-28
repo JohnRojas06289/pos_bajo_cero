@@ -57,31 +57,37 @@
                     <div class="card-body">
                         <!-- Add Product Form -->
                         <div class="row g-3 align-items-end mb-4 bg-light p-3 rounded">
-                            <div class="col-md-6">
-                                <label for="producto_id" class="form-label">Producto</label>
+                            <div class="col-md-5">
+                                <label for="producto_id" class="form-label fw-semibold">Producto</label>
                                 <select id="producto_id" class="form-control selectpicker" data-live-search="true" title="Buscar producto...">
                                     @foreach ($productos as $item)
-                                    <option value="{{$item->id}}">{{$item->nombre_completo}}</option>
+                                    <option value="{{ $item->id }}"
+                                            data-talla="{{ $item->presentacione->caracteristica->nombre ?? '' }}"
+                                            data-sigla="{{ $item->presentacione->sigla ?? '' }}"
+                                            data-stock="{{ $item->inventario->cantidad ?? 0 }}">
+                                        {{ $item->nombre_completo }}
+                                    </option>
                                     @endforeach
                                 </select>
+                                <div id="stockInfo" class="mt-1 small" style="display:none;"></div>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="cantidad" class="form-label fw-semibold">Cantidad</label>
+                                <input type="number" id="cantidad" class="form-control" placeholder="0" min="1">
                             </div>
                             <div class="col-md-3">
-                                <label for="cantidad" class="form-label">Cantidad</label>
-                                <input type="number" id="cantidad" class="form-control" placeholder="0">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="precio_compra" class="form-label">Costo Unitario</label>
+                                <label for="precio_compra" class="form-label fw-semibold">Costo Unitario</label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
-                                    <input type="number" id="precio_compra" class="form-control" step="0.1" placeholder="0.00">
+                                    <input type="number" id="precio_compra" class="form-control" step="0.1" placeholder="0.00" min="0">
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label for="fecha_vencimiento" class="form-label">Vencimiento</label>
+                                <label for="fecha_vencimiento" class="form-label fw-semibold">Vencimiento <small class="text-muted">(opcional)</small></label>
                                 <input type="date" id="fecha_vencimiento" class="form-control">
                             </div>
-                            <div class="col-md-3 ms-auto">
-                                <button id="btn_agregar" class="btn btn-add w-100" type="button">
+                            <div class="col-md-3 ms-auto d-grid">
+                                <button id="btn_agregar" class="btn btn-add" type="button">
                                     <i class="fas fa-plus me-1"></i> Agregar
                                 </button>
                             </div>
@@ -89,27 +95,28 @@
 
                         <!-- Table -->
                         <div class="table-responsive">
-                            <table id="tabla_detalle" class="table table-hover align-middle">
-                                <thead class="table-light">
+                            <table id="tabla_detalle" class="table table-hover align-middle mb-0">
+                                <thead style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
                                     <tr>
-                                        <th>Producto</th>
-                                        <th>Cant.</th>
-                                        <th>Costo</th>
-                                        <th>Subtotal</th>
-                                        <th>Acción</th>
+                                        <th class="fw-bold text-secondary">Producto</th>
+                                        <th class="fw-bold text-secondary text-center" style="width:110px;">Cantidad</th>
+                                        <th class="fw-bold text-secondary text-center">Costo Unit.</th>
+                                        <th class="fw-bold text-secondary text-center">Subtotal</th>
+                                        <th class="fw-bold text-secondary text-center" style="width:70px;">Acción</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="tablaBody">
                                     <!-- Rows added via JS -->
                                 </tbody>
                                 <tfoot>
-                                    <tr class="fw-bold fs-5">
-                                        <td colspan="3" class="text-end">Total:</td>
-                                        <td colspan="2">
+                                    <tr class="table-warning">
+                                        <td colspan="3" class="text-end fw-bold fs-6">TOTAL:</td>
+                                        <td class="fw-bold fs-5 text-success">
                                             $ <span id="total">0</span>
                                             <input type="hidden" name="total" value="0" id="inputTotal">
                                             <input type="hidden" name="subtotal" value="0" id="inputSubtotal">
                                         </td>
+                                        <td></td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -195,6 +202,27 @@
             agregarProducto();
         });
 
+        // Atajo: Enter en campos de detalle agrega producto
+        $('#cantidad, #precio_compra').keypress(function(e) {
+            if (e.which === 13) { e.preventDefault(); agregarProducto(); }
+        });
+
+        // Mostrar info de stock al seleccionar producto
+        $('#producto_id').on('changed.bs.select', function() {
+            var $opt = $(this).find('option:selected');
+            var stock = parseInt($opt.data('stock')) || 0;
+            var sigla = $opt.data('sigla') || '';
+            var $info = $('#stockInfo');
+            if ($opt.val()) {
+                var color = stock > 5 ? 'text-success' : (stock > 0 ? 'text-warning' : 'text-danger');
+                var tallaText = sigla ? ' &nbsp;|&nbsp; <span class="badge bg-warning text-dark">' + sigla + '</span>' : '';
+                $info.html('<span class="' + color + '"><i class="fas fa-boxes me-1"></i>Stock actual: <strong>' + stock + '</strong></span>' + tallaText).show();
+                $('#cantidad').focus();
+            } else {
+                $info.hide();
+            }
+        });
+
         disableButtons();
     });
 
@@ -206,7 +234,7 @@
     let arrayIdProductos = [];
 
     function cancelarCompra() {
-        $('#tabla_detalle tbody').empty();
+        $('#tablaBody').empty();
         cont = 0;
         subtotal = [];
         sumas = 0;
@@ -218,57 +246,97 @@
     }
 
     function disableButtons() {
-        if (total == 0) {
-            $('#guardar').prop('disabled', true);
-        } else {
-            $('#guardar').prop('disabled', false);
-        }
+        $('#guardar').prop('disabled', total == 0);
     }
 
     function agregarProducto() {
         let idProducto = $('#producto_id').val();
-        let textProducto = $('#producto_id option:selected').text();
-        let cantidad = $('#cantidad').val();
-        let precioCompra = $('#precio_compra').val();
+        let $selected = $('#producto_id option:selected');
+        let textProducto = $selected.text();
+        let siglaProducto = $selected.data('sigla') || '';
+        let stockProducto = parseInt($selected.data('stock')) || 0;
+        let cantidad = parseInt($('#cantidad').val());
+        let precioCompra = parseFloat($('#precio_compra').val());
         let fechaVencimiento = $('#fecha_vencimiento').val();
 
-        if (textProducto != '' && textProducto != undefined && cantidad != '' && precioCompra != '') {
-            // Extract simplified name if possible, otherwise use full text
-            let nameProducto = textProducto; 
-            try {
-                 nameProducto = textProducto.split('-')[1].trim(); 
-            } catch(e) {}
-            
-            // Simple validation
-            if (parseInt(cantidad) > 0 && parseFloat(precioCompra) > 0) {
-                if (!arrayIdProductos.includes(idProducto)) {
-                    subtotal[cont] = round(cantidad * precioCompra);
-                    sumas = round(sumas + subtotal[cont]);
-                    total = round(sumas);
-
-                    let fila = '<tr id="fila' + cont + '">' +
-                        '<td><input type="hidden" name="arrayidproducto[]" value="' + idProducto + '">' + textProducto + '</td>' +
-                        '<td><input type="hidden" name="arraycantidad[]" value="' + cantidad + '">' + cantidad + '</td>' +
-                        '<td><input type="hidden" name="arraypreciocompra[]" value="' + precioCompra + '">$' + precioCompra + '</td>' +
-                        '<td><input type="hidden" name="arrayfechavencimiento[]" value="' + fechaVencimiento + '">$' + subtotal[cont] + '</td>' +
-                        '<td><button class="btn btn-sm btn-danger" type="button" onClick="eliminarProducto(' + cont + ', ' + idProducto + ')"><i class="fas fa-trash"></i></button></td>' +
-                        '</tr>';
-
-                    $('#tabla_detalle tbody').append(fila);
-                    limpiarCampos();
-                    cont++;
-                    updateTotals();
-                    arrayIdProductos.push(idProducto);
-                    disableButtons();
-                } else {
-                    showModal('Este producto ya está en la lista. Elimínalo para modificarlo.', 'warning');
-                }
-            } else {
-                showModal('Cantidad y Costo deben ser mayores a 0', 'warning');
-            }
-        } else {
-            showModal('Por favor completa los campos del producto', 'warning');
+        if (!idProducto || !textProducto.trim()) {
+            showModal('Selecciona un producto', 'warning'); return;
         }
+        if (isNaN(cantidad) || cantidad < 1) {
+            showModal('La cantidad debe ser mayor a 0', 'warning'); return;
+        }
+        if (isNaN(precioCompra) || precioCompra <= 0) {
+            showModal('El costo unitario debe ser mayor a 0', 'warning'); return;
+        }
+        if (arrayIdProductos.includes(idProducto)) {
+            showModal('Este producto ya está en la lista. Elimínalo para modificarlo.', 'warning'); return;
+        }
+
+        // Stock warning (no block, only advisory for incoming stock)
+        if (stockProducto > 0 && cantidad > stockProducto * 3) {
+            showModal('Cantidad muy alta. Stock actual: ' + stockProducto, 'info');
+        }
+
+        // Extract product name (part after last ' - ')
+        let nameProducto = textProducto.trim();
+        try { nameProducto = textProducto.split(' - ').slice(1, -1).join(' - ').trim() || textProducto.trim(); } catch(e) {}
+
+        subtotal[cont] = round(cantidad * precioCompra);
+        sumas = round(sumas + subtotal[cont]);
+        total = round(sumas);
+
+        let tallaBadge = siglaProducto ? '<span class="badge bg-warning text-dark ms-1" style="font-size:0.7rem;">' + siglaProducto + '</span>' : '';
+
+        let fila = '<tr id="fila' + cont + '" class="align-middle">' +
+            '<td>' +
+                '<input type="hidden" name="arrayidproducto[]" value="' + idProducto + '">' +
+                '<span class="fw-semibold">' + nameProducto + '</span>' + tallaBadge +
+            '</td>' +
+            '<td class="text-center">' +
+                '<input type="number" class="form-control form-control-sm text-center" style="width:85px;margin:auto;" ' +
+                       'name="arraycantidad[]" ' +
+                       'value="' + cantidad + '" ' +
+                       'min="1" ' +
+                       'onchange="recalcularFila(this, ' + cont + ', ' + precioCompra + ')" ' +
+                       'onclick="this.select()">' +
+            '</td>' +
+            '<td class="text-center">' +
+                '<input type="hidden" name="arraypreciocompra[]" value="' + precioCompra + '">' +
+                '<span class="text-muted">$</span>' + precioCompra.toLocaleString() +
+            '</td>' +
+            '<td class="text-center fw-bold text-success">' +
+                '<input type="hidden" name="arrayfechavencimiento[]" value="' + fechaVencimiento + '">' +
+                '$<span id="subtotal-fila' + cont + '">' + subtotal[cont] + '</span>' +
+            '</td>' +
+            '<td class="text-center">' +
+                '<button class="btn btn-sm btn-outline-danger" type="button" onclick="eliminarProducto(' + cont + ', \'' + idProducto + '\')">' +
+                    '<i class="fas fa-trash"></i>' +
+                '</button>' +
+            '</td>' +
+        '</tr>';
+
+        $('#tablaBody').append(fila);
+        limpiarCampos();
+        cont++;
+        updateTotals();
+        arrayIdProductos.push(idProducto);
+        disableButtons();
+        // Re-focus on product selector for quick next entry
+        setTimeout(function() { $('#producto_id').selectpicker('toggle'); }, 150);
+    }
+
+    function recalcularFila(input, indice, precio) {
+        var nuevaCantidad = parseInt(input.value) || 1;
+        if (nuevaCantidad < 1) { nuevaCantidad = 1; input.value = 1; }
+
+        var nuevoSubtotal = round(nuevaCantidad * precio);
+        sumas = round(sumas - subtotal[indice] + nuevoSubtotal);
+        total = round(sumas);
+        subtotal[indice] = nuevoSubtotal;
+
+        document.getElementById('subtotal-fila' + indice).textContent = nuevoSubtotal;
+        updateTotals();
+        disableButtons();
     }
 
     function eliminarProducto(indice, idProducto) {
@@ -284,13 +352,14 @@
     }
 
     function updateTotals() {
-        $('#total').html(total);
+        $('#total').html(total.toLocaleString());
         $('#inputTotal').val(total);
-        $('#inputSubtotal').val(total); // Assuming subtotal = total as tax is 0
+        $('#inputSubtotal').val(total);
     }
 
     function limpiarCampos() {
         $('#producto_id').selectpicker('val', '');
+        $('#stockInfo').hide();
         $('#cantidad').val('');
         $('#precio_compra').val('');
         $('#fecha_vencimiento').val('');
@@ -314,10 +383,7 @@
             timer: 3000,
             timerProgressBar: true,
         });
-        Toast.fire({
-            icon: icon,
-            title: message
-        });
+        Toast.fire({ icon: icon, title: message });
     }
 </script>
 @endpush

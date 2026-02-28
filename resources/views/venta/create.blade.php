@@ -302,6 +302,31 @@
     
     footer { display: none !important; }
     
+    /* Talla filter strip */
+    .talla-filter-btn {
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        letter-spacing: 0.5px;
+    }
+    .talla-filter-btn.active {
+        background: #f59e0b;
+        color: #fff;
+        border-color: #f59e0b;
+    }
+    .talla-filter-btn:not(.active) {
+        background: #fff;
+        color: #495057;
+        border-color: #dee2e6;
+    }
+    .talla-filter-btn:hover:not(.active) {
+        background: #fff3e0;
+        border-color: #f59e0b;
+        color: #f59e0b;
+    }
+
     /* Indicador de atajo de teclado */
     .keyboard-hint {
         position: fixed;
@@ -385,7 +410,10 @@
 
         <!-- Column 2: Products -->
         <div class="col-12 col-md product-grid">
-            <div class="sticky-top pb-3 pt-1 mb-2" style="z-index: 10;">
+            <div class="sticky-top pb-2 pt-1 mb-2" style="z-index: 10;">
+                <!-- Talla Filter Strip -->
+                <div id="tallaFilterStrip" class="d-flex gap-1 flex-wrap mb-2" style="min-height: 30px;"></div>
+                <!-- Search -->
                 <div class="input-group input-group-lg">
                     <span class="input-group-text bg-transparent border-end-0"><i class="fa-solid fa-search text-muted"></i></span>
                     <input type="text" id="searchInput" class="form-control bg-transparent border-start-0" placeholder="Buscar producto..." autofocus>
@@ -394,11 +422,18 @@
 
             <div class="row g-3" id="productsContainer">
                 @foreach ($productos as $item)
-                <div class="col-6 col-md-3 col-lg-20 product-item" 
+                <div class="col-6 col-md-3 col-lg-20 product-item"
                      data-category="{{$item->categoria_id}}"
-                     data-search="{{ strtolower($item->nombre . ' ' . $item->codigo) }}">
-                    <div class="card h-100 product-card shadow-sm border-0" onclick="addToCart('{{$item->id}}', '{{addslashes($item->nombre)}}', {{$item->precio}}, {{$item->cantidad}}, '{{$item->sigla ?? 'UND'}}')">
-                        <div class="product-img-container">
+                     data-talla="{{ $item->sigla }}"
+                     data-genero="{{ $item->genero ?? '' }}"
+                     data-search="{{ strtolower($item->nombre . ' ' . $item->codigo . ' ' . $item->talla_nombre) }}">
+                    <div class="card h-100 product-card shadow-sm border-0 {{ $item->cantidad <= 0 ? 'opacity-75' : '' }}" onclick="addToCart('{{$item->id}}', '{{addslashes($item->nombre)}}', {{$item->precio ?? 0}}, {{$item->cantidad}}, '{{$item->sigla ?? 'UND'}}')">
+                        <div class="product-img-container position-relative">
+                            @if($item->cantidad <= 0)
+                            <div class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center" style="background:rgba(0,0,0,0.45);z-index:2;top:0;left:0;">
+                                <span class="badge bg-danger" style="font-size:0.85rem;">AGOTADO</span>
+                            </div>
+                            @endif
                             @if($item->img_path)
                                 <img src="{{ $item->image_url }}" class="product-img" alt="{{$item->nombre}}" onerror="this.parentElement.innerHTML='<div class=\'text-muted text-center p-3\'><i class=\'fa-solid fa-image fa-3x mb-2 opacity-25\'></i><br><small>Sin imagen</small></div>'">
                             @else
@@ -410,10 +445,24 @@
                         </div>
                         <div class="card-body p-2 text-center">
                             <h6 class="card-title mb-1 text-truncate product-name" title="{{$item->nombre}}">{{$item->nombre}}</h6>
-                            <div class="product-price">{{$empresa->moneda->simbolo ?? '$'}} {{ number_format($item->precio, 0, ',', '.') }}</div>
-                            <small class="text-{{ $item->cantidad > 5 ? 'success' : 'danger' }} d-block" style="font-size: 0.7rem;">
-                                Stock: {{$item->cantidad}}
-                            </small>
+                            <div class="d-flex justify-content-center align-items-center gap-1 mb-1 flex-wrap">
+                                @if($item->sigla && $item->sigla !== 'UND')
+                                <span class="badge" style="background:#f59e0b;color:#fff;font-size:0.7rem;letter-spacing:.5px;">{{ $item->sigla }}</span>
+                                @endif
+                                @if($item->genero === 'Hombre')
+                                <span class="badge bg-primary" style="font-size:0.65rem;"><i class="fa-solid fa-mars"></i></span>
+                                @elseif($item->genero === 'Mujer')
+                                <span class="badge" style="background:#e879a0;font-size:0.65rem;"><i class="fa-solid fa-venus"></i></span>
+                                @endif
+                            </div>
+                            <div class="product-price">{{$empresa->moneda->simbolo ?? '$'}} {{ number_format($item->precio ?? 0, 0, ',', '.') }}</div>
+                            @if($item->cantidad <= 0)
+                            <small class="text-danger d-block" style="font-size:0.7rem;">Sin stock</small>
+                            @elseif($item->cantidad <= 3)
+                            <span class="badge bg-danger" style="font-size:0.65rem;">¡Últimas {{ $item->cantidad }}!</span>
+                            @else
+                            <small class="text-success d-block" style="font-size:0.7rem;">Stock: {{$item->cantidad}}</small>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -497,6 +546,27 @@
     var cart = [];
     var total = 0;
     var soundEnabled = true; // Cambiar a false para desactivar sonidos
+    var activeCategory = 'all';
+    var activeTalla = 'all';
+    var searchValue = '';
+
+    function applyFilters() {
+        var items = document.querySelectorAll('.product-item');
+        items.forEach(function(item) {
+            var matchCat = activeCategory === 'all' || item.dataset.category === activeCategory;
+            var matchTalla = activeTalla === 'all' || item.dataset.talla === activeTalla;
+            var matchSearch = item.dataset.search.includes(searchValue);
+            item.style.display = (matchCat && matchTalla && matchSearch) ? '' : 'none';
+        });
+    }
+
+    function filterTalla(talla, btn) {
+        activeTalla = talla;
+        document.querySelectorAll('.talla-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        applyFilters();
+        setTimeout(function() { document.getElementById('searchInput').focus(); }, 100);
+    }
 
     // Sonidos simples usando Web Audio API
     function playSound(frequency, duration) {
@@ -547,29 +617,51 @@
         const searchInput = document.getElementById('searchInput');
         searchInput.focus();
 
+        // Build talla filter strip dynamically from product data
+        const tallasEncontradas = new Set();
+        document.querySelectorAll('.product-item').forEach(function(item) {
+            var talla = item.dataset.talla;
+            if (talla && talla !== 'UND' && talla !== '') tallasEncontradas.add(talla);
+        });
+        const strip = document.getElementById('tallaFilterStrip');
+        if (tallasEncontradas.size > 0) {
+            // Add "TODOS" button
+            var todoBtn = document.createElement('button');
+            todoBtn.type = 'button';
+            todoBtn.className = 'btn btn-sm talla-filter-btn active';
+            todoBtn.textContent = 'TODOS';
+            todoBtn.onclick = function() { filterTalla('all', this); };
+            strip.appendChild(todoBtn);
+            // Add talla buttons in logical order
+            var tallaOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+            var ordered = tallaOrder.filter(function(t) { return tallasEncontradas.has(t); });
+            tallasEncontradas.forEach(function(t) { if (!tallaOrder.includes(t)) ordered.push(t); });
+            ordered.forEach(function(talla) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-sm talla-filter-btn';
+                btn.textContent = talla;
+                btn.onclick = function() { filterTalla(talla, this); };
+                strip.appendChild(btn);
+            });
+        } else {
+            strip.style.display = 'none';
+        }
+
         // Búsqueda mejorada
         searchInput.addEventListener('keyup', function(e) {
-            // Si presiona Enter en la búsqueda y hay un solo resultado, agregarlo
             if (e.key === 'Enter') {
-                const visibleProducts = document.querySelectorAll('.product-item[style=""], .product-item:not([style*="display: none"])');
+                const visibleProducts = document.querySelectorAll('.product-item:not([style*="display: none"])');
                 if (visibleProducts.length === 1) {
                     visibleProducts[0].querySelector('.product-card').click();
                     this.value = '';
-                    this.dispatchEvent(new Event('keyup')); // Limpiar filtro
+                    searchValue = '';
+                    applyFilters();
                 }
                 return;
             }
-
-            var value = this.value.toLowerCase();
-            var items = document.querySelectorAll('.product-item');
-            items.forEach(function(item) {
-                var search = item.getAttribute('data-search');
-                if (search.indexOf(value) > -1) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
+            searchValue = this.value.toLowerCase();
+            applyFilters();
         });
 
         // Mantener foco en búsqueda después de agregar productos
@@ -659,25 +751,11 @@
     });
 
     function filterCategory(catId, btn) {
-        var buttons = document.querySelectorAll('.category-btn');
-        buttons.forEach(function(b) { b.classList.remove('active'); });
+        activeCategory = catId;
+        document.querySelectorAll('.category-btn').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
-        
-        var items = document.querySelectorAll('.product-item');
-        if(catId === 'all') {
-            items.forEach(function(item) { item.style.display = ''; });
-        } else {
-            items.forEach(function(item) {
-                if(item.getAttribute('data-category') == catId) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        }
-        
-        // Re-enfocar búsqueda
-        setTimeout(() => document.getElementById('searchInput').focus(), 100);
+        applyFilters();
+        setTimeout(function() { document.getElementById('searchInput').focus(); }, 100);
     }
 
     function addToCart(id, nombre, precio, stock, sigla) {
@@ -814,17 +892,18 @@
                 var itemClass = item.isNew ? 'cart-item cart-item-new' : 'cart-item';
                 item.isNew = false; // Resetear flag
                 
+                var tallaBadge = (item.sigla && item.sigla !== 'UND') ?
+                    '<span class="badge ms-1" style="background:#f59e0b;color:#fff;font-size:0.65rem;">' + item.sigla + '</span>' : '';
                 var row = '<div class="' + itemClass + '">' +
                     '<div class="flex-grow-1">' +
-                        '<div class="fw-bold text-truncate" style="max-width: 140px;">' + item.nombre + '</div>' +
+                        '<div class="fw-bold text-truncate" style="max-width: 140px;">' + item.nombre + tallaBadge + '</div>' +
                         '<div class="d-flex align-items-center gap-2 mt-1">' +
-                            '<small class="text-muted">Cantidad:</small>' +
+                            '<small class="text-muted">Cant:</small>' +
                             '<input type="number" class="form-control form-control-sm" style="width: 60px;" ' +
                                 'value="' + item.cantidad + '" ' +
                                 'min="1" max="' + item.stock + '" ' +
                                 'onchange="updateQuantityManual(\'' + item.id + '\', this.value, ' + item.stock + ')" ' +
                                 'onclick="this.select()">' +
-                            '<small class="text-muted">' + item.sigla + '</small>' +
                         '</div>' +
                         '<small class="text-muted">' + formatNumber(item.precio) + ' c/u</small>' +
                         '<input type="hidden" name="arrayidproducto[]" value="' + item.id + '">' +

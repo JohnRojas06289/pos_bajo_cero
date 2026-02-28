@@ -1,4 +1,4 @@
-# 🔑 Credenciales de Acceso - POS Arepas
+# 🔑 Credenciales de Acceso - Bajo Cero POS
 
 ## 👤 Usuario Administrador
 
@@ -68,4 +68,4 @@ El sistema ha cargado los siguientes datos iniciales:
 ---
 
 **Fecha de Creación:** 2025-12-04  
-**Sistema:** POS Arepas Boyacenses v0.5
+**Sistema:** Bajo Cero POS v1.0

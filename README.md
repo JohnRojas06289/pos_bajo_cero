@@ -1,8 +1,6 @@
-# 🌮 POS Arepas Boyacenses
+# ❄️ Bajo Cero POS
 
-Sistema de Punto de Venta completo para restaurante de arepas, con soporte para modo offline (SQLite) y sincronización cloud (Supabase).
-
-![POS Arepas Icon](pos_arepas_icon_1764822030627.png)
+Sistema de Punto de Venta completo para tienda de ropa y chaquetas, con soporte para modo offline (SQLite) y sincronización cloud (Supabase).
 
 ## ✨ Características Principales
 
@@ -108,7 +106,7 @@ http://127.0.0.1:8000/admin/sync
 ## 📁 Estructura del Proyecto
 
 ```
-pos_arepas/
+pos_bajo_cero/
 ├── 🚀 start-pos.bat              # Inicia el servidor
 ├── 🛑 stop-pos.bat               # Detiene el servidor
 ├── 🔗 crear-acceso-directo.bat   # Crea ícono en escritorio
@@ -267,4 +265,4 @@ Para más información:
 
 ---
 
-**Desarrollado con ❤️ para Arepas Boyacenses**
+**Desarrollado con ❤️ para Bajo Cero**

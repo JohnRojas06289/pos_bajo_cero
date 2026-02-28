@@ -58,7 +58,9 @@ class compraController extends Controller
             $query->where('estado', 1);
         })->get();
         $comprobantes = $comprobanteService->obtenerComprobantes();
-        $productos = Producto::where('estado', 1)->get();
+        $productos = Producto::with(['inventario', 'presentacione.caracteristica'])
+            ->where('estado', 1)
+            ->get();
         $optionsMetodoPago = MetodoPagoEnum::cases();
         $empresa = $this->empresaService->obtenerEmpresa();
 
