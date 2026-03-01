@@ -338,49 +338,68 @@
         color: #f59e0b;
     }
 
-    /* ── Tabs de modo de pago ── */
-    .pay-mode-tabs {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 4px;
-        background: #f1f5f9;
-        border-radius: 10px;
-        padding: 4px;
-    }
-
-    .pay-tab {
-        padding: 6px 4px;
-        border-radius: 7px;
-        border: none;
-        background: transparent;
+    /* ── Botones de modo de pago ── */
+    .modo-pago-btn {
+        padding: 8px 6px;
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+        background: #f8fafc;
         color: #64748b;
-        font-weight: 600;
-        font-size: 0.72rem;
+        font-weight: 700;
+        font-size: 0.8rem;
         cursor: pointer;
         transition: all 0.18s ease;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 3px;
-        white-space: nowrap;
+        gap: 5px;
     }
 
-    .pay-tab i { font-size: 0.75rem; }
-
-    .pay-tab:hover {
-        background: rgba(255,255,255,0.7);
+    .modo-pago-btn:hover {
+        border-color: #94a3b8;
+        background: #f1f5f9;
         color: #334155;
     }
 
-    .pay-tab.active {
-        background: white;
-        color: #1e293b;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    .modo-pago-btn.active {
+        border-color: #059669;
+        background: #ecfdf5;
+        color: #065f46;
+        box-shadow: 0 1px 4px rgba(5,150,105,0.15);
     }
 
-    .pay-tab.active-nequi   { background: #e8f5e9; color: #1b5e20; }
-    .pay-tab.active-daviplata { background: #e3f2fd; color: #0d47a1; }
-    .pay-tab.active-tarjeta { background: #ede7f6; color: #4527a0; }
+    .modo-pago-btn.active-digital {
+        border-color: #2563eb;
+        background: #eff6ff;
+        color: #1d4ed8;
+        box-shadow: 0 1px 4px rgba(37,99,235,0.15);
+    }
+
+    /* ── Mini chips de método digital ── */
+    .metodo-digital-btn {
+        flex: 1 1 0;
+        padding: 5px 4px;
+        border-radius: 6px;
+        border: 1.5px solid #dbeafe;
+        background: #fff;
+        color: #3b82f6;
+        font-weight: 600;
+        font-size: 0.72rem;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        text-align: center;
+    }
+
+    .metodo-digital-btn:hover {
+        background: #eff6ff;
+        border-color: #3b82f6;
+    }
+
+    .metodo-digital-btn.active {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #fff;
+    }
 
     /* ── Botones de vuelto inteligente ── */
     .smart-cash-suggestion {
@@ -650,19 +669,13 @@
                 <input type="hidden" name="subtotal" id="inputSubtotal" value="0">
                 <input type="hidden" name="total" id="inputTotal" value="0">
 
-                <!-- Tabs de modo de pago -->
-                <div class="pay-mode-tabs mb-2">
-                    <button type="button" id="tabEfectivo" class="pay-tab active" onclick="setModoEfectivo()">
+                <!-- Botones de modo de pago -->
+                <div class="d-flex gap-2 mb-2">
+                    <button type="button" id="btnModoEfectivo" class="modo-pago-btn active flex-fill" onclick="setModoEfectivo()">
                         <i class="fas fa-money-bill-wave"></i> Efectivo
                     </button>
-                    <button type="button" id="tabNequi" class="pay-tab" onclick="setModoVirtual('NEQUI', this)">
-                        <i class="fas fa-mobile-alt"></i> Nequi
-                    </button>
-                    <button type="button" id="tabDaviplata" class="pay-tab" onclick="setModoVirtual('DAVIPLATA', this)">
-                        <i class="fas fa-mobile-alt"></i> Daviplata
-                    </button>
-                    <button type="button" id="tabTarjeta" class="pay-tab" onclick="setModoVirtual('TARJETA', this)">
-                        <i class="fas fa-credit-card"></i> Tarjeta
+                    <button type="button" id="btnModoDigital" class="modo-pago-btn flex-fill" onclick="setModoDigital()">
+                        <i class="fas fa-mobile-alt"></i> Pago Digital
                     </button>
                 </div>
 
@@ -692,11 +705,22 @@
                     </div>
                 </div>
 
-                <!-- Sección Virtual -->
+                <!-- Sección Digital -->
                 <div id="seccionVirtual" style="display:none;">
+                    <div class="d-flex gap-1 mb-2">
+                        <button type="button" class="metodo-digital-btn active" id="btnNequi" onclick="setMetodoDigital('NEQUI', this)">
+                            <i class="fas fa-mobile-alt me-1"></i>Nequi
+                        </button>
+                        <button type="button" class="metodo-digital-btn" id="btnDaviplata" onclick="setMetodoDigital('DAVIPLATA', this)">
+                            <i class="fas fa-mobile-alt me-1"></i>Daviplata
+                        </button>
+                        <button type="button" class="metodo-digital-btn" id="btnTarjeta" onclick="setMetodoDigital('TARJETA', this)">
+                            <i class="fas fa-credit-card me-1"></i>Tarjeta
+                        </button>
+                    </div>
                     <div class="virtual-info-box mb-2" id="virtualInfoBox">
                         <i class="fas fa-mobile-alt"></i>
-                        <span id="virtualInfoText">Selecciona un método virtual</span>
+                        <span id="virtualInfoText">Pago digital — monto exacto, sin vuelto</span>
                     </div>
                 </div>
 
@@ -1159,28 +1183,37 @@
     function setModoEfectivo() {
         document.getElementById('metodo_pago_input').value = 'EFECTIVO';
 
-        // Activar tab efectivo, desactivar los demás
-        document.querySelectorAll('.pay-tab').forEach(function(t) {
-            t.className = 'pay-tab';
-        });
-        document.getElementById('tabEfectivo').classList.add('active');
+        document.getElementById('btnModoEfectivo').className = 'modo-pago-btn active flex-fill';
+        document.getElementById('btnModoDigital').className  = 'modo-pago-btn flex-fill';
 
-        // Mostrar sección efectivo, ocultar virtual
         document.getElementById('seccionEfectivo').style.display = '';
-        document.getElementById('seccionVirtual').style.display = 'none';
+        document.getElementById('seccionVirtual').style.display  = 'none';
 
         document.getElementById('btnPayLabel').textContent = 'COBRAR';
         calculateChange();
     }
 
-    // ── Modo de pago: Virtual (Nequi / Daviplata / Tarjeta) ─────────
-    function setModoVirtual(method, btn) {
+    // ── Modo de pago: Digital ────────────────────────────────────────
+    function setModoDigital() {
+        document.getElementById('btnModoEfectivo').className = 'modo-pago-btn flex-fill';
+        document.getElementById('btnModoDigital').className  = 'modo-pago-btn active-digital flex-fill';
+
+        document.getElementById('seccionEfectivo').style.display = 'none';
+        document.getElementById('seccionVirtual').style.display  = '';
+
+        // Activar Nequi por defecto
+        setMetodoDigital('NEQUI', document.getElementById('btnNequi'));
+    }
+
+    // ── Selección del método digital específico ──────────────────────
+    function setMetodoDigital(method, btn) {
         document.getElementById('metodo_pago_input').value = method;
 
-        // Reset todos los tabs
-        document.querySelectorAll('.pay-tab').forEach(function(t) {
-            t.className = 'pay-tab';
+        // Reset chips
+        document.querySelectorAll('.metodo-digital-btn').forEach(function(b) {
+            b.classList.remove('active');
         });
+        btn.classList.add('active');
 
         var infoBox  = document.getElementById('virtualInfoBox');
         var infoText = document.getElementById('virtualInfoText');
@@ -1188,29 +1221,22 @@
         var iconClass = 'fas fa-mobile-alt';
 
         if (method === 'NEQUI') {
-            btn.classList.add('active', 'active-nequi');
             infoBox.classList.add('nequi');
-            infoText.textContent = 'Pago por Nequi — Confirma la transferencia antes de cobrar';
+            infoText.textContent = 'Nequi — Monto exacto, sin vuelto';
         } else if (method === 'DAVIPLATA') {
-            btn.classList.add('active', 'active-daviplata');
             infoBox.classList.add('daviplata');
-            infoText.textContent = 'Pago por Daviplata — Confirma la transferencia antes de cobrar';
+            infoText.textContent = 'Daviplata — Monto exacto, sin vuelto';
         } else if (method === 'TARJETA') {
-            btn.classList.add('active', 'active-tarjeta');
             infoBox.classList.add('tarjeta');
-            infoText.textContent = 'Pago con Tarjeta — Verifica el datáfono antes de cobrar';
+            infoText.textContent = 'Tarjeta — Monto exacto, sin vuelto';
             iconClass = 'fas fa-credit-card';
         }
-
         infoBox.querySelector('i').className = iconClass;
 
-        document.getElementById('seccionEfectivo').style.display = 'none';
-        document.getElementById('seccionVirtual').style.display = '';
-
-        // En pagos virtuales: monto recibido = total, vuelto = 0
+        // Cobro exacto: monto recibido = total, vuelto = 0
         document.getElementById('dinero_recibido').value = total;
         document.getElementById('vuelto').value = 0;
-        document.getElementById('btnPayLabel').textContent = 'COBRAR — ' + method;
+        document.getElementById('btnPayLabel').textContent = 'COBRAR';
 
         if (total > 0) {
             document.getElementById('btnPay').disabled = false;
