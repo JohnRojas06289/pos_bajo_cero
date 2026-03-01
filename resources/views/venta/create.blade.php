@@ -338,6 +338,114 @@
         color: #f59e0b;
     }
 
+    /* ── Tabs de modo de pago ── */
+    .pay-mode-tabs {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+        background: #f1f5f9;
+        border-radius: 10px;
+        padding: 4px;
+    }
+
+    .pay-tab {
+        padding: 6px 4px;
+        border-radius: 7px;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.72rem;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        white-space: nowrap;
+    }
+
+    .pay-tab i { font-size: 0.75rem; }
+
+    .pay-tab:hover {
+        background: rgba(255,255,255,0.7);
+        color: #334155;
+    }
+
+    .pay-tab.active {
+        background: white;
+        color: #1e293b;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    .pay-tab.active-nequi   { background: #e8f5e9; color: #1b5e20; }
+    .pay-tab.active-daviplata { background: #e3f2fd; color: #0d47a1; }
+    .pay-tab.active-tarjeta { background: #ede7f6; color: #4527a0; }
+
+    /* ── Botones de vuelto inteligente ── */
+    .smart-cash-suggestion {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 7px 4px;
+        border-radius: 8px;
+        border: 1.5px solid #e2e8f0;
+        background: white;
+        color: #334155;
+        font-weight: 700;
+        font-size: 0.78rem;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .smart-cash-suggestion:hover {
+        border-color: #f59e0b;
+        background: #fffbeb;
+        color: #d97706;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(245,158,11,0.2);
+    }
+
+    .smart-cash-btn-exact {
+        background: transparent;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 3px 10px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .smart-cash-btn-exact:hover {
+        border-color: #94a3b8;
+        background: #f8fafc;
+        color: #334155;
+    }
+
+    /* ── Caja de info pago virtual ── */
+    .virtual-info-box {
+        background: #f0fdf4;
+        border: 1.5px solid #86efac;
+        border-radius: 10px;
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #166534;
+    }
+
+    .virtual-info-box i { font-size: 1.3rem; color: #16a34a; }
+    .virtual-info-box.nequi     { background: #f0fdf4; border-color: #86efac; color: #166534; }
+    .virtual-info-box.daviplata { background: #eff6ff; border-color: #93c5fd; color: #1e40af; }
+    .virtual-info-box.daviplata i { color: #2563eb; }
+    .virtual-info-box.tarjeta   { background: #faf5ff; border-color: #c4b5fd; color: #4527a0; }
+    .virtual-info-box.tarjeta i { color: #7c3aed; }
+
     /* Indicador de atajo de teclado */
     .keyboard-hint {
         position: fixed;
@@ -519,8 +627,9 @@
             <div class="d-none">
                 <select name="cliente_id"><option value="{{$clientes->first()->id ?? ''}}" selected></option></select>
                 <select name="comprobante_id"><option value="{{$comprobantes->first()->id ?? ''}}" selected></option></select>
-                <select name="metodo_pago"><option value="{{$optionsMetodoPago[0]->value ?? ''}}" selected></option></select>
             </div>
+            {{-- metodo_pago se actualiza dinámicamente --}}
+            <input type="hidden" name="metodo_pago" id="metodo_pago_input" value="EFECTIVO">
 
             <div class="cart-items" id="cartItemsContainer">
                 <div class="text-center text-muted mt-5" id="emptyCartMessage">
@@ -531,48 +640,78 @@
             </div>
 
             <div class="cart-footer">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <!-- Total -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="fs-6 fw-bold text-secondary">TOTAL:</span>
                     <span class="total-display">{{$empresa->moneda->simbolo ?? '$'}} <span id="totalDisplay">0</span></span>
                 </div>
-                
-                <input type="hidden" name="subtotal" id="inputSubtotal" value="0">
 
+                <input type="hidden" name="subtotal" id="inputSubtotal" value="0">
                 <input type="hidden" name="total" id="inputTotal" value="0">
 
-                <div class="mb-2">
-                    <label class="form-label small text-muted mb-1">Pago Rápido:</label>
-                    <div class="row g-1">
-                        <div class="col-3"><button type="button" class="btn btn-outline-secondary w-100 smart-cash-btn" onclick="setExactCash()">Exacto</button></div>
-                        <div class="col-3"><button type="button" class="btn btn-outline-secondary w-100 smart-cash-btn" onclick="addCash(10000)">$10k</button></div>
-                        <div class="col-3"><button type="button" class="btn btn-outline-secondary w-100 smart-cash-btn" onclick="addCash(20000)">$20k</button></div>
-                        <div class="col-3"><button type="button" class="btn btn-outline-secondary w-100 smart-cash-btn" onclick="addCash(50000)">$50k</button></div>
+                <!-- Tabs de modo de pago -->
+                <div class="pay-mode-tabs mb-2">
+                    <button type="button" id="tabEfectivo" class="pay-tab active" onclick="setModoEfectivo()">
+                        <i class="fas fa-money-bill-wave"></i> Efectivo
+                    </button>
+                    <button type="button" id="tabNequi" class="pay-tab" onclick="setModoVirtual('NEQUI', this)">
+                        <i class="fas fa-mobile-alt"></i> Nequi
+                    </button>
+                    <button type="button" id="tabDaviplata" class="pay-tab" onclick="setModoVirtual('DAVIPLATA', this)">
+                        <i class="fas fa-mobile-alt"></i> Daviplata
+                    </button>
+                    <button type="button" id="tabTarjeta" class="pay-tab" onclick="setModoVirtual('TARJETA', this)">
+                        <i class="fas fa-credit-card"></i> Tarjeta
+                    </button>
+                </div>
+
+                <!-- Sección Efectivo -->
+                <div id="seccionEfectivo">
+                    <div class="mb-2">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <label class="small text-muted fw-semibold">Vuelto sugerido</label>
+                            <button type="button" class="smart-cash-btn-exact" onclick="setExactCash()" title="Pago exacto">
+                                <i class="fas fa-equals me-1"></i>Exacto
+                            </button>
+                        </div>
+                        <div id="smartCashButtons" class="d-flex gap-1 flex-wrap"></div>
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label class="small text-muted">Recibido</label>
+                            <input type="text" id="dinero_recibido_display" class="form-control fw-bold" placeholder="0" oninput="updateReceived(this)">
+                            <input type="hidden" id="dinero_recibido" name="monto_recibido">
+                        </div>
+                        <div class="col-6">
+                            <label class="small text-muted">Vuelto</label>
+                            <input type="text" id="vuelto_display" class="form-control fw-bold text-success bg-white" readonly placeholder="0">
+                            <input type="hidden" id="vuelto" name="vuelto_entregado">
+                        </div>
                     </div>
                 </div>
 
-                <div class="row g-2 mb-3">
-                    <div class="col-6">
-                        <label class="small text-muted">Recibido</label>
-                        <input type="text" id="dinero_recibido_display" class="form-control fw-bold" placeholder="0" oninput="updateReceived(this)">
-                        <input type="hidden" id="dinero_recibido" name="monto_recibido">
-                    </div>
-                    <div class="col-6">
-                        <label class="small text-muted">Vuelto</label>
-                        <input type="text" id="vuelto_display" class="form-control fw-bold text-success bg-white" readonly placeholder="0">
-                        <input type="hidden" id="vuelto" name="vuelto_entregado">
+                <!-- Sección Virtual -->
+                <div id="seccionVirtual" style="display:none;">
+                    <div class="virtual-info-box mb-2" id="virtualInfoBox">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span id="virtualInfoText">Selecciona un método virtual</span>
                     </div>
                 </div>
 
+                <!-- Botón cobrar -->
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-success btn-lg fw-bold py-3" id="btnPay" disabled>
-                        <i class="fa-solid fa-cash-register me-2"></i> COBRAR <i class="fa-solid fa-check ms-2"></i>
+                        <i class="fa-solid fa-cash-register me-2"></i>
+                        <span id="btnPayLabel">COBRAR</span>
+                        <i class="fa-solid fa-check ms-2"></i>
                     </button>
                     <button type="button" class="btn btn-light btn-sm text-danger" onclick="cancelarVenta()">
                         <i class="fa-solid fa-times me-1"></i> Cancelar Venta
                     </button>
                 </div>
-                
-                <!-- Indicador de atajos de teclado -->
+
                 <div class="keyboard-hint" id="keyboardHint"></div>
             </div>
         </div>
@@ -966,6 +1105,7 @@
 
         document.getElementById('cartCount').innerText = cart.reduce(function(acc, item) { return acc + item.cantidad; }, 0);
 
+        updateSmartCashButtons(total);
         calculateChange();
     }
 
@@ -983,6 +1123,98 @@
         document.getElementById('dinero_recibido_display').value = formatNumber(amount);
         playSound(600, 0.1);
         calculateChange();
+    }
+
+    // ── Sugerencias de cambio inteligentes ──────────────────────────
+    function updateSmartCashButtons(currentTotal) {
+        var container = document.getElementById('smartCashButtons');
+        container.innerHTML = '';
+        if (currentTotal <= 0) return;
+
+        // Denominaciones COP de menor a mayor
+        var denoms = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000];
+        var suggestions = [];
+
+        for (var i = 0; i < denoms.length; i++) {
+            var d = denoms[i];
+            // Redondear al siguiente múltiplo de d por encima del total
+            var candidate = Math.ceil(currentTotal / d) * d;
+            if (candidate > currentTotal && suggestions.indexOf(candidate) === -1) {
+                suggestions.push(candidate);
+            }
+            if (suggestions.length >= 3) break;
+        }
+
+        suggestions.forEach(function(amount) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'smart-cash-suggestion';
+            btn.innerHTML = '$' + formatNumber(amount);
+            btn.onclick = function() { addCash(amount); };
+            container.appendChild(btn);
+        });
+    }
+
+    // ── Modo de pago: Efectivo ───────────────────────────────────────
+    function setModoEfectivo() {
+        document.getElementById('metodo_pago_input').value = 'EFECTIVO';
+
+        // Activar tab efectivo, desactivar los demás
+        document.querySelectorAll('.pay-tab').forEach(function(t) {
+            t.className = 'pay-tab';
+        });
+        document.getElementById('tabEfectivo').classList.add('active');
+
+        // Mostrar sección efectivo, ocultar virtual
+        document.getElementById('seccionEfectivo').style.display = '';
+        document.getElementById('seccionVirtual').style.display = 'none';
+
+        document.getElementById('btnPayLabel').textContent = 'COBRAR';
+        calculateChange();
+    }
+
+    // ── Modo de pago: Virtual (Nequi / Daviplata / Tarjeta) ─────────
+    function setModoVirtual(method, btn) {
+        document.getElementById('metodo_pago_input').value = method;
+
+        // Reset todos los tabs
+        document.querySelectorAll('.pay-tab').forEach(function(t) {
+            t.className = 'pay-tab';
+        });
+
+        var infoBox  = document.getElementById('virtualInfoBox');
+        var infoText = document.getElementById('virtualInfoText');
+        infoBox.className = 'virtual-info-box mb-2';
+        var iconClass = 'fas fa-mobile-alt';
+
+        if (method === 'NEQUI') {
+            btn.classList.add('active', 'active-nequi');
+            infoBox.classList.add('nequi');
+            infoText.textContent = 'Pago por Nequi — Confirma la transferencia antes de cobrar';
+        } else if (method === 'DAVIPLATA') {
+            btn.classList.add('active', 'active-daviplata');
+            infoBox.classList.add('daviplata');
+            infoText.textContent = 'Pago por Daviplata — Confirma la transferencia antes de cobrar';
+        } else if (method === 'TARJETA') {
+            btn.classList.add('active', 'active-tarjeta');
+            infoBox.classList.add('tarjeta');
+            infoText.textContent = 'Pago con Tarjeta — Verifica el datáfono antes de cobrar';
+            iconClass = 'fas fa-credit-card';
+        }
+
+        infoBox.querySelector('i').className = iconClass;
+
+        document.getElementById('seccionEfectivo').style.display = 'none';
+        document.getElementById('seccionVirtual').style.display = '';
+
+        // En pagos virtuales: monto recibido = total, vuelto = 0
+        document.getElementById('dinero_recibido').value = total;
+        document.getElementById('vuelto').value = 0;
+        document.getElementById('btnPayLabel').textContent = 'COBRAR — ' + method;
+
+        if (total > 0) {
+            document.getElementById('btnPay').disabled = false;
+        }
     }
 
     function updateReceived(input) {
@@ -1021,6 +1253,7 @@
         document.getElementById('dinero_recibido_display').value = '';
         document.getElementById('vuelto').value = '';
         document.getElementById('vuelto_display').value = '';
+        setModoEfectivo(); // Resetear al modo efectivo
         renderCart();
         document.getElementById('searchInput').focus();
     }
