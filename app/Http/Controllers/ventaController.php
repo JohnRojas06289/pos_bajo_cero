@@ -17,6 +17,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -42,7 +43,7 @@ class ventaController extends Controller
     {
         $ventas = Venta::with(['comprobante', 'cliente.persona', 'user'])
             ->latest()
-            ->get();
+            ->paginate(20);
 
         return view('venta.index', compact('ventas'));
     }
@@ -93,11 +94,13 @@ class ventaController extends Controller
 
         // ELIMINADO EL BLOQUEO DE INVENTARIO VACÍO POR SOLICITUD DEL USUARIO
         
-        $categorias = Categoria::whereHas('caracteristica', function ($query) {
-            $query->where('estado', 1);
-        })->get();
+        $categorias = Cache::remember('categorias_activas', 3600, function () {
+            return Categoria::whereHas('caracteristica', function ($query) {
+                $query->where('estado', 1);
+            })->get();
+        });
 
-        $comprobantes = $comprobanteService->obtenerComprobantes();
+        $comprobantes = Cache::remember('comprobantes_activos', 3600, fn () => $comprobanteService->obtenerComprobantes());
         $optionsMetodoPago = MetodoPagoEnum::cases();
 
         return view('venta.create', compact(

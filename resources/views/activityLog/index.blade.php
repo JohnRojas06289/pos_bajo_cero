@@ -21,7 +21,7 @@
             <i class="fas fa-table me-1"></i>
             Tabla Registro de actividad
         </div>
-        <div class="card-body">
+        <div class="card-body table-responsive">
             <table id="datatablesSimple" class="table-striped fs-6">
                 <thead>
                     <tr>
@@ -51,6 +51,9 @@
                 </tbody>
             </table>
 
+        <div class="card-footer d-flex justify-content-center">
+            {{ $activityLogs->links() }}
+        </div>
         </div>
     </div>
 

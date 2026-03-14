@@ -29,7 +29,11 @@ class clienteController extends Controller
      */
     public function index(): View
     {
-        $clientes = Cliente::with('persona.documento')->latest()->get();
+        $clientes = Cliente::with('persona.documento')
+            ->join('personas', 'clientes.persona_id', '=', 'personas.id')
+            ->orderBy('personas.razon_social')
+            ->select('clientes.*')
+            ->paginate(20);
         return view('cliente.index', compact('clientes'));
     }
 

@@ -44,7 +44,7 @@ class compraController extends Controller
         $compras = Compra::with('comprobante', 'proveedore.persona')
             ->where('user_id', Auth::id())
             ->latest()
-            ->get();
+            ->paginate(20);
 
         return view('compra.index', compact('compras'));
     }

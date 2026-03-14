@@ -14,6 +14,7 @@ use App\Services\ProductoService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -40,7 +41,7 @@ class ProductoController extends Controller
             'marca.caracteristica',
             'presentacione.caracteristica'
         ])
-            ->orderByRaw('LENGTH(codigo) ASC, codigo ASC')
+            ->orderBy('nombre')
             ->get();
 
         return view('producto.index', compact('productos'));
@@ -51,20 +52,29 @@ class ProductoController extends Controller
      */
     public function create(): View
     {
-        $marcas = Marca::join('caracteristicas as c', 'marcas.caracteristica_id', '=', 'c.id')
-            ->select('marcas.id as id', 'c.nombre as nombre')
-            ->where('c.estado', 1)
-            ->get();
+        $marcas = Cache::remember('marcas_activas', 3600, fn () =>
+            Marca::join('caracteristicas as c', 'marcas.caracteristica_id', '=', 'c.id')
+                ->select('marcas.id as id', 'c.nombre as nombre')
+                ->where('c.estado', 1)
+                ->orderBy('c.nombre')
+                ->get()
+        );
 
-        $presentaciones = Presentacione::join('caracteristicas as c', 'presentaciones.caracteristica_id', '=', 'c.id')
-            ->select('presentaciones.id as id', 'c.nombre as nombre')
-            ->where('c.estado', 1)
-            ->get();
+        $presentaciones = Cache::remember('presentaciones_activas', 3600, fn () =>
+            Presentacione::join('caracteristicas as c', 'presentaciones.caracteristica_id', '=', 'c.id')
+                ->select('presentaciones.id as id', 'c.nombre as nombre')
+                ->where('c.estado', 1)
+                ->orderBy('c.nombre')
+                ->get()
+        );
 
-        $categorias = Categoria::join('caracteristicas as c', 'categorias.caracteristica_id', '=', 'c.id')
-            ->select('categorias.id as id', 'c.nombre as nombre')
-            ->where('c.estado', 1)
-            ->get();
+        $categorias = Cache::remember('categorias_activas_form', 3600, fn () =>
+            Categoria::join('caracteristicas as c', 'categorias.caracteristica_id', '=', 'c.id')
+                ->select('categorias.id as id', 'c.nombre as nombre')
+                ->where('c.estado', 1)
+                ->orderBy('c.nombre')
+                ->get()
+        );
 
         // Get the last product code and suggest the next one (numeric sorting)
         $ultimoProducto = Producto::orderByRaw('LENGTH(codigo) DESC, codigo DESC')->first();
@@ -181,20 +191,21 @@ class ProductoController extends Controller
      */
     public function edit(Producto $producto): View
     {
-        $marcas = Marca::join('caracteristicas as c', 'marcas.caracteristica_id', '=', 'c.id')
-            ->select('marcas.id as id', 'c.nombre as nombre')
-            ->where('c.estado', 1)
-            ->get();
-
-        $presentaciones = Presentacione::join('caracteristicas as c', 'presentaciones.caracteristica_id', '=', 'c.id')
-            ->select('presentaciones.id as id', 'c.nombre as nombre')
-            ->where('c.estado', 1)
-            ->get();
-
-        $categorias = Categoria::join('caracteristicas as c', 'categorias.caracteristica_id', '=', 'c.id')
-            ->select('categorias.id as id', 'c.nombre as nombre')
-            ->where('c.estado', 1)
-            ->get();
+        $marcas        = Cache::remember('marcas_activas', 3600, fn () =>
+            Marca::join('caracteristicas as c', 'marcas.caracteristica_id', '=', 'c.id')
+                ->select('marcas.id as id', 'c.nombre as nombre')
+                ->where('c.estado', 1)->orderBy('c.nombre')->get()
+        );
+        $presentaciones = Cache::remember('presentaciones_activas', 3600, fn () =>
+            Presentacione::join('caracteristicas as c', 'presentaciones.caracteristica_id', '=', 'c.id')
+                ->select('presentaciones.id as id', 'c.nombre as nombre')
+                ->where('c.estado', 1)->orderBy('c.nombre')->get()
+        );
+        $categorias = Cache::remember('categorias_activas_form', 3600, fn () =>
+            Categoria::join('caracteristicas as c', 'categorias.caracteristica_id', '=', 'c.id')
+                ->select('categorias.id as id', 'c.nombre as nombre')
+                ->where('c.estado', 1)->orderBy('c.nombre')->get()
+        );
 
         return view('producto.edit', compact('producto', 'marcas', 'presentaciones', 'categorias'));
     }

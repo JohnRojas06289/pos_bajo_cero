@@ -32,7 +32,7 @@
             <i class="fas fa-table me-1"></i>
             Tabla proveedores
         </div>
-        <div class="card-body">
+        <div class="card-body table-responsive">
             <table id="datatablesSimple" class="table table-striped fs-6">
                 <thead>
                     <tr>
@@ -129,6 +129,9 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
+        <div class="card-footer d-flex justify-content-center">
+            {{ $proveedores->links() }}
         </div>
     </div>
 </div>

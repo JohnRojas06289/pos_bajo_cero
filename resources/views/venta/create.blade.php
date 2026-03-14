@@ -865,7 +865,9 @@ main { padding: 0 !important; }
                         {{ $method->value === 'EFECTIVO'     ? '💵 Efectivo' :
                            ($method->value === 'NEQUI'       ? '📱 Nequi' :
                            ($method->value === 'DAVIPLATA'   ? '📲 Daviplata' :
-                           ($method->value === 'TRANSFERENCIA'? '🏦 Transf.' : $method->value))) }}
+                           ($method->value === 'TARJETA'     ? '💳 Tarjeta' :
+                           ($method->value === 'FIADO'       ? '🤝 Fiado' :
+                           ($method->value === 'TRANSFERENCIA'? '🏦 Transf.' : $method->value))))) }}
                     </button>
                     @endforeach
                 </div>

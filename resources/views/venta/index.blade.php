@@ -129,6 +129,9 @@
                 </table>
             </div>
         </div>
+        <div class="card-footer d-flex justify-content-center">
+            {{ $ventas->links() }}
+        </div>
     </div>
 
 </div>

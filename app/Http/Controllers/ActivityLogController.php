@@ -13,7 +13,7 @@ class ActivityLogController extends Controller
      */
     public function index(): View
     {
-        $activityLogs = ActivityLog::latest()->get();
+        $activityLogs = ActivityLog::latest()->paginate(50);
         return view('activityLog.index', compact('activityLogs'));
     }
 

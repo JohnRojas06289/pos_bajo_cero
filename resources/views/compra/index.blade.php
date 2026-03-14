@@ -136,6 +136,9 @@
                 </table>
             </div>
         </div>
+        <div class="card-footer d-flex justify-content-center">
+            {{ $compras->links() }}
+        </div>
     </div>
 
 </div>

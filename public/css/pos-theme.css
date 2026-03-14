@@ -1082,3 +1082,83 @@ textarea.form-control { height: auto; }
 [data-theme="dark"] .text-muted { color: var(--text-muted) !important; }
 [data-theme="dark"] .bg-light { background: var(--hover-bg) !important; }
 [data-theme="dark"] .border { border-color: var(--border-color) !important; }
+
+/* ════════════════════════════════════════════
+   POLISH GLOBAL — micro-interactions
+════════════════════════════════════════════ */
+
+/* Transiciones suaves en todos los botones */
+.btn, button:not([class*="ai-"]):not(#aiChatBtn) {
+    transition: background-color 0.18s ease, border-color 0.18s ease,
+                box-shadow 0.18s ease, transform 0.15s ease, opacity 0.18s ease;
+}
+
+/* Hover lift en tarjetas clickeables */
+.card:not(.no-hover):hover, .db-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important;
+}
+
+/* Links en sidebar — hover más visible */
+#layoutSidenav_nav .nav-link:hover {
+    background: rgba(230,126,34,0.12) !important;
+    color: #E67E22 !important;
+    padding-left: 1.5rem;
+}
+
+/* Inputs focus ring consistente */
+.form-control:focus, .form-select:focus, input:focus, select:focus, textarea:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px rgba(230,126,34,0.12) !important;
+    outline: none;
+}
+
+/* Botón outline accent */
+.btn-outline-accent {
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    background: transparent;
+}
+.btn-outline-accent:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* Tablas con hover consistente */
+.table > tbody > tr {
+    transition: background-color 0.15s ease;
+}
+.table > tbody > tr:hover {
+    background: rgba(230,126,34,0.05) !important;
+}
+
+/* Badge animado para notificaciones */
+.badge { transition: transform 0.2s ease; }
+.badge:hover { transform: scale(1.1); }
+
+/* Scrollbar uniforme */
+* { scrollbar-width: thin; scrollbar-color: rgba(230,126,34,0.4) transparent; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(230,126,34,0.4); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #E67E22; }
+
+/* Página: scroll suave */
+html { scroll-behavior: smooth; }
+
+/* Paginación de Bootstrap — paleta naranja */
+.pagination .page-link {
+    color: var(--accent);
+    border-color: var(--border-color);
+    background: var(--card-bg);
+    transition: all 0.15s ease;
+}
+.pagination .page-link:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.pagination .page-item.active .page-link { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* Dark mode pagination */
+[data-theme="dark"] .pagination .page-link {
+    background: var(--card-bg);
+    color: var(--accent);
+    border-color: var(--border-color);
+}

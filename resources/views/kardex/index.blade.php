@@ -51,7 +51,7 @@
             <i class="fas fa-table me-1"></i>
             Tabla kardex del producto
         </div>
-        <div class="card-body">
+        <div class="card-body table-responsive">
             <table id="datatablesSimple" class="table-striped fs-6">
                 <thead>
                     <tr>
@@ -97,6 +97,11 @@
                 </tbody>
             </table>
 
+        <div class="card-footer d-flex justify-content-center">
+            @if(method_exists($kardex, 'links'))
+                {{ $kardex->links() }}
+            @endif
+        </div>
         </div>
     </div>
     @else

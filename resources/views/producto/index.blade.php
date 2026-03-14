@@ -265,7 +265,7 @@
                                     <div class="text-center p-4 bg-light rounded">
                                         @if (!empty($item->img_path))
                                         <img src="{{ $item->image_url }}" alt="{{ $item->nombre }}"
-                                            class="img-fluid rounded shadow" style="max-height: 400px;">
+                                            class="img-fluid rounded shadow" style="max-height: 400px;" loading="lazy">
                                         @else
                                         <div class="empty-state py-5">
                                             <i class="fas fa-image"></i>

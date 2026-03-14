@@ -204,6 +204,10 @@
         <h3>No se encontraron clientes</h3>
         <p>Intenta con otro término de búsqueda</p>
     </div>
+
+    <div class="d-flex justify-content-center mt-3">
+        {{ $clientes->links() }}
+    </div>
 </div>
 
 @endsection

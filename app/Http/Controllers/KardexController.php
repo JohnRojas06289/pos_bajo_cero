@@ -15,10 +15,10 @@ class KardexController extends Controller
     public function index(Request $request): View
     {
         $producto_id = $request->get('producto_id');
-        $productos = Producto::latest()->get();
+        $productos = Producto::orderBy('nombre')->get();
 
         $kardex = $producto_id
-            ? Kardex::where('producto_id', $producto_id)->latest()->get()
+            ? Kardex::where('producto_id', $producto_id)->latest()->paginate(50)
             : collect();
 
         return view('kardex.index', compact('productos', 'kardex', 'producto_id'));

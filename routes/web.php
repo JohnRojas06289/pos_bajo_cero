@@ -25,6 +25,7 @@ use App\Http\Controllers\profileController;
 use App\Http\Controllers\proveedorController;
 use App\Http\Controllers\roleController;
 use App\Http\Controllers\userController;
+use App\Http\Controllers\AgenteIAController;
 use App\Http\Controllers\ventaController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -162,6 +163,8 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
         Auth::user()->unreadNotifications->markAsRead();
         return response()->json(['success' => true]);
     })->name('notifications.markAsRead');
+
+    Route::post('/agente-ia/chat', [AgenteIAController::class, 'chat'])->name('agente.ia.chat');
 
     Route::get('/logout', [logoutController::class, 'logout'])->name('logout');
 });
