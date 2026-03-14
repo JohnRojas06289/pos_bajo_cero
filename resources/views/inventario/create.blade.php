@@ -35,11 +35,6 @@
                 <x-forms.input id="cantidad" required='true' type='number' />
             </div>
 
-            <!-----Fecha de vencimiento----->
-            <div class="col-md-6">
-                <x-forms.input id="fecha_vencimiento" type='date' labelText='Fecha de Vencimiento' />
-            </div>
-
               <!-----Costo Unitario----->
               <div class="col-md-6">
                 <x-forms.input id="costo_unitario" type='number' labelText='Costo unitario' required='true'/>

@@ -196,12 +196,18 @@
                 @endcan
 
                 @can('crear-inventario')
+                @if($item->inventario)
+                <a href="{{route('inventario.edit', $item->inventario->id)}}" class="btn btn-sm btn-outline-success" title="Editar Inventario">
+                    <i class="fas fa-boxes"></i>
+                </a>
+                @else
                 <form action="{{route('inventario.create')}}" method="get" class="d-inline">
                     <input type="hidden" name="producto_id" value="{{$item->id}}">
-                    <button class="btn btn-sm btn-outline-info" type="submit" title="Inventario">
+                    <button class="btn btn-sm btn-outline-info" type="submit" title="Inicializar Inventario">
                         <i class="fas fa-warehouse"></i>
                     </button>
                 </form>
+                @endif
                 @endcan
             </div>
         </div>

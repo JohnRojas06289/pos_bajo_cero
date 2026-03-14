@@ -126,6 +126,11 @@ class ventaController extends Controller
             $arrayCantidad = $request->get('arraycantidad');
             $arrayPrecioVenta = $request->get('arrayprecioventa');
 
+            if (empty($arrayProducto_id)) {
+                DB::rollBack();
+                return redirect()->route('ventas.create')->with('error', 'Debe agregar al menos un producto a la venta.');
+            }
+
             //2.Realizar el llenado
             $siseArray = count($arrayProducto_id);
             $cont = 0;

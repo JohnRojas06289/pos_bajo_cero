@@ -40,7 +40,7 @@ class RopaSeeder extends Seeder
         }
 
         // 2. Marcas
-        $marcas = ['Bajo Cero', 'The North Face', 'Columbia', 'Patagonia'];
+        $marcas = ['Jacket Store', 'The North Face', 'Columbia', 'Patagonia'];
         $marcaIds = [];
 
         foreach ($marcas as $nombre) {
@@ -103,7 +103,7 @@ class RopaSeeder extends Seeder
                 'nombre' => 'Chaqueta Puffer Impermeable',
                 'descripcion' => 'Chaqueta térmica ideal para bajas temperaturas.',
                 'precio' => 150000,
-                'marca' => 'Bajo Cero',
+                'marca' => 'Jacket Store',
                 'categoria' => 'Chaquetas',
                 'talla' => 'M'
             ],
@@ -121,7 +121,7 @@ class RopaSeeder extends Seeder
                 'nombre' => 'Buzo Hoodie Clásico',
                 'descripcion' => 'Algodón perchado premium.',
                 'precio' => 65000,
-                'marca' => 'Bajo Cero',
+                'marca' => 'Jacket Store',
                 'categoria' => 'Buzos',
                 'talla' => 'M'
             ],

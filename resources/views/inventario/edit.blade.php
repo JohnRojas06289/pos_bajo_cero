@@ -31,11 +31,6 @@
                 <x-forms.input id="cantidad" required='true' type='number' :defaultValue="$inventario->cantidad" />
             </div>
 
-            <!-----Fecha de vencimiento----->
-            <div class="col-md-6">
-                <x-forms.input id="fecha_vencimiento" type='date' labelText='Fecha de Vencimiento' :defaultValue="$inventario->fecha_vencimiento ? $inventario->fecha_vencimiento->format('Y-m-d') : ''" />
-            </div>
-
               <!-----Costo Unitario----->
               <div class="col-md-6">
                 <x-forms.input id="costo_unitario" type='number' step="0.01" labelText='Costo unitario' required='true' :defaultValue="$costo_unitario" />

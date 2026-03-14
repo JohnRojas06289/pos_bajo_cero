@@ -70,7 +70,6 @@
                             <th>Código</th>
                             <th>Producto</th>
                             <th>Stock</th>
-                            <th>Vencimiento</th>
                             <th class="text-end">Acciones</th>
                         </tr>
                     </thead>
@@ -85,7 +84,7 @@
                             <td>
                                 <div class="fw-semibold text-dark" style="font-size:0.85rem;">{{ $item->nombre }}</div>
                                 <div class="text-muted" style="font-size:0.75rem;">
-                                    <i class="fas fa-ruler-combined me-1"></i>Talla: {{ $item->presentacione->sigla ?? 'N/A' }}
+                                    <i class="fas fa-ruler-combined me-1"></i>Talla: {{ $item->presentacione?->sigla ?? 'N/A' }}
                                 </div>
                             </td>
                             <td>
@@ -103,11 +102,6 @@
                                         <i class="fas fa-check me-1"></i>{{ $qty }} uds
                                     </span>
                                 @endif
-                            </td>
-                            <td>
-                                <span style="font-size:0.83rem;color:#64748b;">
-                                    {{ $item->inventario?->fecha_vencimiento_format ?? 'N/A' }}
-                                </span>
                             </td>
                             <td>
                                 <div class="table-actions justify-content-end">

@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Bajo Cero | Contacto')
+@section('title', 'Jacket Store | Contacto')
 
 @section('content')
 <div class="container px-5 mt-5 pt-5">
@@ -43,7 +43,7 @@
                         </div>
                         <div class="ms-3">
                             <h5 class="fw-bold text-primary">EMAIL</h5>
-                            <p class="text-white-50">info@bajocero.com<br>soporte@bajocero.com</p>
+                            <p class="text-white-50">info@jacketstore.co<br>soporte@jacketstore.co</p>
                         </div>
                     </div>
 

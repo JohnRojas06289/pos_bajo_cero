@@ -116,9 +116,13 @@ class InventarioControlller extends Controller
             $data = $request->safe()->except(['costo_unitario', 'precio_venta']);
             $inventario->update($data);
             
-            // Note: Costo Unitario updates typically require a new Kardex entry. 
-            // For now, we are prioritizing fixing the crash and price update.
-            // If cost needs adjustment, a specific Kardex flow should be triggered.
+            // Actualizar costo en Kardex (último registro)
+            if ($request->has('costo_unitario')) {
+                $ultimoKardex = \App\Models\Kardex::where('producto_id', $producto->id)->latest('id')->first();
+                if ($ultimoKardex) {
+                    $ultimoKardex->update(['costo_unitario' => $request->costo_unitario]);
+                }
+            }
 
             DB::commit();
             ActivityLogService::log('Actualización de inventario', 'Inventario', $request->validated());

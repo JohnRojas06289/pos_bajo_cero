@@ -1,223 +1,137 @@
-﻿<style>
-    /* Modern Sidebar Styles */
-    .sb-sidenav-dark {
-        background: linear-gradient(180deg, #1f2937 0%, #111827 100%) !important;
-    }
-
-    .sb-sidenav-dark .sb-sidenav-menu {
-        background: transparent;
-    }
-
-    .sb-sidenav-dark .nav-link {
-        color: rgba(255, 255, 255, 0.8) !important;
-        padding: 0.75rem 1rem !important;
-        border-radius: 8px !important;
-        margin: 0.25rem 0.5rem !important;
-        transition: all 0.3s ease !important;
-        font-weight: 500 !important;
-    }
-
-    .sb-sidenav-dark .nav-link:hover {
-        background-color: rgba(245, 158, 11, 0.1) !important;
-        color: #fbbf24 !important;
-        transform: translateX(4px);
-    }
-
-    .sb-sidenav-dark .nav-link.active {
-        background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%) !important;
-        color: white !important;
-        font-weight: 600 !important;
-        box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.3);
-    }
-
-    .sb-sidenav-dark .nav-link .sb-nav-link-icon {
-        color: rgba(255, 255, 255, 0.6);
-        margin-right: 0.75rem;
-        width: 20px;
-        text-align: center;
-    }
-
-    .sb-sidenav-dark .nav-link:hover .sb-nav-link-icon,
-    .sb-sidenav-dark .nav-link.active .sb-nav-link-icon {
-        color: white;
-    }
-
-    .sb-sidenav-dark .sb-sidenav-menu-heading {
-        color: rgba(255, 255, 255, 0.4) !important;
-        font-size: 0.75rem !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.1em !important;
-        padding: 1.5rem 1rem 0.5rem !important;
-        margin-top: 0.5rem !important;
-    }
-
-    .sb-sidenav-dark .sb-sidenav-footer {
-        background: rgba(0, 0, 0, 0.2) !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-        padding: 1rem !important;
-    }
-
-    .sb-sidenav-dark .sb-sidenav-footer .small {
-        color: rgba(255, 255, 255, 0.5) !important;
-        font-size: 0.75rem !important;
-    }
-
-    /* Collapsed Menu Styles */
-    .sb-sidenav-dark .sb-sidenav-collapse-arrow {
-        color: rgba(255, 255, 255, 0.5);
-        transition: transform 0.3s ease;
-    }
-
-    .sb-sidenav-dark .nav-link[aria-expanded="true"] .sb-sidenav-collapse-arrow {
-        transform: rotate(90deg);
-        color: #fbbf24;
-    }
-
-    .sb-sidenav-dark .sb-sidenav-menu-nested {
-        padding-left: 0 !important;
-    }
-
-    .sb-sidenav-dark .sb-sidenav-menu-nested .nav-link {
-        padding-left: 3rem !important;
-        font-size: 0.9rem !important;
-    }
-</style>
-
 <div id="layoutSidenav_nav">
     <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
         <div class="sb-sidenav-menu">
-            <div class="nav">
+            <div class="nav" style="padding: 0.5rem 0 0.75rem;">
 
+                {{-- ══ INICIO ══ --}}
                 @can('ver-panel')
-                <x-nav.heading>Inicio</x-nav.heading>
-                <x-nav.nav-link content='Panel'
-                    icon='fas fa-chart-line'
-                    :href="route('panel')" />
+                <div class="sb-sidenav-menu-heading">Inicio</div>
+                <x-nav.nav-link content='Panel'      icon='fas fa-chart-line'   :href="route('panel')" />
                 @endcan
 
-                <x-nav.heading>Módulos</x-nav.heading>
+                {{-- ══ VENTAS ══ --}}
+                @canany(['ver-venta','ver-caja','ver-movimiento'])
+                <div class="sb-sidenav-menu-heading">Ventas</div>
 
-                @can('ver-categoria')
-                <x-nav.nav-link content='Categorías'
-                    icon='fa-solid fa-tag'
-                    :href="route('categorias.index')" />
+                @can('crear-venta')
+                <x-nav.nav-link content='POS'        icon='fas fa-cash-register' :href="route('ventas.create')" />
                 @endcan
 
-                @can('ver-presentacione')
-                <x-nav.nav-link content='Tallas'
-                    icon='fa-solid fa-ruler-combined'
-                    :href="route('presentaciones.index')" />
-                @endcan
-
-                @can('ver-marca')
-                <x-nav.nav-link content='Marcas'
-                    icon='fa-solid fa-bullhorn'
-                    :href="route('marcas.index')" />
-                @endcan
-
-                @can('ver-producto')
-                <x-nav.nav-link content='Productos'
-                    icon='fa-brands fa-shopify'
-                    :href="route('productos.index')" />
-                @endcan
-
-                @can('ver-inventario')
-                <x-nav.nav-link content='Inventario'
-                    icon='fa-solid fa-book'
-                    :href="route('inventario.index')" />
-                @endcan
-
-                @can('ver-kardex')
-                <x-nav.nav-link content='Kardex'
-                    icon='fa-solid fa-file'
-                    :href="route('kardex.index')" />
-                @endcan
-
-                @can('ver-cliente')
-                <x-nav.nav-link content='Clientes'
-                    icon='fa-solid fa-users'
-                    :href="route('clientes.index')" />
-                @endcan
-
-                @can('ver-proveedore')
-                <x-nav.nav-link content='Proveedores'
-                    icon='fa-solid fa-user-group'
-                    :href="route('proveedores.index')" />
+                @can('ver-venta')
+                <x-nav.nav-link content='Historial'  icon='fas fa-receipt'       :href="route('ventas.index')" />
                 @endcan
 
                 @can('ver-caja')
-                <x-nav.nav-link content='Cajas'
-                    icon='fa-solid fa-money-bill'
-                    :href="route('cajas.index')" />
+                <x-nav.nav-link content='Cajas'      icon='fas fa-money-bill-wave' :href="route('cajas.index')" />
                 @endcan
 
-                <!----Compras---->
+                @can('ver-movimiento')
+                <x-nav.nav-link content='Movimientos' icon='fas fa-exchange-alt'  :href="route('movimientos.index')" />
+                @endcan
+                @endcanany
+
+                {{-- ══ INVENTARIO ══ --}}
+                @canany(['ver-producto','ver-inventario','ver-kardex','ver-compra'])
+                <div class="sb-sidenav-menu-heading">Inventario</div>
+
+                @can('ver-producto')
+                <x-nav.nav-link content='Productos'  icon='fas fa-vest'           :href="route('productos.index')" />
+                @endcan
+
+                @can('ver-inventario')
+                <x-nav.nav-link content='Inventario' icon='fas fa-warehouse'      :href="route('inventario.index')" />
+                @endcan
+
+                @can('ver-kardex')
+                <x-nav.nav-link content='Kardex'     icon='fas fa-file-invoice'   :href="route('kardex.index')" />
+                @endcan
+
                 @can('ver-compra')
-                <x-nav.link-collapsed
-                    id="collapseCompras"
-                    icon="fa-solid fa-store"
-                    content="Compras">
+                <x-nav.link-collapsed id="collapseCompras" icon="fas fa-truck-ramp-box" content="Compras">
                     @can('ver-compra')
-                    <x-nav.link-collapsed-item :href="route('compras.index')" content="Ver" />
+                    <x-nav.link-collapsed-item :href="route('compras.index')"  content="Ver historial" />
                     @endcan
-
                     @can('crear-compra')
-                    <x-nav.link-collapsed-item :href="route('compras.create')" content="Crear" />
+                    <x-nav.link-collapsed-item :href="route('compras.create')" content="Nueva compra" />
                     @endcan
                 </x-nav.link-collapsed>
                 @endcan
+                @endcanany
 
+                {{-- ══ CATÁLOGO ══ --}}
+                @canany(['ver-categoria','ver-marca','ver-presentacione'])
+                <div class="sb-sidenav-menu-heading">Catálogo</div>
 
-
-                <!----Ventas---->
-                @can('ver-venta')
-                <x-nav.link-collapsed
-                    id="collapseVentas"
-                    icon="fa-solid fa-cart-shopping"
-                    content="Ventas">
-                    @can('ver-venta')
-                    <x-nav.link-collapsed-item :href="route('ventas.index')" content="Ver" />
-                    @endcan
-
-                    @can('crear-venta')
-                    <x-nav.link-collapsed-item :href="route('ventas.create')" content="Crear" />
-                    @endcan
-                </x-nav.link-collapsed>
+                @can('ver-categoria')
+                <x-nav.nav-link content='Categorías'    icon='fas fa-tag'              :href="route('categorias.index')" />
                 @endcan
 
-                @hasrole('administrador')
-                <x-nav.heading>Administración</x-nav.heading>
-                @endhasrole
+                @can('ver-marca')
+                <x-nav.nav-link content='Marcas'        icon='fas fa-trademark'         :href="route('marcas.index')" />
+                @endcan
 
-                @can('ver-empresa')
-                <x-nav.nav-link content='Empresa'
-                    icon='fa-solid fa-city'
-                    :href="route('empresa.index')" />
+                @can('ver-presentacione')
+                <x-nav.nav-link content='Tallas'        icon='fas fa-ruler-horizontal'  :href="route('presentaciones.index')" />
+                @endcan
+                @endcanany
+
+                {{-- ══ PERSONAS ══ --}}
+                @canany(['ver-cliente','ver-proveedore','ver-empleado'])
+                <div class="sb-sidenav-menu-heading">Personas</div>
+
+                @can('ver-cliente')
+                <x-nav.nav-link content='Clientes'    icon='fas fa-users'              :href="route('clientes.index')" />
+                @endcan
+
+                @can('ver-proveedore')
+                <x-nav.nav-link content='Proveedores' icon='fas fa-user-tie'           :href="route('proveedores.index')" />
                 @endcan
 
                 @can('ver-empleado')
-                <x-nav.nav-link content='Empleados'
-                    icon='fa-solid fa-users'
-                    :href="route('empleados.index')" />
+                <x-nav.nav-link content='Empleados'   icon='fas fa-id-badge'           :href="route('empleados.index')" />
+                @endcan
+                @endcanany
+
+                {{-- ══ ADMINISTRACIÓN ══ --}}
+                @canany(['ver-empresa','ver-user','ver-role'])
+                <div class="sb-sidenav-menu-heading">Admin</div>
+
+                @can('ver-empresa')
+                <x-nav.nav-link content='Empresa'   icon='fas fa-building'           :href="route('empresa.index')" />
                 @endcan
 
                 @can('ver-user')
-                <x-nav.nav-link content='Usuarios'
-                    icon='fa-solid fa-user'
-                    :href="route('users.index')" />
+                <x-nav.nav-link content='Usuarios'  icon='fas fa-user-circle'        :href="route('users.index')" />
                 @endcan
 
                 @can('ver-role')
-                <x-nav.nav-link content='Roles'
-                    icon='fa-solid fa-person-circle-plus'
-                    :href="route('roles.index')" />
+                <x-nav.nav-link content='Roles'     icon='fas fa-shield-halved'      :href="route('roles.index')" />
+                @endcan
+                @endcanany
+
+                {{-- ══ SISTEMA ══ --}}
+                @can('ver-registro-actividad')
+                <div class="sb-sidenav-menu-heading">Sistema</div>
+                <x-nav.nav-link content='Actividad' icon='fas fa-history'  :href="route('activityLog.index')" />
                 @endcan
 
+                {{-- Theme toggle --}}
+                <div class="theme-toggle-wrapper" style="margin-top: 0.5rem;">
+                    <label class="theme-toggle-btn" for="themeToggle" title="Cambiar tema">
+                        <i class="fas fa-sun toggle-icon" id="themeToggleIcon"></i>
+                        <span id="themeToggleLabel" style="font-size:0.845rem; font-weight:500; color: var(--sidebar-text);">Tema claro</span>
+                        <div class="toggle-switch" style="pointer-events:none;">
+                            <input type="checkbox" id="themeToggle" style="pointer-events:auto;">
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </label>
+                </div>
 
             </div>
         </div>
-        <div class="sb-sidenav-footer" style="padding: 0.75rem 0.5rem 1rem;">
+
+        {{-- Footer del sidebar --}}
+        <div class="sb-sidenav-footer" style="padding: 0.75rem 0.625rem 1rem;">
             <div class="sidebar-user-footer">
                 <div class="user-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 2)) }}</div>
                 <div class="user-info">
@@ -226,6 +140,6 @@
                 </div>
             </div>
         </div>
+
     </nav>
 </div>
-

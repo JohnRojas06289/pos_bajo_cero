@@ -16,10 +16,10 @@ class EmpresaSeeder extends Seeder
         $moneda = \App\Models\Moneda::where('estandar_iso', 'COP')->first();
         Empresa::insert([
             'id' => \Illuminate\Support\Str::uuid(),
-            'nombre' => 'Bajo Cero',
+            'nombre' => 'Jacket Store',
             'propietario' => 'Administrador',
             'ruc' => '00000000',
-            'direccion' => 'Ciudad',
+            'direccion' => 'Colombia',
             'moneda_id' => $moneda->id
         ]);
     }

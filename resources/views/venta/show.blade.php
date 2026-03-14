@@ -26,11 +26,11 @@
 
         <div class="card-body">
             <h6 class="card-subtitle mb-3 text-body-secondary">
-                Comprobante: {{$venta->comprobante->nombre}} ({{$venta->numero_comprobante}})</h6>
+                Comprobante: {{$venta->comprobante?->nombre ?? 'N/A'}} ({{$venta->numero_comprobante}})</h6>
             <h6 class="card-subtitle mb-3 text-body-secondary">
-                Cliente: {{$venta->cliente->persona->razon_social}}</h6>
+                Cliente: {{$venta->cliente?->persona?->razon_social ?? 'N/A'}}</h6>
             <h6 class="card-subtitle mb-3 text-body-secondary">
-                Vendedor: {{$venta->user->name}}</h6>
+                Vendedor: {{$venta->user?->name ?? 'N/A'}}</h6>
             <h6 class="card-subtitle mb-3 text-body-secondary">
                 Método de pago: {{$venta->metodo_pago}}</h6>
             <h6 class="card-subtitle mb-3 text-body-secondary">
@@ -64,7 +64,7 @@
                             {{$item->nombre}}
                         </td>
                         <td>
-                            {{$item->presentacione->sigla}}
+                            {{$item->presentacione?->sigla ?? 'N/A'}}
                         </td>
                         <td>
                             {{$item->pivot->cantidad}}

@@ -15,16 +15,27 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $userId = \Illuminate\Support\Str::uuid()->toString();
-
-        \Illuminate\Support\Facades\DB::table('users')->insert([
-            'id' => $userId,
-            'name' => 'Admin Bajo Cero',
-            'email' => 'admin@gmail.com',
-            'password' => bcrypt('12345678'),
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
+        $user = \Illuminate\Support\Facades\DB::table('users')->where('email', 'admin@gmail.com')->first();
+        
+        if (!$user) {
+            $userId = \Illuminate\Support\Str::uuid()->toString();
+            \Illuminate\Support\Facades\DB::table('users')->insert([
+                'id' => $userId,
+                'name' => 'Admin Jacket Store',
+                'email' => 'admin@gmail.com',
+                'password' => bcrypt('Bajocero-0'),
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        } else {
+            $userId = $user->id;
+            \Illuminate\Support\Facades\DB::table('users')
+                ->where('id', $userId)
+                ->update([
+                    'password' => bcrypt('Bajocero-0'),
+                    'updated_at' => now()
+                ]);
+        }
 
         //Usuario administrador - crear rol sin especificar ID (auto-increment)
         $roleId = \Illuminate\Support\Facades\DB::table('roles')->insertGetId([

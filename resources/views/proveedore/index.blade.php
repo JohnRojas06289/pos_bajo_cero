@@ -48,21 +48,21 @@
                     @foreach ($proveedores as $item)
                     <tr>
                         <td>
-                            {{$item->persona->razon_social}}
+                            {{$item->persona?->razon_social ?? 'N/A'}}
                         </td>
                         <td>
-                            {{$item->persona->direccion}}
+                            {{$item->persona?->direccion ?? 'N/A'}}
                         </td>
                         <td>
-                            <p class="fw-semibold mb-1">{{$item->persona->documento->nombre}}</p>
-                            <p class="text-muted mb-0">{{$item->persona->numero_documento}}</p>
+                            <p class="fw-semibold mb-1">{{$item->persona?->documento?->nombre ?? 'N/A'}}</p>
+                            <p class="text-muted mb-0">{{$item->persona?->numero_documento ?? 'N/A'}}</p>
                         </td>
                         <td>
-                            {{$item->persona->tipo->value}}
+                            {{$item->persona?->tipo?->value ?? 'N/A'}}
                         </td>
                         <td>
-                            <span class="badge rounded-pill text-bg-{{ $item->persona->estado ? 'success' : 'danger' }}">
-                                {{ $item->persona->estado ? 'Activo' : 'Eliminado'}}</span>
+                            <span class="badge rounded-pill text-bg-{{ $item->persona?->estado ? 'success' : 'danger' }}">
+                                {{ $item->persona?->estado ? 'Activo' : 'Eliminado'}}</span>
                         </td>
                         <td>
                             <div class="d-flex justify-content-around">
@@ -113,7 +113,7 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    {{ $item->persona->estado == 1 ? '¿Seguro que quieres eliminar el proveedor?' : '¿Seguro que quieres restaurar el proveedor?' }}
+                                    {{ ($item->persona?->estado ?? 0) == 1 ? '¿Seguro que quieres eliminar el proveedor?' : '¿Seguro que quieres restaurar el proveedor?' }}
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>

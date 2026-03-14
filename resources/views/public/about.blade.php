@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Bajo Cero | Nosotros')
+@section('title', 'Jacket Store | Nosotros')
 
 @section('content')
 <!-- Header -->
@@ -21,7 +21,7 @@
                 <div class="card bg-dark border-secondary p-5 h-100 d-flex justify-content-center">
                     <div>
                         <h2 class="fw-bolder text-primary mb-4">EL ORIGEN</h2>
-                        <p class="text-white-50 lead mb-4">Bajo Cero nació en 2020 con una misión clara: redefinir la moda urbana en Bogotá. Lo que comenzó como un pequeño proyecto de diseño de gorras personalizadas, se transformó rápidamente en una marca referente de estilo y calidad.</p>
+                        <p class="text-white-50 lead mb-4">Jacket Store nació en 2020 con una misión clara: redefinir la moda urbana en Bogotá. Lo que comenzó como un pequeño proyecto de diseño de gorras personalizadas, se transformó rápidamente en una marca referente de estilo y calidad.</p>
                         <p class="text-white-50 lead mb-0">Nos inspiramos en la arquitectura de la ciudad, el arte callejero y la música para crear prendas que no solo visten, sino que expresan una identidad. Cada chaqueta y cada gorra cuenta una historia de resistencia y autenticidad.</p>
                     </div>
                 </div>

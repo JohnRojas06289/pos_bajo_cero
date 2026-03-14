@@ -25,7 +25,6 @@ class StoreInventarioRequest extends FormRequest
             'producto_id' => 'required|exists:productos,id',
             'ubicacione_id' => 'nullable|exists:ubicaciones,id',
             'cantidad' => 'required|numeric|min:0',
-            'fecha_vencimiento' => 'nullable|date',
             'costo_unitario' => 'required|numeric|min:0.1',
             'precio_venta' => 'required|numeric|min:0'
         ];

@@ -1,6 +1,6 @@
 ﻿@extends('layouts.public')
 
-@section('title', 'Bajo Cero | Inicio')
+@section('title', 'Jacket Store | Inicio')
 
 @section('content')
 <!-- Hero Section -->
@@ -22,7 +22,7 @@
             <div class="col-xl-5 col-xxl-6 d-none d-xl-block text-center">
                 <!-- Placeholder for Hero Image -->
                 <div style="width: 100%; height: 500px; background: radial-gradient(circle, #00f2ff40 0%, transparent 70%); position: relative; border: 1px solid #333; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-snowflake fa-5x" style="color: var(--primary-color); opacity: 0.8; filter: drop-shadow(0 0 10px var(--primary-color));"></i>
+                    <i class="fas fa-vest fa-5x" style="color: var(--primary-color); opacity: 0.8; filter: drop-shadow(0 0 10px var(--primary-color));"></i>
                     <div style="position: absolute; bottom: 20px; right: 20px; color: #fff;">
                         <i class="fas fa-star fa-spin"></i> Nueva Colección
                     </div>
@@ -79,7 +79,7 @@
 
                         <!-- Product details-->
                         <div class="product-info text-center">
-                            <div class="product-brand">{{ $product->marca->nombre ?? 'Bajo Cero' }}</div>
+                            <div class="product-brand">{{ $product->marca->nombre ?? 'Jacket Store' }}</div>
                             <h5 class="product-title text-white text-truncate">{{ $product->nombre }}</h5>
                             <div class="d-flex justify-content-center small text-warning mb-2">
                                 <i class="fas fa-star"></i>

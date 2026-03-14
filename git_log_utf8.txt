@@ -1,0 +1,10 @@
+191e8c6 refactor(venta): simplify payment UI to Efectivo + Pago Digital button
+b3f2356 feat(venta): smart cash suggestions + virtual payment tabs (Nequi, Daviplata, Tarjeta)
+2dd552f feat: modernizar UI del POS ??? botones, tablas, m??dulos
+3887b9d fix: restaurar credenciales por defecto en login (ventas@gmail.com)
+0f96239 feat: redise??o UX/UI completo ??? admin + sitio p??blico
+a8ee1a4 fix: usar whereRaw para comparaci??n booleana en PostgreSQL
+1088c5b fix: corregir comparaci??n booleana en PostgreSQL (es_mayorista)
+cda8725 fix: corregir ID del bot??n hamburguesa en men?? p??blico
+9aaab1e fix: restore vendor to .vercelignore - use build cache instead
+293392f fix: bundle vendor for Vercel deploy (no PHP in build env)

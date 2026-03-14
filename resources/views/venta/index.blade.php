@@ -52,14 +52,14 @@
                         @foreach ($ventas as $item)
                         <tr>
                             <td>
-                                <div class="fw-semibold text-dark" style="font-size:0.85rem;">{{ $item->comprobante->tipo_comprobante }}</div>
+                                <div class="fw-semibold text-dark" style="font-size:0.85rem;">{{ $item->comprobante?->tipo_comprobante ?? 'N/A' }}</div>
                                 <div class="text-muted" style="font-size:0.75rem;">{{ $item->numero_comprobante }}</div>
                             </td>
                             <td>
                                 <div class="fw-semibold text-dark" style="font-size:0.85rem;">
-                                    {{ ucfirst($item->cliente->persona->tipo_persona ?? 'Cliente') }}
+                                    {{ ucfirst($item->cliente?->persona?->tipo_persona ?? 'Cliente') }}
                                 </div>
-                                <div class="text-muted" style="font-size:0.75rem;">{{ $item->cliente->persona->razon_social }}</div>
+                                <div class="text-muted" style="font-size:0.75rem;">{{ $item->cliente?->persona?->razon_social ?? 'N/A' }}</div>
                             </td>
                             <td>
                                 <div style="font-size:0.82rem;">
@@ -72,7 +72,7 @@
                                 </div>
                             </td>
                             <td>
-                                <span style="font-size:0.85rem;">{{ $item->user->name }}</span>
+                                <span style="font-size:0.85rem;">{{ $item->user?->name ?? 'N/A' }}</span>
                             </td>
                             <td>
                                 <span class="fw-bold text-success" style="font-size:0.9rem;">

@@ -1,71 +1,71 @@
-# 🔑 Credenciales de Acceso - Bajo Cero POS
+# Credenciales de Acceso — Jacket Store POS
 
-## 👤 Usuario Administrador
+## Usuario Administrador
 
-**Email:** `admin@gmail.com`  
-**Contraseña:** `12345678`  
-**Nombre:** Sak Noel  
+**Email:** `admin@gmail.com`
+**Contraseña:** `12345678`
+**Nombre:** Admin
 **Rol:** Administrador (acceso completo)
 
 ---
 
-## 🌐 URL de Acceso
+## Usuario Ventas (por defecto en el login)
+
+**Email:** `ventas@gmail.com`
+**Contraseña:** `12345678`
+
+---
+
+## URL de Acceso
 
 **Local:** http://127.0.0.1:8000
 
 ---
 
-## ⚠️ Importante
+## Importante
 
 ### Cambiar Contraseña
-Por seguridad, se recomienda cambiar la contraseña después del primer inicio de sesión:
-
-1. Inicia sesión con las credenciales anteriores
-2. Ve a tu perfil (esquina superior derecha)
-3. Cambia la contraseña
-
-### Crear Nuevos Usuarios
-Como administrador, puedes crear nuevos usuarios desde:
-- **Ruta:** `/admin/users`
-- **Menú:** Usuarios → Crear Usuario
+Por seguridad, cambia la contraseña después del primer inicio de sesión:
+1. Inicia sesión → Dropdown usuario → Configuraciones
+2. Cambia la contraseña desde el perfil
 
 ### Roles Disponibles
-El sistema incluye un sistema de roles y permisos completo:
 - **Administrador:** Acceso total al sistema
-- Puedes crear roles personalizados desde `/admin/roles`
+- Roles personalizados desde `/admin/roles`
 
 ---
 
-## 📊 Datos Iniciales Cargados
+## Datos Iniciales Cargados
 
-El sistema ha cargado los siguientes datos iniciales:
-
-✅ **Documentos** - Tipos de documentos (DNI, RUC, etc.)  
-✅ **Comprobantes** - Tipos de comprobantes de venta  
-✅ **Permisos** - Sistema completo de permisos  
-✅ **Usuario Admin** - Usuario administrador principal  
-✅ **Ubicaciones** - Ubicaciones de inventario  
-✅ **Monedas** - COP (Peso Colombiano) y USD  
-✅ **Empresa** - Datos de la empresa
-
----
-
-## 🔐 Seguridad
-
-- Las contraseñas están encriptadas con bcrypt
-- El sistema usa Laravel Sanctum para autenticación
-- Spatie Permission para control de acceso basado en roles
-- Registro de actividades (Activity Log) habilitado
+✅ **Documentos** — Tipos de documentos (CC, NIT, Pasaporte)
+✅ **Comprobantes** — Boleta y Factura
+✅ **Permisos** — 45 permisos granulares
+✅ **Usuario Admin** — Usuario administrador principal
+✅ **Ubicaciones** — Estantes de inventario
+✅ **Monedas** — COP (Peso Colombiano)
+✅ **Empresa** — Jacket Store
+✅ **Catálogo** — Categorías, marcas y tallas de chaquetas
 
 ---
 
-## 📝 Notas
+## Seguridad
+
+- Contraseñas encriptadas con bcrypt
+- Laravel Sanctum para autenticación
+- Spatie Permission para control de acceso por roles
+- Activity Log habilitado
+
+---
+
+## Notas Técnicas
 
 - **Base de Datos:** SQLite local (`database/database.sqlite`)
+- **Stack:** Laravel 12, Blade, Bootstrap 5, SQLite
 - **Modo:** Offline (no requiere internet)
-- **Sincronización Cloud:** Opcional (configurar variables CLOUD_DB_* en .env)
+- **Sync Cloud:** Opcional (configurar variables `CLOUD_DB_*` en `.env`)
 
 ---
 
-**Fecha de Creación:** 2025-12-04  
-**Sistema:** Bajo Cero POS v1.0
+**Sistema:** Jacket Store POS
+**País:** Colombia
+**Moneda:** COP (Peso Colombiano)

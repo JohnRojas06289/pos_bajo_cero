@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Bajo Cero | Colección')
+@section('title', 'Jacket Store | Colección')
 
 @section('content')
 <div class="container px-5 mt-5 pt-5">
@@ -97,7 +97,7 @@
                             <!-- Product details-->
                             <div class="card-body p-4">
                                 <div class="text-start">
-                                    <div class="small text-muted text-uppercase mb-1">{{ $product->marca->nombre ?? 'Bajo Cero' }}</div>
+                                    <div class="small text-muted text-uppercase mb-1">{{ $product->marca->nombre ?? 'Jacket Store' }}</div>
                                     <h5 class="fw-bolder text-white text-truncate">{{ $product->nombre }}</h5>
                                     <div class="text-info fw-bold fs-5">${{ number_format($product->precio_venta, 0) }}</div>
                                 </div>

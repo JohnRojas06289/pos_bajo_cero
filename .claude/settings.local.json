@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:\\\\Users\\\\Cellcenter\\\\Desktop\\\\pos_bajo_cero\" && php artisan config:clear && php artisan view:clear && php artisan cache:clear && php artisan route:clear 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\Cellcenter\\\\Desktop\\\\pos_bajo_cero\" && php artisan config:show app 2>&1 | head -5)",
+      "Bash(cd \"C:\\\\Users\\\\Cellcenter\\\\Desktop\\\\pos_bajo_cero\" && sed -i 's/Bajo Cero/Jacket Store/g; s/BajoCero/JacketStore/g; s/bajocero\\\\.com/jacketstore.co/g' resources/views/public/about.blade.php resources/views/public/collection.blade.php resources/views/public/contact.blade.php resources/views/public/show.blade.php resources/views/welcome.blade.php 2>&1 && echo \"Done\")",
+      "Bash(cd \"C:\\\\Users\\\\Cellcenter\\\\Desktop\\\\pos_bajo_cero\" && sed -i 's/fa-snowflake/fa-vest/g' resources/views/welcome.blade.php resources/views/public/about.blade.php 2>/dev/null; grep -r \"snowflake\\\\|Bajo Cero\\\\|BajoCero\\\\|bajocero\" resources/views/ 2>/dev/null | head -20)",
+      "Bash(cd \"C:\\\\Users\\\\Cellcenter\\\\Desktop\\\\pos_bajo_cero\" && sed -i \"s/'Admin Bajo Cero'/'Admin Jacket Store'/g; s/Admin Bajo Cero/Admin Jacket Store/g\" database/seeders/UserSeeder.php && sed -i \"s/'Bajo Cero'/'Jacket Store'/g\" database/seeders/RopaSeeder.php && echo \"Seeders actualizados\")",
+      "Bash(cd \"C:\\\\Users\\\\Cellcenter\\\\Desktop\\\\pos_bajo_cero\" && php artisan config:show app 2>&1 | grep \"name\\\\|debug\" | head -5)",
+      "Bash(cd \"C:\\\\Users\\\\Cellcenter\\\\Desktop\\\\pos_bajo_cero\" && sed -i 's/APP_NAME=\"Bajo Cero\"/APP_NAME=\"Jacket Store\"/' .env && grep \"APP_NAME\" .env)",
+      "Bash(cd \"C:\\\\Users\\\\Cellcenter\\\\Desktop\\\\pos_bajo_cero\" && php artisan config:clear && php artisan view:clear 2>&1 && php artisan config:show app 2>&1 | grep \"name\" | head -2)"
+    ]
+  }
+}

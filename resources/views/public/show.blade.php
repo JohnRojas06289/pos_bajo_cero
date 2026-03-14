@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Bajo Cero | ' . $product->nombre)
+@section('title', 'Jacket Store | ' . $product->nombre)
 
 @section('content')
 <div class="container px-5 mt-5 pt-5">
@@ -21,7 +21,7 @@
         <!-- Product Info -->
         <div class="col-lg-6">
             <div class="mb-3">
-                <span class="badge bg-primary text-dark fw-bold px-3 py-2">{{ $product->marca->nombre ?? 'Bajo Cero' }}</span>
+                <span class="badge bg-primary text-dark fw-bold px-3 py-2">{{ $product->marca->nombre ?? 'Jacket Store' }}</span>
                 <span class="badge bg-dark border border-secondary text-white fw-normal px-3 py-2 ms-2">{{ $product->categoria->nombre ?? 'General' }}</span>
             </div>
             

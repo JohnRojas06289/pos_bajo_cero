@@ -3,9 +3,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="Bajo Cero - Estilo Urbano" />
-    <meta name="author" content="Bajo Cero" />
-    <title>@yield('title', 'Bajo Cero | Estilo Urbano')</title>
+    <meta name="description" content="Jacket Store - Chaquetas y Ropa de Calidad" />
+    <meta name="author" content="Jacket Store" />
+    <title>@yield('title', 'Jacket Store | Chaquetas y Estilo')</title>
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
@@ -26,7 +26,7 @@
     <nav class="navbar-custom fixed-top">
         <div class="nav-container">
             <a class="navbar-brand" href="{{ route('home') }}">
-                Bajo<span style="color: var(--text-color);">Cero</span>
+                Jacket<span style="color: var(--text-color);">Store</span>
             </a>
 
             <div class="nav-actions">
@@ -56,9 +56,9 @@
     <div id="slideMenu" class="slide-menu">
         <div class="slide-menu-header">
             <div style="display:flex;align-items:center;gap:0.5rem;">
-                <i class="fas fa-snowflake" style="color: var(--primary-color); font-size: 1rem; opacity: 0.8;"></i>
+                <i class="fas fa-vest" style="color: var(--primary-color); font-size: 1rem; opacity: 0.9;"></i>
                 <span style="color: var(--primary-color); font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; font-size: 1.1rem;">
-                    Bajo<span style="color: var(--text-color);">Cero</span>
+                    Jacket<span style="color: var(--text-color);">Store</span>
                 </span>
             </div>
             <button id="menuCloseBtn" class="btn-close-menu">
@@ -87,8 +87,8 @@
         <div class="container px-5">
             <div class="row gx-5">
                 <div class="col-lg-4 mb-5 mb-lg-0">
-                    <div class="footer-heading">Bajo Cero</div>
-                    <p class="text-muted mb-4">Redefiniendo el estilo urbano. Prendas diseñadas para quienes no temen destacar. Calidad premium, diseño exclusivo.</p>
+                    <div class="footer-heading">Jacket Store</div>
+                    <p class="text-muted mb-4">Especialistas en chaquetas de calidad. Prendas diseñadas para quienes no temen destacar. Estilo, comodidad y precio justo.</p>
                     <div class="d-flex gap-3">
                         <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
                         <a href="#" class="text-white"><i class="fab fa-facebook fa-lg"></i></a>
@@ -108,7 +108,7 @@
                     <div class="footer-links">
                         <div class="mb-2"><i class="fas fa-map-marker-alt me-2 text-primary"></i> Bogotá, Colombia</div>
                         <div class="mb-2"><i class="fab fa-whatsapp me-2 text-success"></i> +57 300 123 4567</div>
-                        <div class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i> contacto@bajocero.com</div>
+                        <div class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i> contacto@jacketstore.co</div>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-4">
@@ -122,7 +122,7 @@
                 </div>
             </div>
             <div class="text-center mt-5 pt-4" style="border-top: 1px solid rgba(255,255,255,0.08);">
-                <small style="color: rgba(255,255,255,0.3); font-size: 0.75rem;">&copy; 2026 Bajo Cero. Todos los derechos reservados.</small>
+                <small style="color: rgba(255,255,255,0.3); font-size: 0.75rem;">&copy; 2026 Jacket Store. Todos los derechos reservados.</small>
             </div>
         </div>
     </footer>

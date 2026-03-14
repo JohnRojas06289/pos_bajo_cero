@@ -48,7 +48,15 @@ class StoreProductoRequest extends FormRequest
     public function messages()
     {
         return [
-           // 'codigo.required' => 'Se necesita un campo código'
+            'nombre.required'       => 'El nombre del producto es obligatorio.',
+            'nombre.max'            => 'El nombre no puede superar los 255 caracteres.',
+            'codigo.max'            => 'El código no puede superar los 50 caracteres.',
+            'descripcion.max'       => 'La descripción no puede superar los 255 caracteres.',
+            'img_path.image'        => 'El archivo debe ser una imagen válida.',
+            'img_path.mimes'        => 'La imagen debe ser de tipo: png, jpg, jpeg, webp, gif, svg o bmp.',
+            'precio.numeric'        => 'El precio debe ser un número.',
+            'precio.min'            => 'El precio no puede ser negativo.',
+            'genero.in'             => 'El género debe ser Hombre, Mujer o Unisex.',
         ];
     }
 }
