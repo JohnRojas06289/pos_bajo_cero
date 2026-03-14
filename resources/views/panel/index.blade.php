@@ -706,7 +706,11 @@ function cop(v) {
     return '$' + Number(v).toLocaleString('es-CO', {maximumFractionDigits:0});
 }
 
-// ── Chart.js v2 defaults ──────────────────────────────────────────
+// ── Chart.js: solo si el usuario ve las gráficas ──────────────────
+if (!document.getElementById('ventasLineChart')) {
+    // Usuario sin permiso ver-estadisticas: nada que renderizar
+} else {
+
 Chart.defaults.global.defaultFontFamily = "Inter, system-ui, sans-serif";
 Chart.defaults.global.defaultFontSize   = 11;
 
@@ -905,6 +909,8 @@ if (datosTop5Menos.length) {
         JS_RED
     );
 }
+
+} // end if(ventasLineChart)
 
 // ── Presets de fecha ──────────────────────────────────────────────
 function fmtDate(d) {

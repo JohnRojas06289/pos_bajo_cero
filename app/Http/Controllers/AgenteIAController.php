@@ -46,24 +46,32 @@ class AgenteIAController extends Controller
             "CONTEXTO ACTUAL DEL NEGOCIO:\n{$context}";
 
         try {
-            $response = Http::timeout(15)->post(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}",
-                [
-                    'system_instruction' => [
-                        'parts' => [['text' => $systemPrompt]]
-                    ],
-                    'contents' => [
-                        ['role' => 'user', 'parts' => [['text' => $request->input('message')]]]
-                    ],
-                    'generationConfig' => [
-                        'temperature'     => 0.7,
-                        'maxOutputTokens' => 400,
+            $response = Http::timeout(20)
+                ->withHeaders(['Content-Type' => 'application/json'])
+                ->post(
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
+                    [
+                        'system_instruction' => [
+                            'parts' => [['text' => $systemPrompt]]
+                        ],
+                        'contents' => [
+                            ['role' => 'user', 'parts' => [['text' => $request->input('message')]]]
+                        ],
+                        'generationConfig' => [
+                            'temperature'     => 0.7,
+                            'maxOutputTokens' => 400,
+                        ]
                     ]
-                ]
-            );
+                );
 
             if ($response->failed()) {
-                return response()->json(['reply' => 'No pude conectarme al asistente. Intenta de nuevo.']);
+                $errorBody = $response->json();
+                $errorMsg  = $errorBody['error']['message'] ?? ('HTTP ' . $response->status());
+                \Illuminate\Support\Facades\Log::error('Gemini API error', [
+                    'status' => $response->status(),
+                    'body'   => $errorBody,
+                ]);
+                return response()->json(['reply' => "Error del asistente ({$response->status()}): {$errorMsg}"]);
             }
 
             $data  = $response->json();
@@ -72,7 +80,8 @@ class AgenteIAController extends Controller
             return response()->json(['reply' => trim($reply)]);
 
         } catch (\Exception $e) {
-            return response()->json(['reply' => 'Error al procesar tu mensaje. Intenta de nuevo.']);
+            \Illuminate\Support\Facades\Log::error('Gemini exception', ['msg' => $e->getMessage()]);
+            return response()->json(['reply' => 'Error de red: ' . $e->getMessage()]);
         }
     }
 
