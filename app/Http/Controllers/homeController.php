@@ -140,7 +140,7 @@ class homeController extends Controller
             // Métodos de pago acumulados (para KPIs generales)
             $ventasEfectivo      = Venta::where('metodo_pago', 'EFECTIVO')->sum('total');
             $ventasTransferencia = Venta::whereIn('metodo_pago', ['NEQUI', 'DAVIPLATA', 'TRANSFERENCIA'])->sum('total');
-            $ventasMayoristas    = Venta::whereHas('cliente.persona', fn($q) => $q->where('es_mayorista', true))->sum('total');
+            $ventasMayoristas    = Venta::whereHas('cliente.persona', fn($q) => $q->whereRaw('es_mayorista = true'))->sum('total');
 
             // Top 3 para backward compatibility con secciones que los usen
             $productosMasVendidos   = $top5MasVendidos->take(3);
