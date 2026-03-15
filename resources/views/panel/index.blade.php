@@ -708,6 +708,7 @@ function cop(v) {
 
 // ── Chart.js: solo si el usuario ve las gráficas ──────────────────
 (function initCharts() {
+    try {
     const _vcEl = document.getElementById('ventasLineChart');
     if (!_vcEl) return; // sin permiso ver-estadisticas
 
@@ -913,6 +914,9 @@ if (datosTop5Menos.length) {
     );
 }
 
+    } catch(e) {
+        console.warn('[Jacket Store] Chart.js init error:', e.message);
+    }
 })(); // end initCharts
 
 // ── Presets de fecha ──────────────────────────────────────────────
