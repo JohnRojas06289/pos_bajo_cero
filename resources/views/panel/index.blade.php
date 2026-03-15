@@ -707,9 +707,9 @@ function cop(v) {
 }
 
 // ── Chart.js: solo si el usuario ve las gráficas ──────────────────
-if (!document.getElementById('ventasLineChart')) {
-    // Usuario sin permiso ver-estadisticas: nada que renderizar
-} else {
+(function initCharts() {
+    const _vcEl = document.getElementById('ventasLineChart');
+    if (!_vcEl) return; // sin permiso ver-estadisticas
 
 Chart.defaults.global.defaultFontFamily = "Inter, system-ui, sans-serif";
 Chart.defaults.global.defaultFontSize   = 11;
@@ -722,7 +722,7 @@ const fechas = datosVentasDia.map(d => {
 const montos    = datosVentasDia.map(d => parseFloat(d.total)   || 0);
 const cantidades = datosVentasDia.map(d => parseInt(d.cantidad) || 0);
 
-const ventasLineChart = new Chart(document.getElementById('ventasLineChart'), {
+const ventasLineChart = new Chart(_vcEl, {
     type: 'line',
     data: {
         labels: fechas,
@@ -810,7 +810,8 @@ const pagoTotales = datosPagos.map(p => parseFloat(p.total) || 0);
 const pagoCantidades = datosPagos.map(p => parseInt(p.cantidad) || 0);
 const pagoColors = pagoLabels.map(l => PAGO_COLORS[l] || '#95A5A6');
 
-const pagosDonutChart = new Chart(document.getElementById('pagosDonutChart'), {
+const _pdEl = document.getElementById('pagosDonutChart');
+const pagosDonutChart = _pdEl ? new Chart(_pdEl, {
     type: 'doughnut',
     data: {
         labels: pagoLabels,
@@ -840,7 +841,7 @@ const pagosDonutChart = new Chart(document.getElementById('pagosDonutChart'), {
             }
         }
     }
-});
+}) : null;
 
 // Leyenda manual del donut
 (function buildDonutLegend() {
@@ -856,7 +857,9 @@ const pagosDonutChart = new Chart(document.getElementById('pagosDonutChart'), {
 
 // ── Gráfica 3 & 4: Top 5 productos ───────────────────────────────
 function makeHBarChart(canvasId, labels, data, color) {
-    return new Chart(document.getElementById(canvasId), {
+    const el = document.getElementById(canvasId);
+    if (!el) return null;
+    return new Chart(el, {
         type: 'horizontalBar',
         data: {
             labels,
@@ -910,7 +913,7 @@ if (datosTop5Menos.length) {
     );
 }
 
-} // end if(ventasLineChart)
+})(); // end initCharts
 
 // ── Presets de fecha ──────────────────────────────────────────────
 function fmtDate(d) {
