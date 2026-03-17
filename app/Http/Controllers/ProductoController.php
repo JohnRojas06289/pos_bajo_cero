@@ -486,19 +486,44 @@ class ProductoController extends Controller
                 return response()->json(['error' => 'La IA no generó respuesta.'], 500);
             }
 
-            // Extract JSON block — Gemini sometimes wraps it in ```json ... ```
-            if (preg_match('/\{[\s\S]*?\}/m', $raw, $matches)) {
-                $json = json_decode($matches[0], true);
-                if ($json) {
-                    return response()->json([
-                        'titulo'      => trim($json['titulo']      ?? ''),
-                        'marca'       => trim($json['marca']       ?? ''),
-                        'descripcion' => trim($json['descripcion'] ?? ''),
-                    ]);
+            Log::info('Gemini generateFromImages raw', ['raw' => $raw]);
+
+            // Try direct json_decode first (clean response)
+            $json = json_decode($raw, true);
+
+            // If that fails, extract the first {...} block greedily (handles markdown wrapping)
+            if (!$json) {
+                if (preg_match('/\{[^{}]*(?:\{[^{}]*\}[^{}]*)?\}/s', $raw, $matches)) {
+                    $json = json_decode($matches[0], true);
                 }
             }
 
-            return response()->json(['error' => 'No se pudo procesar la respuesta de la IA. Intenta de nuevo.'], 500);
+            // Last resort: manually extract key values with regex
+            if (!$json) {
+                $titulo      = null;
+                $marca       = null;
+                $descripcion = null;
+                if (preg_match('/"titulo"\s*:\s*"([^"]+)"/u', $raw, $m)) $titulo      = $m[1];
+                if (preg_match('/"marca"\s*:\s*"([^"]+)"/u', $raw, $m)) $marca       = $m[1];
+                if (preg_match('/"descripcion"\s*:\s*"([^"]+)"/u', $raw, $m)) $descripcion = $m[1];
+
+                if ($titulo || $descripcion) {
+                    return response()->json([
+                        'titulo'      => trim($titulo      ?? ''),
+                        'marca'       => trim($marca       ?? ''),
+                        'descripcion' => trim($descripcion ?? ''),
+                    ]);
+                }
+
+                Log::error('generateFromImages: could not parse JSON', ['raw' => $raw]);
+                return response()->json(['error' => 'La IA respondió en un formato inesperado. Intenta de nuevo.'], 500);
+            }
+
+            return response()->json([
+                'titulo'      => trim($json['titulo']      ?? ''),
+                'marca'       => trim($json['marca']       ?? ''),
+                'descripcion' => trim($json['descripcion'] ?? ''),
+            ]);
         } catch (Throwable $e) {
             Log::error('Error en generateFromImages', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Error: ' . $e->getMessage()], 500);
