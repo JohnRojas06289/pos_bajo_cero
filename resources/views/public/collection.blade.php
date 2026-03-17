@@ -86,8 +86,8 @@
                             @endif
 
                             <!-- Product image-->
-                            @if($product->image_path)
-                                <img class="card-img-top" src="{{ Storage::url($product->image_path) }}" alt="{{ $product->nombre }}" />
+                            @if($product->img_path)
+                                <img class="card-img-top" src="{{ $product->image_url }}" alt="{{ $product->nombre }}" style="height:250px;object-fit:cover;" />
                             @else
                                 <div style="height: 250px; background-color: #222; display: flex; align-items: center; justify-content: center;">
                                     <i class="fas fa-camera fa-2x text-muted"></i>
@@ -99,7 +99,7 @@
                                 <div class="text-start">
                                     <div class="small text-muted text-uppercase mb-1">{{ $product->marca->nombre ?? 'Jacket Store' }}</div>
                                     <h5 class="fw-bolder text-white text-truncate">{{ $product->nombre }}</h5>
-                                    <div class="text-info fw-bold fs-5">${{ number_format($product->precio_venta, 0) }}</div>
+                                    <div class="text-info fw-bold fs-5">${{ number_format($product->precio, 0) }}</div>
                                 </div>
                             </div>
                             <!-- Product actions-->
