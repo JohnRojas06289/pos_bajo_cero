@@ -465,11 +465,10 @@ class ProductoController extends Controller
         $parts[] = ['text' => $prompt];
 
         try {
-            // gemini-2.0-flash-lite: fastest vision model, fits within Vercel 10s function timeout
             $response = Http::timeout(9)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key={$apiKey}",
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
                     [
                         'contents'         => [['parts' => $parts]],
                         'generationConfig' => ['temperature' => 0.4, 'maxOutputTokens' => 350],
