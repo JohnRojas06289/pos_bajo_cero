@@ -465,13 +465,17 @@ class ProductoController extends Controller
         $parts[] = ['text' => $prompt];
 
         try {
-            $response = Http::timeout(9)
+            $response = Http::timeout(25)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}",
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
                     [
                         'contents'         => [['parts' => $parts]],
-                        'generationConfig' => ['temperature' => 0.4, 'maxOutputTokens' => 350],
+                        'generationConfig' => [
+                            'temperature'    => 0.4,
+                            'maxOutputTokens'=> 350,
+                            'thinkingConfig' => ['thinkingBudget' => 0],
+                        ],
                     ]
                 );
 
@@ -612,13 +616,17 @@ class ProductoController extends Controller
         }
 
         try {
-            $response = Http::timeout(20)
+            $response = Http::timeout(25)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}",
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
                     [
                         'contents'         => [['parts' => $parts]],
-                        'generationConfig' => ['temperature' => 0.8, 'maxOutputTokens' => 200],
+                        'generationConfig' => [
+                            'temperature'    => 0.8,
+                            'maxOutputTokens'=> 200,
+                            'thinkingConfig' => ['thinkingBudget' => 0],
+                        ],
                     ]
                 );
 
@@ -681,13 +689,17 @@ class ProductoController extends Controller
                     . ($producto->material ? " Material: {$producto->material}." : "")
                     . " Escribe 2-3 oraciones, sin emojis, en español colombiano.";
 
-                $response = Http::timeout(12)
+                $response = Http::timeout(25)
                     ->withHeaders(['Content-Type' => 'application/json'])
                     ->post(
-                        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}",
+                        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
                         [
                             'contents' => [['parts' => [['text' => $prompt]]]],
-                            'generationConfig' => ['temperature' => 0.7, 'maxOutputTokens' => 150],
+                            'generationConfig' => [
+                                'temperature'    => 0.7,
+                                'maxOutputTokens'=> 150,
+                                'thinkingConfig' => ['thinkingBudget' => 0],
+                            ],
                         ]
                     );
 
