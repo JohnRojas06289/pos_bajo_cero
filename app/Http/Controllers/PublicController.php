@@ -43,7 +43,7 @@ class PublicController extends Controller
             $query->where('nombre', 'like', '%' . $request->search . '%');
         }
 
-        $products = $query->paginate(12);
+        $products = $query->latest()->paginate(12);
         $categorias = Categoria::all();
         $marcas = Marca::all();
 
