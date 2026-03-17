@@ -465,10 +465,11 @@ class ProductoController extends Controller
         $parts[] = ['text' => $prompt];
 
         try {
-            $response = Http::timeout(15)
+            // gemini-1.5-flash: faster vision model, fits within Vercel 10s function timeout
+            $response = Http::timeout(9)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={$apiKey}",
                     [
                         'contents'         => [['parts' => $parts]],
                         'generationConfig' => ['temperature' => 0.4, 'maxOutputTokens' => 350],
@@ -476,15 +477,13 @@ class ProductoController extends Controller
                 );
 
             if ($response->failed()) {
-                return response()->json(['error' => 'Error al contactar la IA (' . $response->status() . ').'], 500);
+                return response()->json(['error' => 'Error Gemini ' . $response->status() . ': ' . substr($response->body(), 0, 200)], 500);
             }
 
             $raw = trim($response->json('candidates.0.content.parts.0.text') ?? '');
             if (empty($raw)) {
-                return response()->json(['error' => 'La IA no generó respuesta.'], 500);
+                return response()->json(['error' => 'La IA no generó respuesta. Cuerpo: ' . substr($response->body(), 0, 300)], 500);
             }
-
-            Log::info('Gemini generateFromImages raw', ['raw' => $raw]);
 
             // Try direct json_decode first (clean response)
             $json = json_decode($raw, true);
@@ -513,8 +512,7 @@ class ProductoController extends Controller
                     ]);
                 }
 
-                Log::error('generateFromImages: could not parse JSON', ['raw' => $raw]);
-                return response()->json(['error' => 'La IA respondió en un formato inesperado. Intenta de nuevo.'], 500);
+                return response()->json(['error' => 'Formato inesperado. Raw: ' . substr($raw, 0, 200)], 500);
             }
 
             return response()->json([
@@ -523,8 +521,7 @@ class ProductoController extends Controller
                 'descripcion' => trim($json['descripcion'] ?? ''),
             ]);
         } catch (Throwable $e) {
-            Log::error('Error en generateFromImages', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Error: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Excepción: ' . $e->getMessage()], 500);
         }
     }
 

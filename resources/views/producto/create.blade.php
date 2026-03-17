@@ -736,9 +736,9 @@ async function generateFromImagesAI() {
         const formData = new FormData();
         formData.append('_token', csrfToken);
 
-        // Combine up to 3 photos into one collage image — Gemini sees all views, payload stays small
+        // Combine up to 3 photos into one collage — 200px tiles → ~40-80KB total payload
         const photoFiles = selectedImages.slice(0, 3).map(s => s.file);
-        const collageB64 = await buildCollageForAI(photoFiles);
+        const collageB64 = await buildCollageForAI(photoFiles, 200, 0.70);
         formData.append('image_base64_0', collageB64);
         formData.append('image_mime_0',   'image/jpeg');
 
