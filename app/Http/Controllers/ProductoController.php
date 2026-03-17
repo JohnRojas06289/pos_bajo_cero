@@ -468,7 +468,7 @@ class ProductoController extends Controller
             $response = Http::timeout(9)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}",
                     [
                         'contents'         => [['parts' => $parts]],
                         'generationConfig' => ['temperature' => 0.4, 'maxOutputTokens' => 350],
@@ -615,7 +615,7 @@ class ProductoController extends Controller
             $response = Http::timeout(20)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}",
                     [
                         'contents'         => [['parts' => $parts]],
                         'generationConfig' => ['temperature' => 0.8, 'maxOutputTokens' => 200],
@@ -684,7 +684,7 @@ class ProductoController extends Controller
                 $response = Http::timeout(12)
                     ->withHeaders(['Content-Type' => 'application/json'])
                     ->post(
-                        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
+                        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}",
                         [
                             'contents' => [['parts' => [['text' => $prompt]]]],
                             'generationConfig' => ['temperature' => 0.7, 'maxOutputTokens' => 150],
