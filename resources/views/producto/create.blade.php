@@ -137,6 +137,41 @@
 }
 .code-preview strong { color: var(--text-primary, #111827); font-family: 'JetBrains Mono', monospace; }
 
+/* AI photo hint bar */
+.img-ai-hint { font-size: 0.76rem; }
+.img-ai-hint-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(124,58,237,0.07);
+    border: 1.5px dashed rgba(124,58,237,0.3);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    color: var(--text-secondary, #4b5563);
+    transition: all 0.3s ease;
+}
+.img-ai-hint-bar.ready {
+    background: rgba(16,185,129,0.08);
+    border-color: rgba(16,185,129,0.4);
+    color: #065f46;
+}
+.img-ai-hint-bar.analyzing {
+    background: rgba(124,58,237,0.1);
+    border-color: #7c3aed;
+    border-style: solid;
+}
+.dot {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(124,58,237,0.4);
+    background: transparent;
+    transition: all 0.25s ease;
+}
+.dot.dot-filled { background: #7c3aed; border-color: #7c3aed; }
+.dot.dot-ready  { background: #10b981; border-color: #10b981; }
+#imgAiDots { display: flex; gap: 4px; flex-shrink: 0; }
+
 /* Sticky save button */
 @media (min-width: 992px) {
     .sticky-save { position: sticky; top: 1rem; }
@@ -367,21 +402,23 @@
                             <small class="text-muted" style="font-size:0.72rem;">Máx. 6 fotos</small>
                         </div>
 
+                        {{-- AI photo hint (changes dynamically) --}}
+                        <div id="imgAiHint" class="img-ai-hint mb-2">
+                            <div class="img-ai-hint-bar" id="imgAiBar">
+                                <span id="imgAiDots">
+                                    <span class="dot dot-empty"></span>
+                                    <span class="dot dot-empty"></span>
+                                    <span class="dot dot-empty"></span>
+                                </span>
+                                <span id="imgAiHintText">Sube mínimo <strong>3 fotos</strong> — la IA completará título, marca y descripción</span>
+                            </div>
+                        </div>
+
                         {{-- Gallery grid (populated by JS) --}}
                         <div class="img-gallery" id="imgGallery"></div>
 
                         {{-- Hidden file inputs (populated by JS before submit) --}}
                         <div id="hiddenImgInputs" style="display:none;"></div>
-
-                        {{-- Drag overlay --}}
-                        <div id="dropOverlay" style="display:none; border:2px dashed #2563eb; border-radius:10px; padding:1.5rem; text-align:center; background:#eff6ff; cursor:pointer;" onclick="document.getElementById('imgPickerMain').click()">
-                            <i class="fas fa-cloud-upload-alt fa-2x" style="color:#2563eb;"></i>
-                            <p class="mb-0 mt-1" style="font-size:0.85rem;color:#2563eb;font-weight:600;">Suelta las imágenes aquí</p>
-                        </div>
-
-                        <small class="text-muted d-block mt-1" style="font-size:0.72rem;">
-                            <i class="fas fa-info-circle me-1"></i>La primera foto será la imagen principal. Puedes agregar hasta 6 fotos.
-                        </small>
 
                         {{-- Invisible file picker --}}
                         <input type="file" id="imgPickerMain" class="d-none"
@@ -494,11 +531,36 @@ function toggleModoTallas(checkbox) {
 
 /* ─── Multi-image gallery ─────────────────────────── */
 const MAX_IMAGES    = 6;
+const MIN_AI_PHOTOS = 3;
 let selectedImages  = []; // [{ file: File, previewUrl: string }]
 
 const gallery        = document.getElementById('imgGallery');
 const imgPickerMain  = document.getElementById('imgPickerMain');
 const submitBtn      = document.getElementById('submitBtn');
+const aiHintBar      = document.getElementById('imgAiBar');
+const aiHintText     = document.getElementById('imgAiHintText');
+const aiHintDots     = document.getElementById('imgAiDots');
+
+function updateAiHint() {
+    const n = selectedImages.length;
+    const remaining = MIN_AI_PHOTOS - n;
+
+    // Update dots
+    aiHintDots.innerHTML = [0,1,2].map(i =>
+        `<span class="dot ${n > i ? (n >= MIN_AI_PHOTOS ? 'dot-ready' : 'dot-filled') : 'dot-empty'}"></span>`
+    ).join('');
+
+    if (n === 0) {
+        aiHintBar.className = 'img-ai-hint-bar';
+        aiHintText.innerHTML = `Sube mínimo <strong>3 fotos</strong> — la IA completará título, marca y descripción`;
+    } else if (n < MIN_AI_PHOTOS) {
+        aiHintBar.className = 'img-ai-hint-bar';
+        aiHintText.innerHTML = `${remaining} foto${remaining > 1 ? 's' : ''} más para activar el análisis IA`;
+    } else {
+        aiHintBar.className = 'img-ai-hint-bar ready';
+        aiHintText.innerHTML = `<i class="fas fa-check-circle me-1"></i>¡Listo! Analizando con IA…`;
+    }
+}
 
 function renderGallery() {
     gallery.innerHTML = '';
@@ -521,6 +583,17 @@ function renderGallery() {
         addSlot.onclick = () => imgPickerMain.click();
         gallery.appendChild(addSlot);
     }
+
+    updateAiHint();
+}
+
+async function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload  = e => resolve(e.target.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
 
 async function compressIfNeeded(file) {
@@ -532,12 +605,13 @@ async function compressIfNeeded(file) {
 }
 
 async function handleFilePicker(files) {
-    const remaining = MAX_IMAGES - selectedImages.length;
+    const prevCount = selectedImages.length;
+    const remaining = MAX_IMAGES - prevCount;
     const toProcess = Array.from(files).slice(0, remaining);
     if (!toProcess.length) return;
 
-    submitBtn.disabled   = true;
-    submitBtn.innerHTML  = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+    submitBtn.disabled  = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
 
     for (const file of toProcess) {
         const processed  = await compressIfNeeded(file);
@@ -545,11 +619,17 @@ async function handleFilePicker(files) {
         selectedImages.push({ file: processed, previewUrl });
     }
 
-    imgPickerMain.value = ''; // allow re-selecting same file
+    imgPickerMain.value = '';
     renderGallery();
 
     submitBtn.disabled  = false;
     submitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Guardar Producto';
+
+    // Auto-trigger full AI analysis when reaching MIN_AI_PHOTOS and nombre is empty
+    if (prevCount < MIN_AI_PHOTOS && selectedImages.length >= MIN_AI_PHOTOS
+        && !document.getElementById('nombre').value.trim()) {
+        setTimeout(generateFromImagesAI, 400);
+    }
 }
 
 function removeImageFromGallery(index) {
@@ -558,7 +638,7 @@ function removeImageFromGallery(index) {
     renderGallery();
 }
 
-// Drag & drop on gallery area
+// Drag & drop
 gallery.addEventListener('dragover', e => {
     e.preventDefault();
     gallery.style.outline = '2px dashed #2563eb';
@@ -571,31 +651,24 @@ gallery.addEventListener('drop', e => {
     if (e.dataTransfer.files.length) handleFilePicker(e.dataTransfer.files);
 });
 
-// Pre-submit: populate hidden file inputs using DataTransfer
+// Pre-submit: populate hidden file inputs
 document.getElementById('createForm').addEventListener('submit', function () {
     const container = document.getElementById('hiddenImgInputs');
-    container.innerHTML = ''; // clear old
-
+    container.innerHTML = '';
     if (selectedImages.length === 0) return;
 
-    // Main image → img_path
     const mainDt = new DataTransfer();
     mainDt.items.add(selectedImages[0].file);
     const mainInput = document.createElement('input');
-    mainInput.type  = 'file';
-    mainInput.name  = 'img_path';
-    mainInput.style.display = 'none';
+    mainInput.type = 'file'; mainInput.name = 'img_path'; mainInput.style.display = 'none';
     container.appendChild(mainInput);
     mainInput.files = mainDt.files;
 
-    // Extra images → imagenes_extra[]
     for (let i = 1; i < selectedImages.length; i++) {
-        const dt    = new DataTransfer();
+        const dt = new DataTransfer();
         dt.items.add(selectedImages[i].file);
         const input = document.createElement('input');
-        input.type  = 'file';
-        input.name  = 'imagenes_extra[]';
-        input.style.display = 'none';
+        input.type = 'file'; input.name = 'imagenes_extra[]'; input.style.display = 'none';
         container.appendChild(input);
         input.files = dt.files;
     }
@@ -604,13 +677,99 @@ document.getElementById('createForm').addEventListener('submit', function () {
 // Init
 renderGallery();
 
-/* ─── AI Description generator ───────────────────── */
+/* ─── AI: generar título + marca + descripción desde fotos ─── */
+async function generateFromImagesAI() {
+    if (selectedImages.length < MIN_AI_PHOTOS) {
+        alert(`Sube al menos ${MIN_AI_PHOTOS} fotos para que la IA analice el producto.`);
+        return;
+    }
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+                   || document.querySelector('input[name="_token"]')?.value;
+
+    // Show analyzing state on the hint bar
+    aiHintBar.className = 'img-ai-hint-bar analyzing';
+    aiHintText.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Analizando imágenes con IA…';
+
+    // Also reflect on the AI button
+    const btn     = document.getElementById('btnAI');
+    const aiIcon  = document.getElementById('aiIcon');
+    const aiLabel = document.getElementById('aiLabel');
+    if (btn) { btn.disabled = true; aiIcon.className = 'fas fa-spinner fa-spin'; aiLabel.textContent = 'Analizando…'; }
+
+    try {
+        const formData = new FormData();
+        formData.append('_token', csrfToken);
+
+        // Send up to 3 photos
+        for (let i = 0; i < Math.min(3, selectedImages.length); i++) {
+            const b64 = await fileToBase64(selectedImages[i].file);
+            formData.append(`image_base64_${i}`, b64);
+            formData.append(`image_mime_${i}`,   selectedImages[i].file.type || 'image/jpeg');
+        }
+
+        const res  = await fetch('{{ route("productos.generate-from-images") }}', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.error) {
+            aiHintBar.className = 'img-ai-hint-bar';
+            aiHintText.innerHTML = `<i class="fas fa-exclamation-circle me-1 text-danger"></i>Error IA: ${data.error}`;
+            return;
+        }
+
+        // Fill título
+        if (data.titulo) {
+            const nombreEl = document.getElementById('nombre');
+            if (!nombreEl.value.trim()) nombreEl.value = data.titulo;
+        }
+
+        // Fill descripción
+        if (data.descripcion) {
+            document.getElementById('descripcion').value = data.descripcion;
+        }
+
+        // Match marca (case-insensitive) against existing options
+        if (data.marca) {
+            const marcaSelect = document.getElementById('marca_id');
+            const suggested   = data.marca.toLowerCase().trim();
+            let matched = false;
+            for (const opt of marcaSelect.options) {
+                if (opt.value && opt.text.toLowerCase().trim().includes(suggested)) {
+                    $(marcaSelect).val(opt.value).selectpicker('refresh');
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched && data.marca) {
+                // Show suggestion but don't force it
+                aiHintText.innerHTML += ` · Marca sugerida: <em>${data.marca}</em> (no está en el catálogo)`;
+            }
+        }
+
+        aiHintBar.className = 'img-ai-hint-bar ready';
+        aiHintText.innerHTML = '<i class="fas fa-check-circle me-1"></i>¡IA completó título, marca y descripción!';
+
+    } catch (e) {
+        console.error(e);
+        aiHintBar.className = 'img-ai-hint-bar';
+        aiHintText.innerHTML = '<i class="fas fa-exclamation-circle me-1 text-danger"></i>Error de conexión';
+    } finally {
+        if (btn) { btn.disabled = false; aiIcon.className = 'fas fa-wand-magic-sparkles'; aiLabel.textContent = 'Generar con IA'; }
+    }
+}
+
+/* ─── AI: solo descripción (botón manual) ───────────── */
 async function generateDescriptionAI() {
-    const nombre    = document.getElementById('nombre').value.trim();
-    const hasImage  = selectedImages.length > 0;
+    // If 3+ photos, do the full analysis instead
+    if (selectedImages.length >= MIN_AI_PHOTOS) {
+        return generateFromImagesAI();
+    }
+
+    const nombre   = document.getElementById('nombre').value.trim();
+    const hasImage = selectedImages.length > 0;
 
     if (!nombre && !hasImage) {
-        alert('Ingresa el nombre del producto o sube una foto para que la IA pueda generar la descripción.');
+        alert('Ingresa el nombre del producto o sube al menos una foto.');
         document.getElementById('nombre').focus();
         return;
     }
@@ -639,27 +798,18 @@ async function generateDescriptionAI() {
         if (catEl   && catEl.value)   formData.append('categoria', catEl.options[catEl.selectedIndex]?.text   || '');
         if (marcaEl && marcaEl.value) formData.append('marca',     marcaEl.options[marcaEl.selectedIndex]?.text || '');
 
-        // Attach first image as base64 for vision analysis
         if (hasImage) {
-            const imgFile = selectedImages[0].file;
-            const b64 = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload  = e => resolve(e.target.result.split(',')[1]); // strip data:...;base64,
-                reader.onerror = reject;
-                reader.readAsDataURL(imgFile);
-            });
+            const b64 = await fileToBase64(selectedImages[0].file);
             formData.append('image_base64', b64);
-            formData.append('image_mime',   imgFile.type || 'image/jpeg');
+            formData.append('image_mime',   selectedImages[0].file.type || 'image/jpeg');
         }
 
         const res  = await fetch('{{ route("productos.generate-description") }}', { method: 'POST', body: formData });
         const data = await res.json();
 
-        if (data.error) {
-            alert('Error IA: ' + data.error);
-        } else {
-            document.getElementById('descripcion').value = data.description;
-        }
+        if (data.error) alert('Error IA: ' + data.error);
+        else document.getElementById('descripcion').value = data.description;
+
     } catch (e) {
         alert('Error de conexión al generar descripción.');
         console.error(e);

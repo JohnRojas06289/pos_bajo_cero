@@ -424,6 +424,88 @@ class ProductoController extends Controller
     }
 
     /**
+     * Analyze up to 3 images and return título + marca + descripción in one call
+     */
+    public function generateFromImages(Request $request): JsonResponse
+    {
+        $apiKey = config('services.gemini.api_key');
+        if (!$apiKey) {
+            return response()->json(['error' => 'IA no configurada (GEMINI_API_KEY faltante).'], 503);
+        }
+
+        $userId = auth()->id();
+        $key = "gen_desc_{$userId}";
+        if (RateLimiter::tooManyAttempts($key, 30)) {
+            return response()->json(['error' => 'Demasiadas solicitudes. Intenta en unos minutos.'], 429);
+        }
+        RateLimiter::hit($key, 3600);
+
+        // Collect up to 3 images sent as image_base64_0, image_base64_1, image_base64_2
+        $parts = [];
+        for ($i = 0; $i < 3; $i++) {
+            $b64  = $request->input("image_base64_{$i}");
+            $mime = $request->input("image_mime_{$i}", 'image/jpeg');
+            if ($b64) {
+                $parts[] = ['inline_data' => ['mime_type' => $mime, 'data' => $b64]];
+            }
+        }
+
+        if (empty($parts)) {
+            return response()->json(['error' => 'Se necesitan al menos 3 fotos.'], 422);
+        }
+
+        $prompt = "Eres experto en moda colombiana. Analiza las imágenes de esta prenda de ropa.\n"
+            . "Responde ÚNICAMENTE con un JSON válido con esta estructura exacta:\n"
+            . "{\n"
+            . "  \"titulo\": \"nombre comercial corto del producto (ej: Chaqueta de Cuero Negra)\",\n"
+            . "  \"marca\": \"nombre de la marca si es claramente visible en la prenda o etiqueta, si no null\",\n"
+            . "  \"descripcion\": \"descripción atractiva de 2-3 oraciones, sin emojis, en español colombiano\"\n"
+            . "}\n"
+            . "Solo el JSON, sin markdown ni texto adicional.";
+
+        // Text prompt goes last (after images) for better Gemini multimodal results
+        $parts[] = ['text' => $prompt];
+
+        try {
+            $response = Http::timeout(30)
+                ->withHeaders(['Content-Type' => 'application/json'])
+                ->post(
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
+                    [
+                        'contents'         => [['parts' => $parts]],
+                        'generationConfig' => ['temperature' => 0.4, 'maxOutputTokens' => 350],
+                    ]
+                );
+
+            if ($response->failed()) {
+                return response()->json(['error' => 'Error al contactar la IA (' . $response->status() . ').'], 500);
+            }
+
+            $raw = trim($response->json('candidates.0.content.parts.0.text') ?? '');
+            if (empty($raw)) {
+                return response()->json(['error' => 'La IA no generó respuesta.'], 500);
+            }
+
+            // Extract JSON block — Gemini sometimes wraps it in ```json ... ```
+            if (preg_match('/\{[\s\S]*?\}/m', $raw, $matches)) {
+                $json = json_decode($matches[0], true);
+                if ($json) {
+                    return response()->json([
+                        'titulo'      => trim($json['titulo']      ?? ''),
+                        'marca'       => trim($json['marca']       ?? ''),
+                        'descripcion' => trim($json['descripcion'] ?? ''),
+                    ]);
+                }
+            }
+
+            return response()->json(['error' => 'No se pudo procesar la respuesta de la IA. Intenta de nuevo.'], 500);
+        } catch (Throwable $e) {
+            Log::error('Error en generateFromImages', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Generate AI description — supports vision (base64 image) and text-only mode
      */
     public function generateDescription(Request $request): JsonResponse

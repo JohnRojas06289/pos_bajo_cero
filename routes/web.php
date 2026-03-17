@@ -134,6 +134,7 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
     Route::get('productos/template', [ProductoController::class, 'downloadTemplate'])->name('productos.template');
     Route::post('productos/generate-description', [ProductoController::class, 'generateDescription'])->name('productos.generate-description');
     Route::post('productos/generate-all-descriptions', [ProductoController::class, 'generateAllDescriptions'])->name('productos.generate-all-descriptions');
+    Route::post('productos/generate-from-images', [ProductoController::class, 'generateFromImages'])->name('productos.generate-from-images');
     Route::post('productos/{producto}/remove-imagen', [ProductoController::class, 'removeImagen'])->name('productos.remove-imagen');
     Route::resource('productos', ProductoController::class)->except('show', 'destroy');
     Route::resource('clientes', clienteController::class)->except('show');
