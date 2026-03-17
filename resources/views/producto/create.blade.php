@@ -677,6 +677,27 @@ document.getElementById('createForm').addEventListener('submit', function () {
 // Init
 renderGallery();
 
+/* Resize image via canvas before sending to AI — keeps payload under ~150KB */
+function resizeImageForAI(file, maxPx, quality) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+            const w = Math.round(img.width  * scale);
+            const h = Math.round(img.height * scale);
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve(dataUrl.split(',')[1]); // strip data:...;base64,
+        };
+        img.onerror = reject;
+        img.src = url;
+    });
+}
+
 /* ─── AI: generar título + marca + descripción desde fotos ─── */
 async function generateFromImagesAI() {
     if (selectedImages.length < MIN_AI_PHOTOS) {
@@ -701,12 +722,10 @@ async function generateFromImagesAI() {
         const formData = new FormData();
         formData.append('_token', csrfToken);
 
-        // Send up to 3 photos
-        for (let i = 0; i < Math.min(3, selectedImages.length); i++) {
-            const b64 = await fileToBase64(selectedImages[i].file);
-            formData.append(`image_base64_${i}`, b64);
-            formData.append(`image_mime_${i}`,   selectedImages[i].file.type || 'image/jpeg');
-        }
+        // Send only the first image, aggressively downsized via canvas to keep payload small
+        const smallB64 = await resizeImageForAI(selectedImages[0].file, 600, 0.72);
+        formData.append('image_base64_0', smallB64);
+        formData.append('image_mime_0',   'image/jpeg');
 
         const res  = await fetch('{{ route("productos.generate-from-images") }}', { method: 'POST', body: formData });
         const data = await res.json();

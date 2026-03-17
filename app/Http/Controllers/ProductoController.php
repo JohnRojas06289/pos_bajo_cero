@@ -440,19 +440,17 @@ class ProductoController extends Controller
         }
         RateLimiter::hit($key, 3600);
 
-        // Collect up to 3 images sent as image_base64_0, image_base64_1, image_base64_2
-        $parts = [];
-        for ($i = 0; $i < 3; $i++) {
-            $b64  = $request->input("image_base64_{$i}");
-            $mime = $request->input("image_mime_{$i}", 'image/jpeg');
-            if ($b64) {
-                $parts[] = ['inline_data' => ['mime_type' => $mime, 'data' => $b64]];
-            }
+        // Accept the first image (JS sends 1 downsized image to keep payload small)
+        $b64  = $request->input('image_base64_0');
+        $mime = $request->input('image_mime_0', 'image/jpeg');
+
+        if (empty($b64)) {
+            return response()->json(['error' => 'No se recibió ninguna imagen.'], 422);
         }
 
-        if (empty($parts)) {
-            return response()->json(['error' => 'Se necesitan al menos 3 fotos.'], 422);
-        }
+        $parts = [
+            ['inline_data' => ['mime_type' => $mime, 'data' => $b64]],
+        ];
 
         $prompt = "Eres experto en moda colombiana. Analiza las imágenes de esta prenda de ropa.\n"
             . "Responde ÚNICAMENTE con un JSON válido con esta estructura exacta:\n"
@@ -467,7 +465,7 @@ class ProductoController extends Controller
         $parts[] = ['text' => $prompt];
 
         try {
-            $response = Http::timeout(30)
+            $response = Http::timeout(15)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post(
                     "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
