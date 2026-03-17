@@ -677,25 +677,39 @@ document.getElementById('createForm').addEventListener('submit', function () {
 // Init
 renderGallery();
 
-/* Resize image via canvas before sending to AI — keeps payload under ~150KB */
-function resizeImageForAI(file, maxPx, quality) {
+/* Load a File into an HTMLImageElement */
+function loadImage(file) {
     return new Promise((resolve, reject) => {
         const img = new Image();
         const url = URL.createObjectURL(file);
-        img.onload = () => {
-            URL.revokeObjectURL(url);
-            const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
-            const w = Math.round(img.width  * scale);
-            const h = Math.round(img.height * scale);
-            const canvas = document.createElement('canvas');
-            canvas.width = w; canvas.height = h;
-            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            const dataUrl = canvas.toDataURL('image/jpeg', quality);
-            resolve(dataUrl.split(',')[1]); // strip data:...;base64,
-        };
-        img.onerror = reject;
+        img.onload  = () => { URL.revokeObjectURL(url); resolve(img); };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(); };
         img.src = url;
     });
+}
+
+/**
+ * Combine up to 3 images into a single side-by-side canvas and return base64 JPEG.
+ * Total width ≤ 900px, each tile is square-cropped to keep the collage tidy.
+ * Final payload stays ≈ 100-200 KB regardless of how many photos are used.
+ */
+async function buildCollageForAI(files, tileSize = 300, quality = 0.75) {
+    const imgs = await Promise.all(files.map(f => loadImage(f)));
+    const n = imgs.length;
+    const canvas = document.createElement('canvas');
+    canvas.width  = tileSize * n;
+    canvas.height = tileSize;
+    const ctx = canvas.getContext('2d');
+
+    imgs.forEach((img, i) => {
+        // Centre-crop to square
+        const side = Math.min(img.width, img.height);
+        const sx   = (img.width  - side) / 2;
+        const sy   = (img.height - side) / 2;
+        ctx.drawImage(img, sx, sy, side, side, i * tileSize, 0, tileSize, tileSize);
+    });
+
+    return canvas.toDataURL('image/jpeg', quality).split(',')[1];
 }
 
 /* ─── AI: generar título + marca + descripción desde fotos ─── */
@@ -722,9 +736,10 @@ async function generateFromImagesAI() {
         const formData = new FormData();
         formData.append('_token', csrfToken);
 
-        // Send only the first image, aggressively downsized via canvas to keep payload small
-        const smallB64 = await resizeImageForAI(selectedImages[0].file, 600, 0.72);
-        formData.append('image_base64_0', smallB64);
+        // Combine up to 3 photos into one collage image — Gemini sees all views, payload stays small
+        const photoFiles = selectedImages.slice(0, 3).map(s => s.file);
+        const collageB64 = await buildCollageForAI(photoFiles);
+        formData.append('image_base64_0', collageB64);
         formData.append('image_mime_0',   'image/jpeg');
 
         const res  = await fetch('{{ route("productos.generate-from-images") }}', { method: 'POST', body: formData });
