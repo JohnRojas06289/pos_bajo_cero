@@ -113,6 +113,8 @@ class ProductoController extends Controller
                 return redirect()->back()->withErrors(['codigo' => 'El código del producto ya existe.'])->withInput();
             }
 
+            // Pass extra image files to service (outside validated())
+            $data['imagenes_files'] = array_filter($request->file('imagenes_extra', []));
             $this->productoService->crearProducto($data);
             ActivityLogService::log('Creación de producto', 'Productos', $data);
             return redirect()->route('productos.index')->with('success', 'Producto registrado');
@@ -254,7 +256,9 @@ class ProductoController extends Controller
                 'post_data' => $request->except(['img_path']),
             ]);
 
-            $this->productoService->editarProducto($request->validated(), $producto);
+            $editData = $request->validated();
+            $editData['imagenes_nuevas_files'] = array_filter($request->file('imagenes_nuevas', []));
+            $this->productoService->editarProducto($editData, $producto);
             ActivityLogService::log('Edición de producto', 'Productos', $request->validated());
             return redirect()->route('productos.index')->with('success', 'Producto editado');
         } catch (Throwable $e) {
@@ -388,7 +392,39 @@ class ProductoController extends Controller
     }
 
     /**
-     * Generate AI description for a product (single or from form data)
+     * Remove a single image from a product (AJAX)
+     */
+    public function removeImagen(Request $request, Producto $producto): JsonResponse
+    {
+        $path = $request->input('path');
+        if (empty($path)) {
+            return response()->json(['error' => 'Path requerido.'], 422);
+        }
+
+        $disk = config('filesystems.disks.cloudinary.cloud_name') ? 'cloudinary' : config('filesystems.default');
+
+        if ($path === $producto->img_path) {
+            // Removing main image — promote first additional as new main
+            $imagenes = array_values($producto->imagenes ?? []);
+            $newMain  = array_shift($imagenes);
+            try { \Illuminate\Support\Facades\Storage::disk($disk)->delete($path); } catch (\Exception $e) {}
+            $producto->update(['img_path' => $newMain, 'imagenes' => !empty($imagenes) ? $imagenes : null]);
+        } else {
+            // Removing from additional array
+            $imagenes = array_values(array_filter($producto->imagenes ?? [], fn($p) => $p !== $path));
+            try { \Illuminate\Support\Facades\Storage::disk($disk)->delete($path); } catch (\Exception $e) {}
+            $producto->update(['imagenes' => !empty($imagenes) ? $imagenes : null]);
+        }
+
+        $fresh = $producto->fresh();
+        return response()->json([
+            'success'   => true,
+            'remaining' => count($fresh->todas_imagenes_urls),
+        ]);
+    }
+
+    /**
+     * Generate AI description — supports vision (base64 image) and text-only mode
      */
     public function generateDescription(Request $request): JsonResponse
     {
@@ -404,13 +440,11 @@ class ProductoController extends Controller
         }
         RateLimiter::hit($key, 3600);
 
-        // Load from product ID or use provided form data
+        // Gather product context
         if ($request->filled('producto_id')) {
             $producto = Producto::with(['categoria.caracteristica', 'marca.caracteristica'])->find($request->input('producto_id'));
-            if (!$producto) {
-                return response()->json(['error' => 'Producto no encontrado.'], 404);
-            }
-            $nombre   = $producto->nombre;
+            if (!$producto) return response()->json(['error' => 'Producto no encontrado.'], 404);
+            $nombre    = $producto->nombre;
             $categoria = $producto->categoria->caracteristica->nombre ?? null;
             $marca     = $producto->marca->caracteristica->nombre ?? null;
             $color     = $producto->color;
@@ -425,28 +459,65 @@ class ProductoController extends Controller
             $genero    = ($request->input('genero') && $request->input('genero') !== 'Unisex') ? $request->input('genero') : null;
         }
 
-        if (empty($nombre)) {
-            return response()->json(['error' => 'El nombre del producto es requerido.'], 422);
+        // If image_url sent (edit page with existing image), fetch and convert to base64
+        if (!$request->filled('image_base64') && $request->filled('image_url')) {
+            try {
+                $imgResponse = Http::timeout(10)->get($request->input('image_url'));
+                if ($imgResponse->ok()) {
+                    $request->merge([
+                        'image_base64' => base64_encode($imgResponse->body()),
+                        'image_mime'   => $imgResponse->header('Content-Type') ?: 'image/jpeg',
+                    ]);
+                }
+            } catch (Throwable $e) {
+                Log::warning('Could not fetch image_url for AI description', ['url' => $request->input('image_url'), 'error' => $e->getMessage()]);
+            }
         }
 
-        $prompt = "Genera una descripción de producto atractiva y concisa para una tienda de ropa en Colombia. "
-            . "Producto: '{$nombre}'."
-            . ($categoria ? " Categoría: {$categoria}." : "")
-            . ($marca ? " Marca: {$marca}." : "")
-            . ($color ? " Color: {$color}." : "")
-            . ($material ? " Material: {$material}." : "")
-            . ($genero ? " Para: {$genero}." : "")
-            . " Escribe exactamente 2-3 oraciones, sin título, sin emojis, en español colombiano. "
-            . "Resalta beneficios, estilo y calidad.";
+        $hasImage  = $request->filled('image_base64');
+        $hasName   = !empty($nombre);
+
+        // Must have at least name OR image
+        if (!$hasName && !$hasImage) {
+            return response()->json(['error' => 'Ingresa el nombre del producto o sube una imagen primero.'], 422);
+        }
+
+        // Build prompt
+        if ($hasImage && !$hasName) {
+            $prompt = "Estás viendo la imagen de un producto de una tienda de ropa en Colombia. "
+                . "Describe el producto: qué es, color, estilo, materiales visibles y a quién va dirigido. "
+                . "Escribe 2-3 oraciones atractivas, sin título, sin emojis, en español colombiano.";
+        } else {
+            $prompt = "Genera una descripción de producto atractiva para una tienda de ropa en Colombia. "
+                . "Producto: '{$nombre}'."
+                . ($categoria ? " Categoría: {$categoria}." : "")
+                . ($marca     ? " Marca: {$marca}."          : "")
+                . ($color     ? " Color: {$color}."          : "")
+                . ($material  ? " Material: {$material}."    : "")
+                . ($genero    ? " Para: {$genero}."          : "")
+                . ($hasImage  ? " Usa también la imagen adjunta para dar más detalle." : "")
+                . " Escribe 2-3 oraciones, sin título, sin emojis, en español colombiano. Resalta estilo, calidad y beneficios.";
+        }
+
+        // Build parts array (text + optional image)
+        $parts = [['text' => $prompt]];
+        if ($hasImage) {
+            $parts[] = [
+                'inline_data' => [
+                    'mime_type' => $request->input('image_mime', 'image/jpeg'),
+                    'data'      => $request->input('image_base64'),
+                ],
+            ];
+        }
 
         try {
-            $response = Http::timeout(15)
+            $response = Http::timeout(20)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post(
                     "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
                     [
-                        'contents' => [['parts' => [['text' => $prompt]]]],
-                        'generationConfig' => ['temperature' => 0.8, 'maxOutputTokens' => 150],
+                        'contents'         => [['parts' => $parts]],
+                        'generationConfig' => ['temperature' => 0.8, 'maxOutputTokens' => 200],
                     ]
                 );
 

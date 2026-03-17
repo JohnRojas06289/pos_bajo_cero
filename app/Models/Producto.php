@@ -19,6 +19,7 @@ class Producto extends Model
         'nombre',
         'descripcion',
         'img_path',
+        'imagenes',
         'estado',
         'precio',
         'marca_id',
@@ -27,6 +28,10 @@ class Producto extends Model
         'color',
         'material',
         'genero'
+    ];
+
+    protected $casts = [
+        'imagenes' => 'array',
     ];
 
     public function compras(): BelongsToMany
@@ -100,34 +105,38 @@ class Producto extends Model
 
     public function getImageUrlAttribute(): string
     {
-        if (empty($this->img_path)) {
-            return '';
-        }
+        if (empty($this->img_path)) return '';
+        return $this->resolveImageUrl($this->img_path);
+    }
 
-        // If path is already a URL, return it
-        if (str_starts_with($this->img_path, 'http')) {
-            return $this->img_path;
+    /**
+     * Returns all image URLs: main + additional images
+     */
+    public function getTodasImagenesUrlsAttribute(): array
+    {
+        $urls = [];
+        if (!empty($this->img_path)) {
+            $urls[] = ['path' => $this->img_path, 'url' => $this->resolveImageUrl($this->img_path), 'main' => true];
         }
+        foreach ($this->imagenes ?? [] as $path) {
+            if (!empty($path)) {
+                $urls[] = ['path' => $path, 'url' => $this->resolveImageUrl($path), 'main' => false];
+            }
+        }
+        return $urls;
+    }
 
-        // Check if using Cloudinary (Force check due to Vercel/Latency issues)
+    public function resolveImageUrl(string $path): string
+    {
+        if (str_starts_with($path, 'http')) return $path;
+
         $cloudName = config('filesystems.disks.cloudinary.cloud_name');
-        
-        // Fallback: If config is missing but env is present (should be handled by config, but safe check)
         if (!$cloudName) {
-             $cloudName = parse_url(env('CLOUDINARY_URL'), PHP_URL_HOST);
+            $cloudName = parse_url(env('CLOUDINARY_URL'), PHP_URL_HOST);
         }
-        
-        // If we have a cloud name, we assume the image is hosted there if it's not a full URL already
         if ($cloudName) {
-            return "https://res.cloudinary.com/{$cloudName}/image/upload/{$this->img_path}";
+            return "https://res.cloudinary.com/{$cloudName}/image/upload/{$path}";
         }
-
-        // Fallback to Storage::url for local files
-        if (config('filesystems.default') === 'local' || config('filesystems.default') === 'public') {
-             return \Illuminate\Support\Facades\Storage::url($this->img_path);
-        }
-
-        // Fallback to Storage::url
-        return \Illuminate\Support\Facades\Storage::url($this->img_path);
+        return \Illuminate\Support\Facades\Storage::url($path);
     }
 }

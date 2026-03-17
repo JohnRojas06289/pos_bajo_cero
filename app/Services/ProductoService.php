@@ -13,13 +13,32 @@ class ProductoService
      */
     public function crearProducto(array $data): Producto
     {
+        // Main image
+        $mainPath = null;
+        $extraFiles = $data['imagenes_files'] ?? [];
+
+        // If no dedicated img_path but there are extra files, use first as main
+        if (isset($data['img_path']) && $data['img_path']) {
+            $mainPath = $this->handleUploadImage($data['img_path']);
+        } elseif (!empty($extraFiles)) {
+            $first = array_shift($extraFiles);
+            if ($first) $mainPath = $this->handleUploadImage($first);
+        }
+
+        // Additional images
+        $imagenesPaths = [];
+        foreach ($extraFiles as $file) {
+            if ($file && method_exists($file, 'isValid') && $file->isValid()) {
+                $imagenesPaths[] = $this->handleUploadImage($file);
+            }
+        }
+
         $producto = Producto::create([
             'codigo'           => $data['codigo'] ?? null,
             'nombre'           => $data['nombre'],
             'descripcion'      => $data['descripcion'] ?? null,
-            'img_path'         => isset($data['img_path']) && $data['img_path']
-                ? $this->handleUploadImage($data['img_path'])
-                : null,
+            'img_path'         => $mainPath,
+            'imagenes'         => !empty($imagenesPaths) ? $imagenesPaths : null,
             'marca_id'         => $data['marca_id'] ?? null,
             'categoria_id'     => $data['categoria_id'] ?? null,
             'presentacione_id' => $data['presentacione_id'] ?? null,
@@ -38,13 +57,26 @@ class ProductoService
      */
     public function editarProducto(array $data, Producto $producto): Producto
     {
+        // Main image: only replace if new one provided
+        $mainPath = $producto->img_path;
+        if (isset($data['img_path']) && $data['img_path']) {
+            $mainPath = $this->handleUploadImage($data['img_path'], $producto->img_path);
+        }
+
+        // Additional new images (appended to existing)
+        $imagenes = $producto->imagenes ?? [];
+        foreach ($data['imagenes_nuevas_files'] ?? [] as $file) {
+            if ($file && method_exists($file, 'isValid') && $file->isValid()) {
+                $imagenes[] = $this->handleUploadImage($file);
+            }
+        }
+
         $producto->update([
             'codigo'           => $data['codigo'],
             'nombre'           => $data['nombre'],
             'descripcion'      => $data['descripcion'] ?? null,
-            'img_path'         => isset($data['img_path']) && $data['img_path']
-                ? $this->handleUploadImage($data['img_path'], $producto->img_path)
-                : $producto->img_path,
+            'img_path'         => $mainPath,
+            'imagenes'         => !empty($imagenes) ? array_values($imagenes) : null,
             'marca_id'         => $data['marca_id'] ?? null,
             'categoria_id'     => $data['categoria_id'] ?? null,
             'presentacione_id' => $data['presentacione_id'] ?? null,

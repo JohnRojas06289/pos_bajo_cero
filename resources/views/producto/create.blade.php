@@ -65,24 +65,48 @@
 .btn-ai-gen:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
 .btn-ai-gen:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-/* Drop zone */
-.drop-zone {
-    border: 2px dashed var(--border-color, #d1d5db);
-    border-radius: 10px;
-    padding: 2.25rem 1rem;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.18s;
-    background: var(--hover-bg, #f9fafb);
-    position: relative;
+/* Image gallery */
+.img-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
 }
-.drop-zone:hover, .drop-zone.dragover { border-color: #2563eb; background: #eff6ff; }
-.drop-zone.has-image { border-style: solid; border-color: #10b981; padding: 0.5rem; background: transparent; }
-.drop-zone img { max-height: 220px; border-radius: 8px; display: block; margin: 0 auto; }
-.drop-zone-hint { pointer-events: none; }
-.drop-zone-hint i { font-size: 2rem; color: var(--text-muted, #9ca3af); margin-bottom: 0.5rem; display: block; }
-.drop-zone-hint p { font-size: 0.85rem; color: var(--text-muted, #6b7280); margin: 0 0 0.25rem; }
-.drop-zone-hint small { font-size: 0.75rem; color: var(--text-muted, #9ca3af); }
+.img-slot {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px dashed var(--border-color, #d1d5db);
+    background: var(--hover-bg, #f9fafb);
+    cursor: pointer;
+    transition: border-color 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.img-slot:hover { border-color: #2563eb; }
+.img-slot.filled { border-style: solid; border-color: #10b981; cursor: default; }
+.img-slot.add-btn { border-style: dashed; cursor: pointer; flex-direction: column; gap: 0.25rem; }
+.img-slot.add-btn i { font-size: 1.25rem; color: var(--text-muted, #9ca3af); }
+.img-slot.add-btn span { font-size: 0.68rem; color: var(--text-muted, #9ca3af); font-weight: 600; }
+.img-slot img { width: 100%; height: 100%; object-fit: cover; }
+.img-slot .slot-remove {
+    position: absolute; top: 4px; right: 4px;
+    width: 22px; height: 22px;
+    border-radius: 50%; border: none;
+    background: rgba(231,76,60,0.85); color: #fff;
+    font-size: 0.75rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+}
+.img-slot .slot-remove:hover { background: #c0392b; }
+.img-slot .slot-main-badge {
+    position: absolute; bottom: 4px; left: 4px;
+    background: rgba(16,185,129,0.9); color: #fff;
+    font-size: 0.6rem; font-weight: 700;
+    padding: 2px 6px; border-radius: 4px;
+}
 
 /* Gender radio pills */
 .gender-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; }
@@ -336,27 +360,35 @@
 
                 <div class="sticky-save">
 
-                    {{-- Imagen --}}
+                    {{-- Imágenes --}}
                     <div class="create-section">
-                        <div class="section-title"><i class="fas fa-image"></i> Imagen del producto</div>
-
-                        <div class="drop-zone" id="dropZone" onclick="document.getElementById('img_path').click()">
-                            <div class="drop-zone-hint" id="dropHint">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <p>Arrastra o haz clic para subir</p>
-                                <small>PNG, JPG, WEBP — Máx. 5 MB</small>
-                            </div>
-                            <img id="imgPreview" src="" alt="" style="display:none;">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="section-title mb-0"><i class="fas fa-images"></i> Fotos del producto</div>
+                            <small class="text-muted" style="font-size:0.72rem;">Máx. 6 fotos</small>
                         </div>
 
-                        <input type="file" name="img_path" id="img_path" class="d-none"
-                               accept="image/png,image/jpeg,image/jpg,image/webp,image/avif,image/gif">
-                        @error('img_path')<small class="text-danger">{{ $message }}</small>@enderror
+                        {{-- Gallery grid (populated by JS) --}}
+                        <div class="img-gallery" id="imgGallery"></div>
 
-                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2 w-100"
-                                id="btnRemoveImg" style="display:none;" onclick="removeImage()">
-                            <i class="fas fa-trash-alt me-1"></i> Quitar imagen
-                        </button>
+                        {{-- Hidden file inputs (populated by JS before submit) --}}
+                        <div id="hiddenImgInputs" style="display:none;"></div>
+
+                        {{-- Drag overlay --}}
+                        <div id="dropOverlay" style="display:none; border:2px dashed #2563eb; border-radius:10px; padding:1.5rem; text-align:center; background:#eff6ff; cursor:pointer;" onclick="document.getElementById('imgPickerMain').click()">
+                            <i class="fas fa-cloud-upload-alt fa-2x" style="color:#2563eb;"></i>
+                            <p class="mb-0 mt-1" style="font-size:0.85rem;color:#2563eb;font-weight:600;">Suelta las imágenes aquí</p>
+                        </div>
+
+                        <small class="text-muted d-block mt-1" style="font-size:0.72rem;">
+                            <i class="fas fa-info-circle me-1"></i>La primera foto será la imagen principal. Puedes agregar hasta 6 fotos.
+                        </small>
+
+                        {{-- Invisible file picker --}}
+                        <input type="file" id="imgPickerMain" class="d-none"
+                               accept="image/png,image/jpeg,image/jpg,image/webp,image/avif,image/gif"
+                               multiple onchange="handleFilePicker(this.files)">
+
+                        @error('img_path')<small class="text-danger">{{ $message }}</small>@enderror
                     </div>
 
                     {{-- Clasificación --}}
@@ -460,71 +492,125 @@ function toggleModoTallas(checkbox) {
     }
 }
 
-/* ─── Image drop zone ─────────────────────────────── */
-const dropZone   = document.getElementById('dropZone');
-const dropHint   = document.getElementById('dropHint');
-const imgPreview = document.getElementById('imgPreview');
-const imgInput   = document.getElementById('img_path');
-const removeBtn  = document.getElementById('btnRemoveImg');
-const submitBtn  = document.getElementById('submitBtn');
+/* ─── Multi-image gallery ─────────────────────────── */
+const MAX_IMAGES    = 6;
+let selectedImages  = []; // [{ file: File, previewUrl: string }]
 
-dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    if (e.dataTransfer.files.length) handleImageFile(e.dataTransfer.files[0]);
-});
+const gallery        = document.getElementById('imgGallery');
+const imgPickerMain  = document.getElementById('imgPickerMain');
+const submitBtn      = document.getElementById('submitBtn');
 
-imgInput.addEventListener('change', function () {
-    if (this.files && this.files[0]) handleImageFile(this.files[0]);
-});
+function renderGallery() {
+    gallery.innerHTML = '';
 
-async function handleImageFile(file) {
-    let processedFile = file;
+    selectedImages.forEach((img, i) => {
+        const slot = document.createElement('div');
+        slot.className = 'img-slot filled';
+        slot.innerHTML =
+            `<img src="${img.previewUrl}" alt="foto ${i + 1}">` +
+            (i === 0 ? '<span class="slot-main-badge">Principal</span>' : '') +
+            `<button type="button" class="slot-remove" onclick="removeImageFromGallery(${i})" title="Eliminar">` +
+            `<i class="fas fa-times"></i></button>`;
+        gallery.appendChild(slot);
+    });
 
-    if (file.size > 1024 * 1024) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Comprimiendo...';
-        try {
-            const compressed = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 1280, useWebWorker: true });
-            processedFile = new File([compressed], file.name, { type: file.type });
-            const dt = new DataTransfer();
-            dt.items.add(processedFile);
-            imgInput.files = dt.files;
-        } catch (e) {
-            console.error('Compression error:', e);
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Guardar Producto';
-        }
+    if (selectedImages.length < MAX_IMAGES) {
+        const addSlot = document.createElement('div');
+        addSlot.className = 'img-slot add-btn';
+        addSlot.innerHTML = '<i class="fas fa-plus"></i><span>Añadir foto</span>';
+        addSlot.onclick = () => imgPickerMain.click();
+        gallery.appendChild(addSlot);
+    }
+}
+
+async function compressIfNeeded(file) {
+    if (file.size <= 1024 * 1024) return file;
+    try {
+        const compressed = await imageCompression(file, { maxSizeMB: 0.7, maxWidthOrHeight: 1280, useWebWorker: true });
+        return new File([compressed], file.name, { type: file.type });
+    } catch (e) { return file; }
+}
+
+async function handleFilePicker(files) {
+    const remaining = MAX_IMAGES - selectedImages.length;
+    const toProcess = Array.from(files).slice(0, remaining);
+    if (!toProcess.length) return;
+
+    submitBtn.disabled   = true;
+    submitBtn.innerHTML  = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+
+    for (const file of toProcess) {
+        const processed  = await compressIfNeeded(file);
+        const previewUrl = URL.createObjectURL(processed);
+        selectedImages.push({ file: processed, previewUrl });
     }
 
-    const reader = new FileReader();
-    reader.onload = e => {
-        imgPreview.src        = e.target.result;
-        imgPreview.style.display = 'block';
-        dropHint.style.display   = 'none';
-        dropZone.classList.add('has-image');
-        removeBtn.style.display  = '';
-    };
-    reader.readAsDataURL(processedFile);
+    imgPickerMain.value = ''; // allow re-selecting same file
+    renderGallery();
+
+    submitBtn.disabled  = false;
+    submitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Guardar Producto';
 }
 
-function removeImage() {
-    imgInput.value           = '';
-    imgPreview.src           = '';
-    imgPreview.style.display = 'none';
-    dropHint.style.display   = '';
-    dropZone.classList.remove('has-image');
-    removeBtn.style.display  = 'none';
+function removeImageFromGallery(index) {
+    URL.revokeObjectURL(selectedImages[index].previewUrl);
+    selectedImages.splice(index, 1);
+    renderGallery();
 }
+
+// Drag & drop on gallery area
+gallery.addEventListener('dragover', e => {
+    e.preventDefault();
+    gallery.style.outline = '2px dashed #2563eb';
+    gallery.style.borderRadius = '8px';
+});
+gallery.addEventListener('dragleave', () => { gallery.style.outline = ''; });
+gallery.addEventListener('drop', e => {
+    e.preventDefault();
+    gallery.style.outline = '';
+    if (e.dataTransfer.files.length) handleFilePicker(e.dataTransfer.files);
+});
+
+// Pre-submit: populate hidden file inputs using DataTransfer
+document.getElementById('createForm').addEventListener('submit', function () {
+    const container = document.getElementById('hiddenImgInputs');
+    container.innerHTML = ''; // clear old
+
+    if (selectedImages.length === 0) return;
+
+    // Main image → img_path
+    const mainDt = new DataTransfer();
+    mainDt.items.add(selectedImages[0].file);
+    const mainInput = document.createElement('input');
+    mainInput.type  = 'file';
+    mainInput.name  = 'img_path';
+    mainInput.style.display = 'none';
+    container.appendChild(mainInput);
+    mainInput.files = mainDt.files;
+
+    // Extra images → imagenes_extra[]
+    for (let i = 1; i < selectedImages.length; i++) {
+        const dt    = new DataTransfer();
+        dt.items.add(selectedImages[i].file);
+        const input = document.createElement('input');
+        input.type  = 'file';
+        input.name  = 'imagenes_extra[]';
+        input.style.display = 'none';
+        container.appendChild(input);
+        input.files = dt.files;
+    }
+});
+
+// Init
+renderGallery();
 
 /* ─── AI Description generator ───────────────────── */
 async function generateDescriptionAI() {
-    const nombre = document.getElementById('nombre').value.trim();
-    if (!nombre) {
-        alert('Por favor ingresa el nombre del producto primero.');
+    const nombre    = document.getElementById('nombre').value.trim();
+    const hasImage  = selectedImages.length > 0;
+
+    if (!nombre && !hasImage) {
+        alert('Ingresa el nombre del producto o sube una foto para que la IA pueda generar la descripción.');
         document.getElementById('nombre').focus();
         return;
     }
@@ -533,8 +619,8 @@ async function generateDescriptionAI() {
     const aiIcon  = document.getElementById('aiIcon');
     const aiLabel = document.getElementById('aiLabel');
 
-    btn.disabled       = true;
-    aiIcon.className   = 'fas fa-spinner fa-spin';
+    btn.disabled        = true;
+    aiIcon.className    = 'fas fa-spinner fa-spin';
     aiLabel.textContent = 'Generando...';
 
     try {
@@ -548,10 +634,23 @@ async function generateDescriptionAI() {
         formData.append('material', document.getElementById('materialInput')?.value || '');
         formData.append('genero',   document.querySelector('input[name="genero"]:checked')?.value || 'Unisex');
 
-        const catEl  = document.getElementById('categoria_id');
+        const catEl   = document.getElementById('categoria_id');
         const marcaEl = document.getElementById('marca_id');
-        if (catEl  && catEl.value)  formData.append('categoria', catEl.options[catEl.selectedIndex]?.text   || '');
-        if (marcaEl && marcaEl.value) formData.append('marca',  marcaEl.options[marcaEl.selectedIndex]?.text || '');
+        if (catEl   && catEl.value)   formData.append('categoria', catEl.options[catEl.selectedIndex]?.text   || '');
+        if (marcaEl && marcaEl.value) formData.append('marca',     marcaEl.options[marcaEl.selectedIndex]?.text || '');
+
+        // Attach first image as base64 for vision analysis
+        if (hasImage) {
+            const imgFile = selectedImages[0].file;
+            const b64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload  = e => resolve(e.target.result.split(',')[1]); // strip data:...;base64,
+                reader.onerror = reject;
+                reader.readAsDataURL(imgFile);
+            });
+            formData.append('image_base64', b64);
+            formData.append('image_mime',   imgFile.type || 'image/jpeg');
+        }
 
         const res  = await fetch('{{ route("productos.generate-description") }}', { method: 'POST', body: formData });
         const data = await res.json();
@@ -563,9 +662,10 @@ async function generateDescriptionAI() {
         }
     } catch (e) {
         alert('Error de conexión al generar descripción.');
+        console.error(e);
     } finally {
-        btn.disabled       = false;
-        aiIcon.className   = 'fas fa-wand-magic-sparkles';
+        btn.disabled        = false;
+        aiIcon.className    = 'fas fa-wand-magic-sparkles';
         aiLabel.textContent = 'Generar con IA';
     }
 }

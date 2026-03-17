@@ -358,7 +358,7 @@
             });
         }
 
-        // ── Sidebar: cerrar en móvil al hacer click en enlace ──
+        // ── Sidebar: cerrar en móvil al hacer click en enlace o en el overlay ──
         const navLinks = document.querySelectorAll('#layoutSidenav_nav .nav-link:not([data-bs-toggle])');
         navLinks.forEach(link => {
             link.addEventListener('click', function () {
@@ -367,6 +367,16 @@
                 }
             });
         });
+
+        // Cerrar sidebar al tocar el overlay (área oscura) en móvil
+        const sidenavContent = document.getElementById('layoutSidenav_content');
+        if (sidenavContent) {
+            sidenavContent.addEventListener('click', function () {
+                if (window.innerWidth < 992 && document.body.classList.contains('sb-sidenav-toggled')) {
+                    document.body.classList.remove('sb-sidenav-toggled');
+                }
+            });
+        }
 
         // ── Counter animation for KPI values ──
         function animateEl(el, target, prefix, suffix) {

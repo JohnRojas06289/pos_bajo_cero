@@ -132,8 +132,41 @@ h1, h2, h3, h4, h5, h6 {
     transition: var(--theme-transition);
 }
 
+/* Override hardcoded 225px from styles.css to match --sidebar-w (260px) */
+#layoutSidenav #layoutSidenav_nav {
+    flex-basis: var(--sidebar-w);
+    transform: translateX(calc(-1 * var(--sidebar-w)));
+}
+
 .sb-nav-fixed #layoutSidenav #layoutSidenav_nav {
     width: var(--sidebar-w);
+}
+
+/* Desktop: content offset = sidebar width */
+.sb-nav-fixed #layoutSidenav #layoutSidenav_content {
+    padding-left: var(--sidebar-w);
+}
+
+/* Desktop: sidebar visible by default */
+@media (min-width: 992px) {
+    #layoutSidenav #layoutSidenav_nav {
+        transform: translateX(0);
+    }
+    #layoutSidenav #layoutSidenav_content {
+        margin-left: 0;
+    }
+    /* Toggled on desktop: collapse sidebar completely */
+    .sb-sidenav-toggled #layoutSidenav #layoutSidenav_content {
+        margin-left: calc(-1 * var(--sidebar-w));
+    }
+    .sb-nav-fixed.sb-sidenav-toggled #layoutSidenav #layoutSidenav_nav {
+        width: 0 !important;
+        transform: translateX(calc(-1 * var(--sidebar-w))) !important;
+    }
+    .sb-nav-fixed.sb-sidenav-toggled #layoutSidenav #layoutSidenav_content {
+        padding-left: 0 !important;
+        margin-left: 0 !important;
+    }
 }
 
 main {
@@ -1024,8 +1057,28 @@ textarea.form-control { height: auto; }
    20. RESPONSIVE
    ---------------------------------------------------------------- */
 @media (max-width: 991.98px) {
+    /* Mobile: sidebar hidden by default — use correct 260px offset */
+    #layoutSidenav #layoutSidenav_nav {
+        transform: translateX(calc(-1 * var(--sidebar-w))) !important;
+        position: fixed;
+        top: var(--topnav-h, 60px);
+        left: 0;
+        height: calc(100vh - var(--topnav-h, 60px));
+        z-index: 1038;
+        width: var(--sidebar-w) !important;
+    }
+
+    /* Mobile: sidebar shown when toggled */
     .sb-sidenav-toggled #layoutSidenav #layoutSidenav_nav {
-        width: var(--sidebar-w);
+        transform: translateX(0) !important;
+        width: var(--sidebar-w) !important;
+    }
+
+    /* Mobile: content takes full width — no padding or margin from sidebar */
+    #layoutSidenav #layoutSidenav_content,
+    .sb-nav-fixed #layoutSidenav #layoutSidenav_content {
+        padding-left: 0 !important;
+        margin-left: 0 !important;
     }
 }
 

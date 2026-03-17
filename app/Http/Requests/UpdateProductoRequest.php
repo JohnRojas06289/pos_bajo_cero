@@ -25,8 +25,10 @@ class UpdateProductoRequest extends FormRequest
         return [
             'codigo' => 'nullable|max:50', // Removed unique
             'nombre' => 'required|max:255', // Removed unique
-            'descripcion' => 'nullable|max:255',
+            'descripcion' => 'nullable|max:2000',
             'img_path' => 'nullable|image|mimes:png,jpg,jpeg,webp,avif,gif,svg,bmp',
+            'imagenes_nuevas' => 'nullable|array|max:5',
+            'imagenes_nuevas.*' => 'nullable|image|mimes:png,jpg,jpeg,webp,avif,gif,svg,bmp',
             'marca_id' => 'nullable', 
             'presentacione_id' => 'nullable', 
             'categoria_id' => 'nullable',
@@ -52,7 +54,7 @@ class UpdateProductoRequest extends FormRequest
             'nombre.required'       => 'El nombre del producto es obligatorio.',
             'nombre.max'            => 'El nombre no puede superar los 255 caracteres.',
             'codigo.max'            => 'El código no puede superar los 50 caracteres.',
-            'descripcion.max'       => 'La descripción no puede superar los 255 caracteres.',
+            'descripcion.max'       => 'La descripción no puede superar los 2000 caracteres.',
             'img_path.image'        => 'El archivo debe ser una imagen válida.',
             'img_path.mimes'        => 'La imagen debe ser de tipo: png, jpg, jpeg, webp, gif, svg o bmp.',
             'precio.numeric'        => 'El precio debe ser un número.',
