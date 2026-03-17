@@ -14,15 +14,20 @@ class ProductoService
     public function crearProducto(array $data): Producto
     {
         $producto = Producto::create([
-            'codigo' => $data['codigo'],
-            'nombre' => $data['nombre'],
-            'descripcion' => $data['descripcion'],
-            'img_path' => isset($data['img_path']) && $data['img_path']
+            'codigo'           => $data['codigo'] ?? null,
+            'nombre'           => $data['nombre'],
+            'descripcion'      => $data['descripcion'] ?? null,
+            'img_path'         => isset($data['img_path']) && $data['img_path']
                 ? $this->handleUploadImage($data['img_path'])
                 : null,
-            'marca_id' => $data['marca_id'],
-            'categoria_id' => $data['categoria_id'],
-            'presentacione_id' => $data['presentacione_id'],
+            'marca_id'         => $data['marca_id'] ?? null,
+            'categoria_id'     => $data['categoria_id'] ?? null,
+            'presentacione_id' => $data['presentacione_id'] ?? null,
+            'color'            => $data['color'] ?? null,
+            'material'         => $data['material'] ?? null,
+            'genero'           => $data['genero'] ?? 'Unisex',
+            'precio'           => $data['precio'] ?? null,
+            'estado'           => 0,
         ]);
 
         return $producto;
@@ -33,17 +38,21 @@ class ProductoService
      */
     public function editarProducto(array $data, Producto $producto): Producto
     {
-
         $producto->update([
-            'codigo' => $data['codigo'],
-            'nombre' => $data['nombre'],
-            'descripcion' => $data['descripcion'],
-            'img_path' => isset($data['img_path']) && $data['img_path']
+            'codigo'           => $data['codigo'],
+            'nombre'           => $data['nombre'],
+            'descripcion'      => $data['descripcion'] ?? null,
+            'img_path'         => isset($data['img_path']) && $data['img_path']
                 ? $this->handleUploadImage($data['img_path'], $producto->img_path)
                 : $producto->img_path,
-            'marca_id' => $data['marca_id'],
-            'categoria_id' => $data['categoria_id'],
-            'presentacione_id' => $data['presentacione_id'],
+            'marca_id'         => $data['marca_id'] ?? null,
+            'categoria_id'     => $data['categoria_id'] ?? null,
+            'presentacione_id' => $data['presentacione_id'] ?? null,
+            'color'            => $data['color'] ?? null,
+            'material'         => $data['material'] ?? null,
+            'genero'           => $data['genero'] ?? 'Unisex',
+            'precio'           => $data['precio'] ?? null,
+            'estado'           => $data['estado'] ?? $producto->estado,
         ]);
 
         return $producto;

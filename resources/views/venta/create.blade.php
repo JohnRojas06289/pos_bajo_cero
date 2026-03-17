@@ -735,6 +735,53 @@ main { padding: 0 !important; }
     .pos-cart { flex: 0 0 42%; max-width: 320px; }
     .product-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
 }
+
+/* ── Barcode scanner mode ── */
+.scan-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+    margin-bottom: 0.5rem;
+}
+.scan-row .pos-search-wrap {
+    flex: 1;
+    margin-bottom: 0;
+    position: relative;
+}
+.scan-mode-btn {
+    height: 40px;
+    padding: 0 0.875rem;
+    border-radius: 8px;
+    border: 1.5px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.scan-mode-btn:hover { border-color: var(--accent); color: var(--accent); }
+.scan-mode-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.scan-feedback {
+    height: 14px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 0.15rem;
+    margin-top: -0.3rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-family: 'Inter', sans-serif;
+}
+.scan-feedback.show { opacity: 1; }
+.scan-feedback.ok  { color: #27ae60; }
+.scan-feedback.err { color: #e74c3c; }
 </style>
 @endpush
 
@@ -762,13 +809,21 @@ main { padding: 0 !important; }
 
         {{-- Top bar --}}
         <div class="pos-topbar">
-            {{-- Search --}}
-            <div class="pos-search-wrap">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="searchInput"
-                       placeholder="Buscar por nombre o código... (Atajo: /)"
-                       autocomplete="off" spellcheck="false">
+            {{-- Search + Scanner toggle --}}
+            <div class="scan-row">
+                <div class="pos-search-wrap">
+                    <i class="fas fa-search search-icon" id="searchModeIcon"></i>
+                    <input type="text" id="searchInput"
+                           placeholder="Buscar por nombre o código... (Atajo: /)"
+                           autocomplete="off" spellcheck="false">
+                </div>
+                <button type="button" class="scan-mode-btn" id="scanModeBtn"
+                        title="Activar modo escáner de código de barras">
+                    <i class="fas fa-barcode"></i>
+                    <span class="d-none d-md-inline">Escanear</span>
+                </button>
             </div>
+            <div class="scan-feedback" id="scanFeedback"></div>
             {{-- Category chips --}}
             <div class="pos-cats" id="catChips">
                 <button class="cat-chip active" data-cat="">
@@ -1349,8 +1404,9 @@ document.getElementById('btnPagar').addEventListener('click', function () {
 /* ══════════════════════════════════════
    EVENT LISTENERS
 ══════════════════════════════════════ */
-// Search with debounce
+// Search with debounce (disabled in scanner mode)
 document.getElementById('searchInput').addEventListener('input', function () {
+    if (scannerMode) return;
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
         searchQuery = this.value.trim();
@@ -1430,6 +1486,83 @@ document.addEventListener('keydown', function (e) {
     if (e.key === 'F10') { e.preventDefault(); setCash(10000); }
     if (e.key === 'F11') { e.preventDefault(); setCash(20000); }
     if (e.key === 'F12') { e.preventDefault(); setCash(50000); }
+});
+
+/* ══════════════════════════════════════
+   BARCODE SCANNER MODE
+══════════════════════════════════════ */
+let scannerMode   = false;
+const scanModeBtn   = document.getElementById('scanModeBtn');
+const scanFeedback  = document.getElementById('scanFeedback');
+const searchModeIcon = document.getElementById('searchModeIcon');
+const searchInputEl  = document.getElementById('searchInput');
+
+scanModeBtn.addEventListener('click', function () {
+    scannerMode = !scannerMode;
+    this.classList.toggle('active', scannerMode);
+
+    if (scannerMode) {
+        searchInputEl.placeholder = 'Escanea el código de barras aquí...';
+        searchInputEl.value       = '';
+        searchModeIcon.className  = 'fas fa-barcode search-icon';
+        searchQuery               = '';
+        renderProducts();
+        searchInputEl.focus();
+        showScanFeedback('Modo escáner activo — escanea el código', 'ok', 2500);
+    } else {
+        searchInputEl.placeholder = 'Buscar por nombre o código... (Atajo: /)';
+        searchModeIcon.className  = 'fas fa-search search-icon';
+        hideScanFeedback();
+    }
+});
+
+function showScanFeedback(msg, type, duration) {
+    scanFeedback.textContent = msg;
+    scanFeedback.className   = 'scan-feedback show ' + type;
+    if (duration > 0) setTimeout(hideScanFeedback, duration);
+}
+function hideScanFeedback() {
+    scanFeedback.className = 'scan-feedback';
+}
+
+// Handle barcode Enter in scanner mode
+searchInputEl.addEventListener('keydown', function (e) {
+    if (!scannerMode || e.key !== 'Enter') return;
+    e.preventDefault();
+
+    const code = this.value.trim();
+    this.value  = '';
+    searchQuery = '';
+    if (!code) return;
+
+    const product = allProducts.find(
+        p => p.codigo && p.codigo.toLowerCase() === code.toLowerCase()
+    );
+
+    if (!product) {
+        showScanFeedback('Código no encontrado: ' + code, 'err', 2200);
+        return;
+    }
+
+    const inCart  = cart.find(c => c.id == product.id)?.cantidad || 0;
+    if (product.stock > 0 && inCart >= product.stock) {
+        showScanFeedback(product.nombre + ' — Stock agotado en carrito', 'err', 2200);
+        return;
+    }
+    if (product.stock <= 0) {
+        showScanFeedback(product.nombre + ' — Sin stock disponible', 'err', 2200);
+        return;
+    }
+
+    addToCart(product.id);
+    showScanFeedback('+ ' + product.nombre, 'ok', 1800);
+
+    // Flash card if visible
+    const card = document.querySelector(`.product-card[data-product-id="${product.id}"]`);
+    if (card) {
+        card.classList.add('added');
+        setTimeout(() => card.classList.remove('added'), 600);
+    }
 });
 
 /* ══════════════════════════════════════

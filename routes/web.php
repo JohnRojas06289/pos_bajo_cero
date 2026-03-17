@@ -131,6 +131,9 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
     Route::resource('marcas', marcaController::class)->except('show');
     Route::get('productos/export', [ProductoController::class, 'export'])->name('productos.export');
     Route::post('productos/import', [ProductoController::class, 'import'])->name('productos.import');
+    Route::get('productos/template', [ProductoController::class, 'downloadTemplate'])->name('productos.template');
+    Route::post('productos/generate-description', [ProductoController::class, 'generateDescription'])->name('productos.generate-description');
+    Route::post('productos/generate-all-descriptions', [ProductoController::class, 'generateAllDescriptions'])->name('productos.generate-all-descriptions');
     Route::resource('productos', ProductoController::class)->except('show', 'destroy');
     Route::resource('clientes', clienteController::class)->except('show');
     Route::resource('proveedores', proveedorController::class)->except('show');

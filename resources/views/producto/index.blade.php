@@ -14,17 +14,28 @@
         <h1><i class="fas fa-box-open me-2"></i> Productos</h1>
         <div class="d-flex gap-2 align-items-center flex-wrap">
             @can('ver-producto')
-            <a href="{{route('productos.export')}}" class="btn btn-sm btn-ghost" style="border-color:rgba(255,255,255,0.3);color:white;">
-                <i class="fas fa-file-excel"></i>
+            <a href="{{route('productos.export')}}" class="btn btn-sm btn-ghost" style="border-color:rgba(255,255,255,0.3);color:white;" title="Exportar CSV">
+                <i class="fas fa-file-csv"></i>
                 <span class="d-none d-sm-inline">Exportar</span>
             </a>
             @endcan
             @can('crear-producto')
-            <button type="button" class="btn btn-sm btn-ghost" style="border-color:rgba(255,255,255,0.3);color:white;" data-bs-toggle="modal" data-bs-target="#importModal">
+            <button type="button" class="btn btn-sm btn-ghost" style="border-color:rgba(255,255,255,0.3);color:white;" data-bs-toggle="modal" data-bs-target="#importModal" title="Importar Excel o CSV">
                 <i class="fas fa-file-upload"></i>
                 <span class="d-none d-sm-inline">Importar</span>
             </button>
             @endcan
+            @if(config('services.gemini.api_key'))
+            @can('editar-producto')
+            <button type="button" class="btn btn-sm btn-ghost" id="btnGenAllDesc"
+                    style="border-color:rgba(255,255,255,0.3);color:white;"
+                    title="Generar descripciones con IA para productos sin descripción"
+                    onclick="generateAllDescriptions()">
+                <i class="fas fa-wand-magic-sparkles"></i>
+                <span class="d-none d-sm-inline">IA Descripciones</span>
+            </button>
+            @endcan
+            @endif
             @can('crear-producto')
             <a href="{{route('productos.create')}}" class="btn btn-sm" style="background:white;color:#2563eb;font-weight:700;border:none;">
                 <i class="fas fa-plus me-1"></i> Nuevo Producto
@@ -453,55 +464,135 @@
 
 <!-- Import Modal -->
 <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="importModalLabel">
-                    <i class="fas fa-file-upload"></i> Importar Productos desde Excel
+                    <i class="fas fa-file-upload me-2"></i>Importar Productos
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ route('productos.import') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
+
+                    {{-- Download template --}}
+                    <div class="d-flex align-items-center gap-3 p-3 rounded mb-3"
+                         style="background:#eff6ff;border:1px solid #bfdbfe;">
+                        <i class="fas fa-file-excel fa-2x" style="color:#1d6f42;flex-shrink:0;"></i>
+                        <div class="flex-1">
+                            <div class="fw-bold" style="font-size:0.9rem;">Plantilla Excel lista para llenar</div>
+                            <div class="text-muted" style="font-size:0.8rem;">
+                                Descarga la plantilla, llénala con tus productos y súbela aquí.
+                                Incluye columnas para foto (URL), color, material, género y más.
+                            </div>
+                        </div>
+                        <a href="{{ route('productos.template') }}" class="btn btn-success btn-sm flex-shrink-0" target="_blank">
+                            <i class="fas fa-download me-1"></i>Descargar plantilla
+                        </a>
+                    </div>
+
+                    {{-- File input --}}
                     <div class="mb-3">
-                        <label for="file" class="form-label">Archivo CSV:</label>
-                        <input type="file" class="form-control" id="file" name="file" accept=".csv,.txt" required>
-                        <small class="text-muted">Tamaño máximo: 2MB</small>
+                        <label for="file" class="form-label fw-semibold">Selecciona tu archivo:</label>
+                        <input type="file" class="form-control" id="file" name="file"
+                               accept=".csv,.txt,.xlsx,.xls" required>
+                        <small class="text-muted">Acepta: <strong>Excel (.xlsx, .xls)</strong> o CSV — Máx. 5MB</small>
                     </div>
-                    
-                    <div class="alert alert-info">
-                        <strong><i class="fas fa-info-circle"></i> Formato del archivo:</strong>
-                        <p class="mb-1">El archivo CSV debe tener las siguientes columnas en este orden:</p>
-                        <code>Código, Nombre, Descripción, Precio, Categoría, Marca, Presentación, Stock, Estado</code>
-                        
-                        <hr>
-                        <p class="mb-1"><strong>Notas importantes:</strong></p>
-                        <ul class="mb-0">
-                            <li><strong>Código:</strong> Opcional (se genera automáticamente si está vacío)</li>
-                            <li><strong>Nombre:</strong> Requerido</li>
-                            <li><strong>Precio:</strong> Requerido (número)</li>
-                            <li><strong>Categoría, Marca, Presentación:</strong> Deben existir en el sistema</li>
-                            <li><strong>Stock:</strong> Número (0 por defecto)</li>
-                            <li><strong>Estado:</strong> "Activo" o "Inactivo"</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="alert alert-success">
-                        <i class="fas fa-lightbulb"></i> <strong>Consejo:</strong> 
-                        Puedes usar el botón "Exportar a Excel" para descargar un archivo de ejemplo con el formato correcto.
+
+                    {{-- Column guide --}}
+                    <div class="alert alert-info mb-0" style="font-size:0.82rem;">
+                        <strong><i class="fas fa-table me-1"></i>Columnas de la plantilla:</strong>
+                        <div class="mt-2 row g-1">
+                            @foreach([
+                                ['Código','Opcional (auto si vacío)','secondary'],
+                                ['Nombre','Requerido','danger'],
+                                ['Descripción','Opcional','secondary'],
+                                ['Precio','Número sin símbolos','secondary'],
+                                ['Categoría','Nombre exacto del sistema','secondary'],
+                                ['Marca','Nombre exacto del sistema','secondary'],
+                                ['Presentación','Nombre de la talla','secondary'],
+                                ['Stock','Número entero','secondary'],
+                                ['Estado','Activo o Inactivo','secondary'],
+                                ['Color','Ej: Negro','secondary'],
+                                ['Material','Ej: Cuero','secondary'],
+                                ['Género','Hombre, Mujer o Unisex','secondary'],
+                                ['URL_Imagen','URL pública de la imagen','secondary'],
+                            ] as [$col, $desc, $badge])
+                            <div class="col-12 col-sm-6 d-flex align-items-baseline gap-1">
+                                <span class="badge bg-{{ $badge }} text-truncate" style="min-width:90px;font-size:0.72rem;">{{ $col }}</span>
+                                <small class="text-muted">{{ $desc }}</small>
+                            </div>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-upload"></i> Importar
+                        <i class="fas fa-upload me-1"></i>Importar
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+{{-- AI Descriptions progress toast --}}
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999;">
+    <div id="aiToast" class="toast align-items-center text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="aiToastBody">
+                <i class="fas fa-spinner fa-spin me-2"></i> Generando descripciones con IA...
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ─── AI: Generate all descriptions ─────────────────── */
+async function generateAllDescriptions() {
+    const btn = document.getElementById('btnGenAllDesc');
+    const toast = document.getElementById('aiToast');
+    const toastBody = document.getElementById('aiToastBody');
+
+    if (!confirm('¿Generar descripciones con IA para todos los productos que no tienen? (máx. 15 a la vez)')) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span class="d-none d-sm-inline">Generando...</span>';
+
+    toastBody.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generando descripciones con Gemini AI...';
+    const bsToast = new bootstrap.Toast(toast, { autohide: false });
+    bsToast.show();
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+                       || '{{ csrf_token() }}';
+
+        const res = await fetch('{{ route("productos.generate-all-descriptions") }}', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+        });
+        const data = await res.json();
+
+        if (data.error) {
+            toastBody.innerHTML = '<i class="fas fa-times-circle me-2 text-danger"></i>' + data.error;
+            setTimeout(() => bsToast.hide(), 4000);
+        } else {
+            toastBody.innerHTML = '<i class="fas fa-check-circle me-2 text-success"></i>' + data.message
+                + (data.remaining > 0 ? ` (${data.remaining} aún sin descripción)` : ' ¡Todos actualizados!');
+            setTimeout(() => { bsToast.hide(); if (data.count > 0) window.location.reload(); }, 3500);
+        }
+    } catch (e) {
+        toastBody.innerHTML = '<i class="fas fa-exclamation-triangle me-2 text-warning"></i>Error de conexión.';
+        setTimeout(() => bsToast.hide(), 3000);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> <span class="d-none d-sm-inline">IA Descripciones</span>';
+    }
+}
+</script>
 @endpush
 
 
