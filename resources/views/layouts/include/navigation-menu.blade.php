@@ -28,6 +28,20 @@
                 @can('ver-movimiento')
                 <x-nav.nav-link content='Movimientos' icon='fas fa-exchange-alt'  :href="route('movimientos.index')" />
                 @endcan
+
+                {{-- Reservas --}}
+                @php
+                    $pendientesReservas = 0;
+                    try { $pendientesReservas = \App\Models\Reserva::where('estado','pendiente')->count(); } catch(\Throwable $e) {}
+                @endphp
+                <a class="nav-link {{ request()->routeIs('reservas.*') ? 'active' : '' }}" href="{{ route('reservas.index') }}"
+                   style="position:relative;">
+                    <div class="sb-nav-link-icon"><i class="fas fa-calendar-check"></i></div>
+                    Reservas
+                    @if($pendientesReservas > 0)
+                        <span style="margin-left:auto;background:#f39c12;color:#fff;border-radius:999px;font-size:0.65rem;font-weight:700;padding:1px 7px;min-width:18px;text-align:center;">{{ $pendientesReservas }}</span>
+                    @endif
+                </a>
                 @endcanany
 
                 {{-- ══ INVENTARIO ══ --}}

@@ -5,13 +5,13 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="Jacket Store — Punto de Venta" />
-    <meta name="author" content="Jacket Store" />
+    <meta name="description" content="Bajo Cero — Punto de Venta" />
+    <meta name="author" content="Bajo Cero" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Panel') | Jacket Store</title>
+    <title>@yield('title', 'Panel') | Bajo Cero</title>
 
-    <!-- Favicon SVG chaqueta -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧥</text></svg>">
+    <!-- Favicon ❄️ -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❄️</text></svg>">
 
     <!-- Google Fonts: Inter + JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,8 +32,8 @@
     /* Custom scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(230,126,34,0.4); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #E67E22; }
+    ::-webkit-scrollbar-thumb { background: rgba(29,150,200,0.4); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #1D96C8; }
 
     /* Fade-in on main content */
     main > * { animation: fadeInUp 0.3s ease both; }
@@ -50,12 +50,12 @@
         width: 56px;
         height: 56px;
         border-radius: 50%;
-        background: #E67E22;
+        background: #1D96C8;
         border: none;
         color: #fff;
         font-size: 1.3rem;
         cursor: pointer;
-        box-shadow: 0 4px 20px rgba(230,126,34,0.5);
+        box-shadow: 0 4px 20px rgba(29,150,200,0.5);
         z-index: 1060;
         display: flex;
         align-items: center;
@@ -63,10 +63,10 @@
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         animation: pulse-ai 2.5s infinite;
     }
-    #aiChatBtn:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(230,126,34,0.65); animation: none; }
+    #aiChatBtn:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(29,150,200,0.65); animation: none; }
     @keyframes pulse-ai {
-        0%,100% { box-shadow: 0 4px 20px rgba(230,126,34,0.5); }
-        50%      { box-shadow: 0 4px 32px rgba(230,126,34,0.8); }
+        0%,100% { box-shadow: 0 4px 20px rgba(29,150,200,0.5); }
+        50%      { box-shadow: 0 4px 32px rgba(29,150,200,0.8); }
     }
 
     #aiChatPanel {
@@ -96,7 +96,7 @@
 
     .ai-header {
         padding: 0.875rem 1rem;
-        background: linear-gradient(135deg, #E67E22, #D35400);
+        background: linear-gradient(135deg, #1D96C8, #1275A0);
         color: #fff;
         display: flex;
         align-items: center;
@@ -140,7 +140,7 @@
     }
     .ai-bubble.user {
         align-self: flex-end;
-        background: #E67E22;
+        background: #1D96C8;
         color: #fff;
         border-bottom-right-radius: 3px;
     }
@@ -178,7 +178,7 @@
         transition: all 0.15s ease;
         white-space: nowrap;
     }
-    .ai-chip:hover { border-color: #E67E22; color: #D35400; background: rgba(230,126,34,0.07); }
+    .ai-chip:hover { border-color: #1D96C8; color: #1275A0; background: rgba(29,150,200,0.07); }
 
     .ai-input-row {
         display: flex;
@@ -199,12 +199,12 @@
         outline: none;
         transition: border-color 0.2s;
     }
-    .ai-input:focus { border-color: #E67E22; }
+    .ai-input:focus { border-color: #1D96C8; }
     .ai-send {
         width: 36px;
         height: 36px;
         border-radius: 50%;
-        background: #E67E22;
+        background: #1D96C8;
         border: none;
         color: #fff;
         cursor: pointer;
@@ -272,7 +272,7 @@
     <div id="aiChatPanel">
         <div class="ai-header">
             <div class="ai-header-title">
-                <span>🧥</span> Asistente Jacket Store
+                <span>🧥</span> Asistente Bajo Cero
             </div>
             <button class="ai-header-close" id="aiChatClose"><i class="fas fa-times"></i></button>
         </div>
@@ -283,11 +283,11 @@
         </div>
         <div class="ai-chips" id="aiChips">
             @if(auth()->user()?->can('ver-panel'))
-                <button class="ai-chip" data-msg="¿Cuánto vendimos hoy?">💰 ¿Cuánto vendimos hoy?</button>
+                <button class="ai-chip" data-msg="¿Cuánto vendimos hoy?">💰 Ventas hoy</button>
                 <button class="ai-chip" data-msg="¿Qué productos tienen stock bajo?">⚠️ Stock bajo</button>
-                <button class="ai-chip" data-msg="¿Cuál es la chaqueta más vendida esta semana?">🏆 Más vendida</button>
-                <button class="ai-chip" data-msg="Resumen del día">📊 Resumen del día</button>
-                <button class="ai-chip" data-msg="¿Qué ventas se hicieron esta semana?">📅 Ventas semana</button>
+                <button class="ai-chip" data-msg="¿Cuántas reservas están pendientes de atender?">📅 Reservas pendientes</button>
+                <button class="ai-chip" data-msg="Resumen del día">📊 Resumen</button>
+                <button class="ai-chip" data-msg="¿Cuál es el producto más vendido esta semana?">🏆 Más vendido</button>
             @else
                 <button class="ai-chip" data-msg="¿Cómo registro una venta?">🛒 Cómo vender</button>
                 <button class="ai-chip" data-msg="¿Cómo abro una caja?">🗄️ Abrir caja</button>

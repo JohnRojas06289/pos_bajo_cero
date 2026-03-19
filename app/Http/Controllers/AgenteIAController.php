@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Producto;
+use App\Models\Reserva;
 use App\Models\Venta;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -38,11 +39,11 @@ class AgenteIAController extends Controller
         // Contexto del negocio
         $context = $this->buildContext();
 
-        $systemPrompt = "Eres el asistente del POS Jacket Store, un almacén de ropa en Colombia especializado en chaquetas. " .
-            "Ayudas al usuario a navegar el sistema, responder preguntas de inventario, ventas y productos. " .
-            "Responde en español colombiano, corto y claro. " .
+        $systemPrompt = "Eres el asistente IA de Bajo Cero, una tienda de ropa urbana en Colombia especializada en chaquetas y gorras. " .
+            "Ayudas al equipo a navegar el sistema POS, responder preguntas de inventario, ventas, reservas y productos. " .
+            "Responde en español colombiano, corto y claro. Sé amigable pero directo. " .
             "Cuando informes dinero usa formato \$XX.XXX COP. " .
-            "Cuando sugieras navegar, incluye la ruta exacta (ej: /admin/ventas, /admin/productos). " .
+            "Cuando sugieras navegar, incluye la ruta exacta (ej: /admin/ventas, /admin/productos, /admin/reservas). " .
             "CONTEXTO ACTUAL DEL NEGOCIO:\n{$context}";
 
         try {
@@ -116,9 +117,15 @@ class AgenteIAController extends Controller
             // Total de productos activos
             $totalProductos = Producto::where('estado', 1)->count();
 
+            // Reservas pendientes
+            $reservasPendientes = Reserva::where('estado', 'pendiente')->count();
+            $reservasHoy        = Reserva::whereDate('created_at', Carbon::today())->count();
+
             $ctx  = "Fecha: " . Carbon::now()->format('d/m/Y H:i') . "\n";
             $ctx .= "Ventas hoy: $" . number_format($ventasHoy, 0, ',', '.') . " COP en {$cantVentasHoy} transacciones.\n";
             $ctx .= "Productos activos en catálogo: {$totalProductos}.\n";
+            $ctx .= "Reservas pendientes de atender: {$reservasPendientes}.\n";
+            if ($reservasHoy > 0) $ctx .= "Reservas recibidas hoy: {$reservasHoy}.\n";
 
             if ($stockBajo->isNotEmpty()) {
                 $ctx .= "Stock bajo (<10 uds): ";

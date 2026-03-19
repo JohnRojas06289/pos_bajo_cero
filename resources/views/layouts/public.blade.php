@@ -3,9 +3,16 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="Jacket Store - Chaquetas y Ropa de Calidad" />
-    <meta name="author" content="Jacket Store" />
-    <title>@yield('title', 'Jacket Store | Chaquetas y Estilo')</title>
+    <meta name="description" content="@yield('meta_description', 'Bajo Cero — Ropa urbana de montaña. Chaquetas, gorras y prendas para desafiar el frío en Colombia.')" />
+    <meta name="author" content="Bajo Cero" />
+    <meta property="og:title"       content="@yield('title', 'Bajo Cero | Ropa Urbana de Montaña')" />
+    <meta property="og:description" content="@yield('meta_description', 'Bajo Cero — Ropa urbana de montaña. Chaquetas, gorras y prendas para desafiar el frío en Colombia.')" />
+    <meta property="og:type"        content="website" />
+    <meta property="og:image"       content="{{ asset('images/logo-bajo-cero.png') }}" />
+    <meta name="twitter:card"       content="summary_large_image" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-bajo-cero.png') }}">
+    <title>@yield('title', 'Bajo Cero | Ropa Urbana de Montaña')</title>
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
@@ -26,8 +33,9 @@
     <!-- Navigation -->
     <nav class="navbar-custom fixed-top">
         <div class="nav-container">
-            <a class="navbar-brand" href="{{ route('home') }}">
-                Jacket<span style="color: var(--text-color);">Store</span>
+            <a class="navbar-brand" href="{{ route('home') }}" style="display:flex;align-items:center;gap:0.5rem;">
+                <img src="{{ asset('images/logo-bajo-cero.png') }}" alt="Bajo Cero" style="height:36px;width:auto;object-fit:contain;">
+                <span>Bajo<span style="color: var(--primary-color);">Cero</span></span>
             </a>
 
             <div class="nav-actions">
@@ -57,9 +65,9 @@
     <div id="slideMenu" class="slide-menu">
         <div class="slide-menu-header">
             <div style="display:flex;align-items:center;gap:0.5rem;">
-                <i class="fas fa-vest" style="color: var(--primary-color); font-size: 1rem; opacity: 0.9;"></i>
+                <img src="{{ asset('images/logo-bajo-cero.png') }}" alt="Bajo Cero" style="height:30px;width:auto;object-fit:contain;filter:var(--logo-filter);">
                 <span style="color: var(--primary-color); font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; font-size: 1.1rem;">
-                    Jacket<span style="color: var(--text-color);">Store</span>
+                    Bajo<span style="color: var(--text-color);">Cero</span>
                 </span>
             </div>
             <button id="menuCloseBtn" class="btn-close-menu">
@@ -70,6 +78,7 @@
             <ul class="navbar-nav-custom">
                 <li><a class="nav-link-custom {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}"><i class="fas fa-home me-2"></i>Inicio</a></li>
                 <li><a class="nav-link-custom {{ request()->routeIs('collection') ? 'active' : '' }}" href="{{ route('collection') }}"><i class="fas fa-th-large me-2"></i>Colección</a></li>
+                <li><a class="nav-link-custom {{ request()->routeIs('reservar.*') ? 'active' : '' }}" href="{{ route('reservar.index') }}"><i class="fas fa-calendar-check me-2"></i>Reservar</a></li>
                 <li><a class="nav-link-custom {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}"><i class="fas fa-envelope me-2"></i>Contacto</a></li>
                 <li><a class="nav-link-custom {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}"><i class="fas fa-info-circle me-2"></i>Nosotros</a></li>
             </ul>
@@ -88,8 +97,8 @@
         <div class="container px-5">
             <div class="row gx-5">
                 <div class="col-lg-4 mb-5 mb-lg-0">
-                    <div class="footer-heading">Jacket Store</div>
-                    <p class="text-muted mb-4">Especialistas en chaquetas de calidad. Prendas diseñadas para quienes no temen destacar. Estilo, comodidad y precio justo.</p>
+                    <div class="footer-heading">Bajo Cero</div>
+                    <p class="text-muted mb-4">Ropa urbana inspirada en la montaña. Chaquetas, gorras y prendas para quienes desafían el frío. Estilo, calidad y actitud colombiana.</p>
                     <div class="d-flex gap-3">
                         <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
                         <a href="#" class="text-white"><i class="fab fa-facebook fa-lg"></i></a>
@@ -109,7 +118,7 @@
                     <div class="footer-links">
                         <div class="mb-2"><i class="fas fa-map-marker-alt me-2 text-primary"></i> Bogotá, Colombia</div>
                         <div class="mb-2"><i class="fab fa-whatsapp me-2 text-success"></i> +57 300 123 4567</div>
-                        <div class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i> contacto@jacketstore.co</div>
+                        <div class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i> contacto@bajocero.co</div>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-4">
@@ -123,16 +132,16 @@
                 </div>
             </div>
             <div class="text-center mt-5 pt-4" style="border-top: 1px solid rgba(255,255,255,0.08);">
-                <small style="color: rgba(255,255,255,0.3); font-size: 0.75rem;">&copy; 2026 Jacket Store. Todos los derechos reservados.</small>
+                <small style="color: rgba(255,255,255,0.3); font-size: 0.75rem;">&copy; 2026 Bajo Cero. Todos los derechos reservados.</small>
             </div>
         </div>
     </footer>
 
     <!-- Whatsapp Floating Button -->
-    <a href="https://wa.me/573001234567" target="_blank" title="Escríbenos por WhatsApp"
-       style="position:fixed;bottom:24px;right:24px;background:#25d366;color:white;width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;z-index:1000;box-shadow:0 4px 16px rgba(37,211,102,0.35);transition:transform 0.2s ease,box-shadow 0.2s ease;"
-       onmouseenter="this.style.transform='scale(1.08)';this.style.boxShadow='0 6px 20px rgba(37,211,102,0.45)'"
-       onmouseleave="this.style.transform='scale(1)';this.style.boxShadow='0 4px 16px rgba(37,211,102,0.35)'">
+    <a href="https://wa.me/{{ env('WHATSAPP_NUMERO','573001234567') }}" target="_blank" title="Escríbenos por WhatsApp" class="wsp-float"
+       style="position:fixed;bottom:24px;right:24px;background:#25d366;color:white;width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;z-index:1000;transition:transform 0.2s ease,box-shadow 0.2s ease;"
+       onmouseenter="this.style.transform='scale(1.08)'"
+       onmouseleave="this.style.transform='scale(1)'">
         <i class="fab fa-whatsapp"></i>
     </a>
 
@@ -166,6 +175,35 @@
                 localStorage.setItem('theme', newTheme);
                 updateIcon(newTheme);
             });
+        })();
+
+        // Snow effect on hero
+        (function() {
+            const hero = document.querySelector('.hero-section');
+            if (!hero) return;
+            const wrap = document.createElement('div');
+            wrap.className = 'snow-wrap';
+            hero.prepend(wrap);
+            const symbols = ['❄', '❅', '❆', '·', '*'];
+            for (let i = 0; i < 22; i++) {
+                const s = document.createElement('span');
+                s.className = 'snowflake-pub';
+                s.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                s.style.left     = Math.random() * 100 + '%';
+                s.style.fontSize = (Math.random() * 14 + 8) + 'px';
+                s.style.opacity  = (Math.random() * 0.4 + 0.2).toString();
+                s.style.animationDuration = (Math.random() * 8 + 5) + 's';
+                s.style.animationDelay    = (Math.random() * 8) + 's';
+                wrap.appendChild(s);
+            }
+        })();
+
+        // Scroll-triggered fade-in-up
+        (function() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+            }, { threshold: 0.12 });
+            document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
         })();
 
         // Slide Menu Toggle (pure JS)

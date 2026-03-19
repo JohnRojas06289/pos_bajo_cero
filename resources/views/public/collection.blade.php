@@ -1,6 +1,7 @@
 @extends('layouts.public')
 
-@section('title', 'Jacket Store | Colección')
+@section('title', 'Catálogo | Bajo Cero')
+@section('meta_description', 'Explora el catálogo completo de Bajo Cero. Chaquetas, gorras y ropa urbana de montaña. Filtra por categoría, marca y precio.')
 
 @section('content')
 <div class="container px-5 mt-5 pt-5">

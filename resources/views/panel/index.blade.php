@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title','Dashboard — Jacket Store')
+@section('title','Dashboard — Bajo Cero')
 
 @push('css')
 <style>
@@ -676,7 +676,7 @@ const datosPagos      = @json($pagosPorMetodo);
 const datosTop5Mas    = @json($top5MasVendidos);
 const datosTop5Menos  = @json($top5MenosVendidos);
 
-// ── Paleta Jacket Store ───────────────────────────────────────────
+// ── Paleta Bajo Cero ───────────────────────────────────────────
 const JS_ACCENT  = '#E67E22';
 const JS_PRIMARY = '#2C3E50';
 const JS_GREEN   = '#27AE60';
@@ -915,7 +915,7 @@ if (datosTop5Menos.length) {
 }
 
     } catch(e) {
-        console.warn('[Jacket Store] Chart.js init error:', e.message);
+        console.warn('[Bajo Cero] Chart.js init error:', e.message);
     }
 })(); // end initCharts
 

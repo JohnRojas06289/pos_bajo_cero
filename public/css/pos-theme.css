@@ -1,6 +1,6 @@
 /* ================================================================
-   JACKET STORE POS — Design System & Theme
-   Paleta: Petróleo #2C3E50 · Naranja #E67E22 · Oscuro #1A1A2E
+   BAJO CERO POS — Design System & Theme
+   Paleta: Montaña #1B4F72 · Glaciar #1D96C8 · Noche #0A1628
    ================================================================ */
 
 /* ----------------------------------------------------------------
@@ -15,15 +15,15 @@
     /* Backgrounds */
     --bg-primary:       #F5F6FA;
     --bg-secondary:     #FFFFFF;
-    --bg-sidebar:       #1A1A2E;
-    --bg-sidebar-hover: rgba(230,126,34,0.12);
+    --bg-sidebar:       #0A1628;
+    --bg-sidebar-hover: rgba(29,150,200,0.12);
 
     /* Texto */
-    --text-primary:     #1A1A2E;
+    --text-primary:     #0A1628;
     --text-secondary:   #6C7A89;
     --text-muted:       #9BA3AF;
     --sidebar-text:     rgba(255,255,255,0.72);
-    --sidebar-active:   #E67E22;
+    --sidebar-active:   #1D96C8;
 
     /* Borders */
     --border-color:     #E1E5EB;
@@ -37,10 +37,10 @@
     --hover-bg:         #F0F1F5;
 
     /* Brand palette */
-    --accent:           #E67E22;
-    --accent-hover:     #D35400;
-    --primary:          #2C3E50;
-    --primary-hover:    #1A252F;
+    --accent:           #1D96C8;
+    --accent-hover:     #1275A0;
+    --primary:          #1B4F72;
+    --primary-hover:    #0F3A56;
     --success:          #27AE60;
     --danger:           #E74C3C;
     --warning:          #F39C12;
@@ -58,27 +58,27 @@
    3. VARIABLES — TEMA OSCURO
    ---------------------------------------------------------------- */
 [data-theme="dark"] {
-    --bg-primary:       #0F0F1A;
-    --bg-secondary:     #161625;
-    --bg-sidebar:       #0A0A14;
-    --bg-sidebar-hover: rgba(230,126,34,0.15);
+    --bg-primary:       #070D1A;
+    --bg-secondary:     #0D1829;
+    --bg-sidebar:       #060E1C;
+    --bg-sidebar-hover: rgba(29,150,200,0.15);
 
     --text-primary:     #ECEDF0;
     --text-secondary:   #9BA3AF;
     --text-muted:       #6C7A89;
     --sidebar-text:     rgba(255,255,255,0.6);
-    --sidebar-active:   #E67E22;
+    --sidebar-active:   #1D96C8;
 
-    --border-color:     #2A2A3E;
-    --input-border:     #2E2E42;
+    --border-color:     #162438;
+    --input-border:     #1A2E42;
 
-    --card-bg:          #1A1A2C;
+    --card-bg:          #0F1E30;
     --card-shadow:      0 4px 16px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.3);
-    --input-bg:         #12121E;
-    --hover-bg:         #242438;
+    --input-bg:         #080F1A;
+    --hover-bg:         #162232;
 
-    --accent:           #E67E22;
-    --accent-hover:     #D35400;
+    --accent:           #1D96C8;
+    --accent-hover:     #1275A0;
     --primary:          #5B9BD5;
     --primary-hover:    #4A87C0;
     --success:          #2ECC71;
@@ -182,7 +182,7 @@ main {
    ---------------------------------------------------------------- */
 .sb-topnav {
     background: var(--bg-sidebar) !important;
-    border-bottom: 1px solid rgba(230,126,34,0.3) !important;
+    border-bottom: 1px solid rgba(29,150,200,0.3) !important;
     box-shadow: 0 2px 12px rgba(0,0,0,0.25) !important;
     height: var(--topnav-h);
     display: flex;
@@ -346,13 +346,13 @@ main {
 .sb-sidenav-dark .nav-link:hover {
     background: var(--bg-sidebar-hover) !important;
     color: rgba(255,255,255,0.95) !important;
-    border-left-color: rgba(230,126,34,0.5);
+    border-left-color: rgba(29,150,200,0.5);
     transform: none !important;
 }
 
 .sb-sidenav-dark .nav-link.active,
 .sb-sidenav-dark .nav-link[aria-current="page"] {
-    background: rgba(230,126,34,0.18) !important;
+    background: rgba(29,150,200,0.18) !important;
     color: #FFFFFF !important;
     border-left-color: var(--accent) !important;
     font-weight: 600 !important;
@@ -466,7 +466,7 @@ main {
 }
 
 .theme-toggle-btn:hover {
-    background: rgba(230,126,34,0.12) !important;
+    background: rgba(29,150,200,0.12) !important;
     color: rgba(255,255,255,0.95);
 }
 
@@ -576,13 +576,13 @@ main {
 .btn-modern-primary {
     background: var(--primary) !important;
     color: #FFFFFF !important;
-    box-shadow: 0 2px 8px rgba(44,62,80,0.25) !important;
+    box-shadow: 0 2px 8px rgba(27,79,114,0.25) !important;
 }
 
 .btn-primary:hover,
 .btn-modern-primary:hover {
     background: var(--primary-hover) !important;
-    box-shadow: 0 4px 16px rgba(44,62,80,0.35) !important;
+    box-shadow: 0 4px 16px rgba(27,79,114,0.35) !important;
 }
 
 /* Acento — naranja */
@@ -590,13 +590,13 @@ main {
 .btn-warning {
     background: var(--accent) !important;
     color: #FFFFFF !important;
-    box-shadow: 0 2px 8px rgba(230,126,34,0.3) !important;
+    box-shadow: 0 2px 8px rgba(29,150,200,0.3) !important;
 }
 
 .btn-accent:hover,
 .btn-warning:hover {
     background: var(--accent-hover) !important;
-    box-shadow: 0 4px 16px rgba(230,126,34,0.4) !important;
+    box-shadow: 0 4px 16px rgba(29,150,200,0.4) !important;
 }
 
 .btn-success {
@@ -649,13 +649,13 @@ main {
     height: 40px;
     font-size: 0.875rem;
     font-weight: 600;
-    box-shadow: 0 2px 8px rgba(44,62,80,0.25);
+    box-shadow: 0 2px 8px rgba(27,79,114,0.25);
     transition: background 0.18s ease, box-shadow 0.18s ease !important;
 }
 
 .btn-add:hover {
     background: var(--primary-hover);
-    box-shadow: 0 4px 16px rgba(44,62,80,0.35);
+    box-shadow: 0 4px 16px rgba(27,79,114,0.35);
     color: #FFFFFF !important;
 }
 
@@ -677,7 +677,7 @@ main {
 }
 
 .btn-icon-sm.btn-view:hover  { background: rgba(52,152,219,0.1) !important; color: var(--info) !important; border-color: var(--info) !important; }
-.btn-icon-sm.btn-edit:hover  { background: rgba(230,126,34,0.1) !important; color: var(--accent) !important; border-color: var(--accent) !important; }
+.btn-icon-sm.btn-edit:hover  { background: rgba(29,150,200,0.1) !important; color: var(--accent) !important; border-color: var(--accent) !important; }
 .btn-icon-sm.btn-delete:hover { background: rgba(231,76,60,0.1) !important; color: var(--danger) !important; border-color: var(--danger) !important; }
 
 /* Large icon buttons */
@@ -697,7 +697,7 @@ main {
 }
 
 .btn-icon-large.btn-view:hover  { background: rgba(52,152,219,0.1); color: var(--info); border-color: var(--info); }
-.btn-icon-large.btn-edit:hover  { background: rgba(230,126,34,0.1); color: var(--accent); border-color: var(--accent); }
+.btn-icon-large.btn-edit:hover  { background: rgba(29,150,200,0.1); color: var(--accent); border-color: var(--accent); }
 .btn-icon-large.btn-delete:hover { background: rgba(231,76,60,0.1); color: var(--danger); border-color: var(--danger); }
 
 /* ----------------------------------------------------------------
@@ -758,7 +758,7 @@ textarea.form-control { height: auto; }
 
 .form-control:focus, .form-select:focus {
     border-color: var(--accent) !important;
-    box-shadow: 0 0 0 3px rgba(230,126,34,0.12) !important;
+    box-shadow: 0 0 0 3px rgba(29,150,200,0.12) !important;
     outline: none !important;
     background-color: var(--input-bg) !important;
 }
@@ -996,7 +996,7 @@ textarea.form-control { height: auto; }
 .search-bar-large input:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(230,126,34,0.1);
+    box-shadow: 0 0 0 3px rgba(29,150,200,0.1);
 }
 
 .search-bar-large button {
@@ -1154,15 +1154,15 @@ textarea.form-control { height: auto; }
 
 /* Links en sidebar — hover más visible */
 #layoutSidenav_nav .nav-link:hover {
-    background: rgba(230,126,34,0.12) !important;
-    color: #E67E22 !important;
+    background: rgba(29,150,200,0.12) !important;
+    color: #1D96C8 !important;
     padding-left: 1.5rem;
 }
 
 /* Inputs focus ring consistente */
 .form-control:focus, .form-select:focus, input:focus, select:focus, textarea:focus {
     border-color: var(--accent) !important;
-    box-shadow: 0 0 0 3px rgba(230,126,34,0.12) !important;
+    box-shadow: 0 0 0 3px rgba(29,150,200,0.12) !important;
     outline: none;
 }
 
@@ -1182,7 +1182,7 @@ textarea.form-control { height: auto; }
     transition: background-color 0.15s ease;
 }
 .table > tbody > tr:hover {
-    background: rgba(230,126,34,0.05) !important;
+    background: rgba(29,150,200,0.05) !important;
 }
 
 /* Badge animado para notificaciones */
@@ -1190,11 +1190,11 @@ textarea.form-control { height: auto; }
 .badge:hover { transform: scale(1.1); }
 
 /* Scrollbar uniforme */
-* { scrollbar-width: thin; scrollbar-color: rgba(230,126,34,0.4) transparent; }
+* { scrollbar-width: thin; scrollbar-color: rgba(29,150,200,0.4) transparent; }
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(230,126,34,0.4); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #E67E22; }
+::-webkit-scrollbar-thumb { background: rgba(29,150,200,0.4); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #1D96C8; }
 
 /* Página: scroll suave */
 html { scroll-behavior: smooth; }

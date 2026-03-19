@@ -2,7 +2,7 @@
 use App\Models\Empresa;
 $empresa = Empresa::first();
 if (!$empresa) {
-    $empresa = (object)['nombre' => 'Jacket Store'];
+    $empresa = (object)['nombre' => 'Bajo Cero'];
 }
 ?>
 
@@ -10,8 +10,8 @@ if (!$empresa) {
 
     <!-- Brand -->
     <a class="navbar-brand ps-3 pe-2" href="{{ route('panel') }}">
-        <i class="fas fa-vest me-2" style="color: var(--accent, #E67E22);"></i>
-        <span>Jacket<span class="brand-accent">Store</span></span>
+        <img src="{{ asset('images/logo-bajo-cero.png') }}" alt="Bajo Cero" style="height:32px;width:auto;object-fit:contain;filter:brightness(0) invert(1);opacity:0.92;">
+        <span class="ms-2">Bajo<span class="brand-accent">Cero</span></span>
     </a>
 
     <!-- Sidebar Toggle -->

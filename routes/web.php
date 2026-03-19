@@ -27,6 +27,7 @@ use App\Http\Controllers\roleController;
 use App\Http\Controllers\userController;
 use App\Http\Controllers\AgenteIAController;
 use App\Http\Controllers\ventaController;
+use App\Http\Controllers\ReservaController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -42,12 +43,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 use App\Http\Controllers\PublicController;
+use App\Http\Controllers\ReservaController;
 
 Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/coleccion', [PublicController::class, 'collection'])->name('collection');
 Route::get('/producto/{id}', [PublicController::class, 'show'])->name('product.show');
 Route::get('/contacto', [PublicController::class, 'contact'])->name('contact');
 Route::get('/nosotros', [PublicController::class, 'about'])->name('about');
+Route::get('/reservar', [ReservaController::class, 'index'])->name('reservar.index');
+Route::post('/reservar', [ReservaController::class, 'store'])->name('reservar.store');
 
 Route::get('/migrate-db-secret-key-12345', function () {
     try {
@@ -170,6 +174,10 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
     })->name('notifications.markAsRead');
 
     Route::post('/agente-ia/chat', [AgenteIAController::class, 'chat'])->name('agente.ia.chat');
+
+    // Reservas
+    Route::get('/reservas', [ReservaController::class, 'adminIndex'])->name('reservas.index');
+    Route::patch('/reservas/{reserva}/estado', [ReservaController::class, 'updateEstado'])->name('reservas.estado');
 
     Route::get('/logout', [logoutController::class, 'logout'])->name('logout');
 });

@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Jacket Store | Inicio')
+@section('title', 'Bajo Cero | Ropa Urbana de Montaña')
 
 @section('content')
 <!-- Hero Section -->
@@ -10,12 +10,12 @@
             <div class="col-lg-8 col-xl-7 col-xxl-6">
                 <div class="my-5 text-center text-xl-start">
                     <h1 class="hero-title mb-2">
-                        Estilo que <br><span>Desafía</span>
+                        Estilo que <br><span>Congela</span>
                     </h1>
-                    <p class="lead fw-normal mb-4" style="color:rgba(255,255,255,0.6);">Descubre la nueva colección de chaquetas y gorras diseñadas para la vida urbana. Calidad premium, diseño exclusivo y la actitud que necesitas.</p>
+                    <p class="lead fw-normal mb-4" style="color:rgba(255,255,255,0.6);">Descubre la nueva colección de chaquetas, gorras y prendas para desafiar el frío. Calidad premium, diseño exclusivo y la actitud que necesitas.</p>
                     <div class="d-grid gap-3 d-sm-flex justify-content-sm-center justify-content-xl-start">
                         <a class="btn-neon px-4 me-sm-3" href="{{ route('collection') }}">Ver Colección</a>
-                        <a class="btn btn-outline-light btn-lg px-4" href="{{ route('contact') }}">Contactar</a>
+                        <a class="btn btn-outline-light btn-lg px-4" href="{{ route('reservar.index') }}"><i class="fas fa-calendar-check me-2"></i>Reservar</a>
                     </div>
                 </div>
             </div>
@@ -32,7 +32,7 @@
 </header>
 
 <!-- Features Section -->
-<section class="py-5 welcome-alt-section">
+<section class="py-5 welcome-alt-section fade-in-up">
     <div class="container px-5 my-5">
         <div class="row gx-5">
             <div class="col-lg-4 mb-5 mb-lg-0">
@@ -52,7 +52,7 @@
 </section>
 
 <!-- Featured Products -->
-<section class="py-5">
+<section class="py-5 fade-in-up">
     <div class="container px-5 my-5">
         <div class="text-center mb-5">
             <h2 class="fw-bolder section-title-pub">Tendencias <span style="color:var(--primary-color);">Destacadas</span></h2>
@@ -82,7 +82,7 @@
                         </a>
 
                         <div class="pub-product-card-body">
-                            <div class="pub-product-card-brand">{{ $product->marca->caracteristica->nombre ?? 'Jacket Store' }}</div>
+                            <div class="pub-product-card-brand">{{ $product->marca->caracteristica->nombre ?? '' }}</div>
                             <h5 class="pub-product-card-title text-truncate">{{ $product->nombre }}</h5>
                             <div class="d-flex small text-warning mb-2">
                                 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
