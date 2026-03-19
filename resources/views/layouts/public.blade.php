@@ -14,6 +14,7 @@
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     <!-- Custom CSS (cache-busted) -->
     <link href="{{ asset('css/bajocero.css') }}?v={{ time() }}" rel="stylesheet" />
+    @stack('css')
     <script>
         // Init Theme
         const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -137,6 +138,7 @@
 
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @stack('js')
     
     <script>
         // Theme Toggle
