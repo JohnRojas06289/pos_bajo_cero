@@ -25,15 +25,20 @@ class CreateMovimientoVentaCajaListener
      */
     public function handle(CreateVentaEvent $event): void
     {
-        $caja_id = Caja::where('user_id', Auth::id())->where('estado', 1)->first()->id;
-
         try {
+            $caja = Caja::where('user_id', Auth::id())->where('estado', 1)->first();
+
+            if (!$caja) {
+                Log::error('CreateMovimientoVentaCajaListener: No hay caja abierta para el usuario', ['user_id' => Auth::id()]);
+                return;
+            }
+
             Movimiento::create([
                 'tipo' => TipoMovimientoEnum::Venta,
                 'descripcion' => 'Venta n° ' . $event->venta->numero_comprobante,
                 'monto' => $event->venta->total,
                 'metodo_pago' => $event->venta->metodo_pago,
-                'caja_id' => $caja_id
+                'caja_id' => $caja->id
             ]);
         } catch (Exception $e) {
             Log::error(

@@ -53,64 +53,67 @@ class ventaController extends Controller
      */
     public function create(ComprobanteService $comprobanteService): View|RedirectResponse
     {
-        // Verificar que existe una empresa
-        $empresa = $this->empresaService->obtenerEmpresa();
-        
-        // Verificar que existen clientes
-        $clientes = Cliente::whereHas('persona', function ($query) {
-            $query->where('estado', 1);
-        })->get();
-        
-        if ($clientes->isEmpty()) {
-            return redirect()->route('panel')
-                ->with('error', 'Debe crear al menos un cliente antes de realizar ventas. Vaya a Clientes > Nuevo Cliente.');
-        }
+        try {
+            // Verificar que existe una empresa
+            $empresa = $this->empresaService->obtenerEmpresa();
 
-        // Verificar productos (sin bloquear si está vacío)
-        // Verificar productos (sin bloquear si está vacío)
-        $productos = Producto::leftJoin('inventario as i', function ($join) {
-            $join->on('i.producto_id', '=', 'productos.id');
-        })
-            ->leftJoin('presentaciones as p', function ($join) {
-                $join->on('p.id', '=', 'productos.presentacione_id');
-            })
-            ->leftJoin('caracteristicas as cp', function ($join) {
-                $join->on('cp.id', '=', 'p.caracteristica_id');
-            })
-            ->select(
-                DB::raw("COALESCE(p.sigla, 'UND') as sigla"),
-                DB::raw("COALESCE(cp.nombre, '') as talla_nombre"),
-                'productos.nombre',
-                'productos.codigo',
-                'productos.id',
-                DB::raw("COALESCE(i.cantidad, 0) as cantidad"),
-                'productos.precio',
-                'productos.img_path',
-                'productos.categoria_id',
-                'productos.genero'
-            )
-            ->where('productos.estado', 1)
-            ->get();
-
-        // ELIMINADO EL BLOQUEO DE INVENTARIO VACÍO POR SOLICITUD DEL USUARIO
-        
-        $categorias = Cache::remember('categorias_activas', 3600, function () {
-            return Categoria::whereHas('caracteristica', function ($query) {
+            // Verificar que existen clientes
+            $clientes = Cliente::whereHas('persona', function ($query) {
                 $query->where('estado', 1);
             })->get();
-        });
 
-        $comprobantes = Cache::remember('comprobantes_activos', 3600, fn () => $comprobanteService->obtenerComprobantes());
-        $optionsMetodoPago = MetodoPagoEnum::cases();
+            if ($clientes->isEmpty()) {
+                return redirect()->route('panel')
+                    ->with('error', 'Debe crear al menos un cliente antes de realizar ventas. Vaya a Clientes > Nuevo Cliente.');
+            }
 
-        return view('venta.create', compact(
-            'productos',
-            'categorias',
-            'clientes',
-            'comprobantes',
-            'optionsMetodoPago',
-            'empresa'
-        ));
+            $productos = Producto::leftJoin('inventario as i', function ($join) {
+                $join->on('i.producto_id', '=', 'productos.id');
+            })
+                ->leftJoin('presentaciones as p', function ($join) {
+                    $join->on('p.id', '=', 'productos.presentacione_id');
+                })
+                ->leftJoin('caracteristicas as cp', function ($join) {
+                    $join->on('cp.id', '=', 'p.caracteristica_id');
+                })
+                ->select(
+                    DB::raw("COALESCE(p.sigla, 'UND') as sigla"),
+                    DB::raw("COALESCE(cp.nombre, '') as talla_nombre"),
+                    'productos.nombre',
+                    'productos.codigo',
+                    'productos.id',
+                    DB::raw("COALESCE(i.cantidad, 0) as cantidad"),
+                    'productos.precio',
+                    'productos.img_path',
+                    'productos.categoria_id',
+                    'productos.genero'
+                )
+                ->where('productos.estado', 1)
+                ->get();
+
+            $categorias = Cache::remember('categorias_activas', 3600, function () {
+                return Categoria::with('caracteristica')
+                    ->whereHas('caracteristica', function ($query) {
+                        $query->where('estado', 1);
+                    })->get();
+            });
+
+            $comprobantes = $comprobanteService->obtenerComprobantes();
+            $optionsMetodoPago = MetodoPagoEnum::cases();
+
+            return view('venta.create', compact(
+                'productos',
+                'categorias',
+                'clientes',
+                'comprobantes',
+                'optionsMetodoPago',
+                'empresa'
+            ));
+        } catch (\Throwable $e) {
+            Log::error('Error al cargar la vista de crear venta', ['error' => $e->getMessage()]);
+            return redirect()->route('panel')
+                ->with('error', 'Error al cargar el punto de venta: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -162,14 +165,21 @@ class ventaController extends Controller
             CreateVentaEvent::dispatch($venta);
 
             DB::commit();
-            ActivityLogService::log('Creación de una venta', 'Ventas', $request->validated());
-            return redirect()->route('ventas.create')
-                ->with('success', 'Venta registrada');
         } catch (Throwable $e) {
             DB::rollBack();
             Log::error('Error al crear la venta', ['error' => $e->getMessage()]);
             return redirect()->route('ventas.create')->with('error', 'Ups, algo falló: ' . $e->getMessage());
         }
+
+        // Log fuera de la transacción para no mezclar fallos del log con rollback de la venta
+        try {
+            ActivityLogService::log('Creación de una venta', 'Ventas', $request->validated());
+        } catch (Throwable $e) {
+            Log::warning('No se pudo registrar el activity log de venta', ['error' => $e->getMessage()]);
+        }
+
+        return redirect()->route('ventas.create')
+            ->with('success', 'Venta registrada');
     }
 
     /**

@@ -27,7 +27,7 @@ class StoreVentaRequest extends FormRequest
             'cliente_id' => 'required|exists:clientes,id',
             'comprobante_id' => 'required|exists:comprobantes,id',
             'metodo_pago' => ['required', new Enum(MetodoPagoEnum::class)],
-            'subtotal' => 'required|min:1',
+            'subtotal' => 'required|numeric|min:1',
 
             'total' => 'required|numeric',
             'monto_recibido' => 'required|numeric|min:1',

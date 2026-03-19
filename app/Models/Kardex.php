@@ -22,7 +22,7 @@ class Kardex extends Model
 
     public function producto(): BelongsTo
     {
-        return $this->belongsTo(Kardex::class);
+        return $this->belongsTo(Producto::class);
     }
 
     public function getFechaAttribute(): string

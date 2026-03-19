@@ -72,15 +72,23 @@ class Venta extends Model
         // Determinar el prefijo según el tipo de comprobante
         $prefijo = strtoupper(substr($tipoComprobante, 0, 1)); // "B" para Boleta, "F" para Factura
 
-        // Contar el total de ventas globalmente (no solo por caja) para evitar duplicados
-        $totalVentas = Venta::count();
-        
-        // Incrementar el número
-        $nuevoNumero = $totalVentas + 1;
+        // Obtener todos los números del mismo prefijo y calcular el máximo en PHP
+        // lockForUpdate previene race conditions en transacciones concurrentes
+        $numeros = Venta::where('numero_comprobante', 'like', $prefijo . '-%')
+            ->lockForUpdate()
+            ->pluck('numero_comprobante');
+
+        $maxNumero = 0;
+        foreach ($numeros as $num) {
+            $partes = explode('-', $num, 2);
+            if (isset($partes[1]) && is_numeric($partes[1])) {
+                $maxNumero = max($maxNumero, (int)$partes[1]);
+            }
+        }
+
+        $nuevoNumero = $maxNumero + 1;
 
         // Formatear el número de venta (Prefijo + Número secuencial de 7 dígitos)
-        $numeroVenta = sprintf("%s-%07d", $prefijo, $nuevoNumero);
-
-        return $numeroVenta;
+        return sprintf("%s-%07d", $prefijo, $nuevoNumero);
     }
 }
