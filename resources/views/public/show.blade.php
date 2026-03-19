@@ -274,8 +274,8 @@
         <div class="col-lg-6">
             {{-- Badges --}}
             <div class="mb-3 d-flex gap-2 flex-wrap">
-                @if($product->marca)
-                    <span class="badge bg-primary text-dark fw-bold px-3 py-2">{{ $product->marca->nombre }}</span>
+                @if($product->marca && $product->marca->caracteristica)
+                    <span class="badge bg-primary text-dark fw-bold px-3 py-2">{{ $product->marca->caracteristica->nombre }}</span>
                 @endif
                 @if($product->categoria && $product->categoria->caracteristica)
                     <span class="badge bg-dark border border-secondary text-white fw-normal px-3 py-2">

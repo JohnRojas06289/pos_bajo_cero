@@ -82,7 +82,7 @@
                         <div class="badge-new">Nuevo</div>
 
                         <div class="product-info text-center">
-                            <div class="product-brand">{{ $product->marca->nombre ?? 'Jacket Store' }}</div>
+                            <div class="product-brand">{{ $product->marca->caracteristica->nombre ?? 'Jacket Store' }}</div>
                             <h5 class="product-title text-white text-truncate">{{ $product->nombre }}</h5>
                             <div class="d-flex justify-content-center small text-warning mb-2">
                                 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>

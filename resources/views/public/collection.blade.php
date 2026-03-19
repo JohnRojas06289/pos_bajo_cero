@@ -56,9 +56,12 @@
                             <select name="marca" class="form-select form-control-dark">
                                 <option value="all">Todas las marcas</option>
                                 @foreach($marcas as $marca)
-                                    <option value="{{ $marca->nombre }}" {{ request('marca') == $marca->nombre ? 'selected' : '' }}>
-                                        {{ $marca->nombre }}
-                                    </option>
+                                    @php $marcaNombre = $marca->caracteristica->nombre ?? ''; @endphp
+                                    @if($marcaNombre)
+                                        <option value="{{ $marcaNombre }}" {{ request('marca') == $marcaNombre ? 'selected' : '' }}>
+                                            {{ $marcaNombre }}
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
@@ -120,7 +123,7 @@
                             <!-- Product details -->
                             <div class="card-body p-4">
                                 <div class="text-start">
-                                    <div class="small text-muted text-uppercase mb-1">{{ $product->marca->nombre ?? 'Jacket Store' }}</div>
+                                    <div class="small text-muted text-uppercase mb-1">{{ $product->marca->caracteristica->nombre ?? 'Jacket Store' }}</div>
                                     <h5 class="fw-bolder text-white text-truncate mb-1">{{ $product->nombre }}</h5>
                                     @if($product->categoria && $product->categoria->caracteristica)
                                         <div class="small text-muted mb-2">{{ $product->categoria->caracteristica->nombre }}</div>

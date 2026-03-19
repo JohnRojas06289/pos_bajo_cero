@@ -11,7 +11,7 @@ class PublicController extends Controller
 {
     public function home()
     {
-        $featuredProducts = Producto::with(['categoria.caracteristica', 'marca', 'presentacione', 'inventario'])
+        $featuredProducts = Producto::with(['categoria.caracteristica', 'marca.caracteristica', 'presentacione', 'inventario'])
             ->where('estado', 1)
             ->latest()
             ->take(4)
@@ -22,7 +22,7 @@ class PublicController extends Controller
 
     public function collection(Request $request)
     {
-        $query = Producto::with(['categoria.caracteristica', 'marca', 'presentacione', 'inventario'])
+        $query = Producto::with(['categoria.caracteristica', 'marca.caracteristica', 'presentacione', 'inventario'])
             ->where('estado', 1);
 
         if ($request->filled('categoria') && $request->categoria !== 'all') {
@@ -32,7 +32,7 @@ class PublicController extends Controller
         }
 
         if ($request->filled('marca') && $request->marca !== 'all') {
-            $query->whereHas('marca', function ($q) use ($request) {
+            $query->whereHas('marca.caracteristica', function ($q) use ($request) {
                 $q->where('nombre', $request->marca);
             });
         }
@@ -45,22 +45,24 @@ class PublicController extends Controller
             });
         }
 
-        $products  = $query->latest()->paginate(12)->withQueryString();
+        $products   = $query->latest()->paginate(12)->withQueryString();
         $categorias = Categoria::with('caracteristica')
             ->whereHas('caracteristica', fn ($q) => $q->where('estado', 1))
             ->get();
-        $marcas = Marca::orderBy('nombre')->get();
+        $marcas = Marca::with('caracteristica')
+            ->whereHas('caracteristica', fn ($q) => $q->where('estado', 1))
+            ->get();
 
         return view('public.collection', compact('products', 'categorias', 'marcas'));
     }
 
     public function show($id)
     {
-        $product = Producto::with(['categoria.caracteristica', 'marca', 'presentacione', 'inventario'])
+        $product = Producto::with(['categoria.caracteristica', 'marca.caracteristica', 'presentacione', 'inventario'])
             ->where('estado', 1)
             ->findOrFail($id);
 
-        $relatedProducts = Producto::with(['inventario'])
+        $relatedProducts = Producto::with(['inventario', 'marca.caracteristica'])
             ->where('categoria_id', $product->categoria_id)
             ->where('id', '!=', $id)
             ->where('estado', 1)
