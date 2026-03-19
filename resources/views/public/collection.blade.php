@@ -8,7 +8,7 @@
     <div class="text-center mb-5">
         <h1 class="fw-bolder text-white">NUESTRO CATÁLOGO</h1>
         <p class="lead fw-normal text-muted mb-0">Descubre las últimas tendencias en moda urbana</p>
-        <div style="width: 50px; height: 3px; background-color: var(--primary-color); margin: 20px auto;"></div>
+        <div style="width:50px;height:3px;background-color:var(--primary-color);margin:20px auto;"></div>
     </div>
 
     <div class="row gx-5">
@@ -26,7 +26,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="fw-bold mb-0 text-primary"><i class="fas fa-sliders-h me-2"></i>FILTROS</h4>
                     </div>
-                    
+
                     <form action="{{ route('collection') }}" method="GET">
                         <!-- Text Search -->
                         <div class="mb-4">
@@ -40,9 +40,12 @@
                             <select name="categoria" class="form-select form-control-dark">
                                 <option value="all">Todas las categorías</option>
                                 @foreach($categorias as $cat)
-                                    <option value="{{ $cat->nombre }}" {{ request('categoria') == $cat->nombre ? 'selected' : '' }}>
-                                        {{ $cat->nombre }}
-                                    </option>
+                                    @php $catNombre = $cat->caracteristica->nombre ?? ''; @endphp
+                                    @if($catNombre)
+                                        <option value="{{ $catNombre }}" {{ request('categoria') == $catNombre ? 'selected' : '' }}>
+                                            {{ $catNombre }}
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
@@ -61,7 +64,7 @@
                         </div>
 
                         <button type="submit" class="btn btn-neon w-100 py-2">APLICAR</button>
-                        
+
                         @if(request()->hasAny(['search', 'categoria', 'marca']))
                             <a href="{{ route('collection') }}" class="btn btn-link text-white-50 w-100 mt-2 text-decoration-none small">
                                 <i class="fas fa-times me-1"></i> Limpiar Filtros
@@ -74,39 +77,61 @@
 
         <!-- Product Grid -->
         <div class="col-lg-9">
+            {{-- Contador de resultados --}}
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <p class="text-muted small mb-0">
+                    {{ $products->total() }} producto{{ $products->total() !== 1 ? 's' : '' }} encontrado{{ $products->total() !== 1 ? 's' : '' }}
+                </p>
+            </div>
+
             <div class="row gx-3 gx-md-4 row-cols-2 row-cols-md-3 row-cols-xl-3 justify-content-center">
                 @forelse($products as $product)
+                    @php $stock = $product->inventario->cantidad ?? 0; @endphp
                     <div class="col mb-5">
                         <div class="card product-card h-100 border-0">
-                            <!-- Sale badge-->
-                            @if(rand(0,1))
-                                <div class="badge bg-success text-white position-absolute" style="top: 0.5rem; right: 0.5rem">DISPONIBLE</div>
+                            {{-- Badge de stock real (no más rand()) --}}
+                            @if($stock > 0)
+                                <div class="badge bg-success text-white position-absolute" style="top:.5rem;right:.5rem">DISPONIBLE</div>
                             @else
-                                 <div class="badge bg-danger text-white position-absolute" style="top: 0.5rem; right: 0.5rem">AGOTADO</div>
+                                <div class="badge bg-danger text-white position-absolute" style="top:.5rem;right:.5rem">AGOTADO</div>
                             @endif
 
-                            <!-- Product image-->
-                            @if($product->img_path)
-                                <img class="card-img-top" src="{{ $product->image_url }}" alt="{{ $product->nombre }}" style="height:250px;object-fit:cover;" />
-                            @else
-                                <div style="height: 250px; background-color: #222; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-camera fa-2x text-muted"></i>
+                            {{-- Imagen del producto --}}
+                            <a href="{{ route('product.show', $product->id) }}" class="d-block overflow-hidden" style="height:250px;">
+                                @if($product->img_path)
+                                    <img class="card-img-top h-100 w-100" src="{{ $product->image_url }}" alt="{{ $product->nombre }}" style="object-fit:cover;transition:transform .3s ease;" loading="lazy"
+                                         onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
+                                @else
+                                    <div class="h-100 d-flex align-items-center justify-content-center" style="background:#222;">
+                                        <i class="fas fa-vest fa-2x text-muted"></i>
+                                    </div>
+                                @endif
+                            </a>
+
+                            {{-- Indicador de múltiples imágenes --}}
+                            @if(!empty($product->imagenes) && count($product->imagenes) > 0)
+                                <div class="position-absolute" style="top:.5rem;left:.5rem;">
+                                    <span class="badge" style="background:rgba(0,0,0,.6);font-size:.65rem;">
+                                        <i class="fas fa-images me-1"></i>{{ count($product->imagenes) + 1 }}
+                                    </span>
                                 </div>
                             @endif
 
-                            <!-- Product details-->
+                            <!-- Product details -->
                             <div class="card-body p-4">
                                 <div class="text-start">
                                     <div class="small text-muted text-uppercase mb-1">{{ $product->marca->nombre ?? 'Jacket Store' }}</div>
-                                    <h5 class="fw-bolder text-white text-truncate">{{ $product->nombre }}</h5>
+                                    <h5 class="fw-bolder text-white text-truncate mb-1">{{ $product->nombre }}</h5>
+                                    @if($product->categoria && $product->categoria->caracteristica)
+                                        <div class="small text-muted mb-2">{{ $product->categoria->caracteristica->nombre }}</div>
+                                    @endif
                                     <div class="text-info fw-bold fs-5">${{ number_format($product->precio, 0) }}</div>
                                 </div>
                             </div>
-                            <!-- Product actions-->
+
+                            <!-- Product actions -->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center">
-                                    <a class="btn btn-outline-info mt-auto w-100" href="{{ route('product.show', $product->id) }}">VER DETALLES</a>
-                                </div>
+                                <a class="btn btn-outline-info mt-auto w-100" href="{{ route('product.show', $product->id) }}">VER DETALLES</a>
                             </div>
                         </div>
                     </div>
@@ -116,11 +141,12 @@
                             <i class="fas fa-search fa-3x mb-3"></i>
                             <h3>No encontramos productos</h3>
                             <p>Intenta ajustar tus filtros de búsqueda.</p>
+                            <a href="{{ route('collection') }}" class="btn btn-outline-light btn-sm mt-2">Ver todos los productos</a>
                         </div>
                     </div>
                 @endforelse
             </div>
-            
+
             <!-- Pagination -->
             <div class="d-flex justify-content-center mt-4">
                 {{ $products->links('pagination::bootstrap-5') }}
