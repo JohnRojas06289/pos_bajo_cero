@@ -70,7 +70,14 @@ class PublicController extends Controller
             ->take(4)
             ->get();
 
-        return view('public.show', compact('product', 'relatedProducts'));
+        $featuredProducts = Producto::with(['inventario', 'marca.caracteristica'])
+            ->where('estado', 1)
+            ->where('id', '!=', $id)
+            ->latest()
+            ->take(4)
+            ->get();
+
+        return view('public.show', compact('product', 'relatedProducts', 'featuredProducts'));
     }
 
     public function contact()

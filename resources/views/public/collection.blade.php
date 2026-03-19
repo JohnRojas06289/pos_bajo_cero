@@ -22,7 +22,7 @@
         <!-- Sidebar Filters -->
         <div class="col-lg-3">
             <div class="collapse d-lg-block mb-5" id="filterCollapse">
-                <div class="card bg-dark border-secondary text-white p-4 shadow-sm">
+                <div class="filter-card p-4 shadow-sm">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="fw-bold mb-0 text-primary"><i class="fas fa-sliders-h me-2"></i>FILTROS</h4>
                     </div>
@@ -30,13 +30,13 @@
                     <form action="{{ route('collection') }}" method="GET">
                         <!-- Text Search -->
                         <div class="mb-4">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Buscar</label>
+                            <label class="filter-label">Buscar</label>
                             <input type="text" name="search" class="form-control form-control-dark" placeholder="¿Qué buscas?" value="{{ request('search') }}">
                         </div>
 
                         <!-- Categories -->
                         <div class="mb-4">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Categoría</label>
+                            <label class="filter-label">Categoría</label>
                             <select name="categoria" class="form-select form-control-dark">
                                 <option value="all">Todas las categorías</option>
                                 @foreach($categorias as $cat)
@@ -52,7 +52,7 @@
 
                         <!-- Brands -->
                         <div class="mb-4">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Marca</label>
+                            <label class="filter-label">Marca</label>
                             <select name="marca" class="form-select form-control-dark">
                                 <option value="all">Todas las marcas</option>
                                 @foreach($marcas as $marca)
@@ -69,7 +69,7 @@
                         <button type="submit" class="btn btn-neon w-100 py-2">APLICAR</button>
 
                         @if(request()->hasAny(['search', 'categoria', 'marca']))
-                            <a href="{{ route('collection') }}" class="btn btn-link text-white-50 w-100 mt-2 text-decoration-none small">
+                            <a href="{{ route('collection') }}" class="btn btn-link w-100 mt-2 text-decoration-none small" style="color:var(--text-muted);">
                                 <i class="fas fa-times me-1"></i> Limpiar Filtros
                             </a>
                         @endif

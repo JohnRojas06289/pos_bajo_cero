@@ -4,466 +4,183 @@
 
 @push('css')
 <style>
-/* ═══════════════════════════════════════
-   PRODUCT PAGE LAYOUT
-═══════════════════════════════════════ */
-.product-page {
-    padding-top: 90px;
-    padding-bottom: 80px;
-    min-height: 100vh;
-}
+/* ── Product page layout ── */
+.product-page { padding-top: 90px; padding-bottom: 80px; min-height: 100vh; }
 
-/* ═══════════════════════════════════════
-   GALLERY
-═══════════════════════════════════════ */
-.gallery-col {
-    position: sticky;
-    top: 80px;
-}
+/* ── Sticky gallery col ── */
+.gallery-col { position: sticky; top: 80px; align-self: flex-start; }
+@media (max-width: 991px) { .gallery-col { position: static; } }
 
-/* Main image */
+/* ── Main image ── */
 .gallery-main {
     position: relative;
     width: 100%;
-    height: 540px;
+    height: 520px;
     border-radius: 16px;
     overflow: hidden;
-    background: #111;
     cursor: zoom-in;
 }
-.gallery-main img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.4s ease;
-}
-.gallery-main:hover img {
-    transform: scale(1.06);
-}
-.gallery-main-placeholder {
-    width: 100%;
-    height: 540px;
-    border-radius: 16px;
-    background: #111;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+.gallery-main img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
+.gallery-main:hover img { transform: scale(1.05); }
+.gallery-no-img { width: 100%; height: 520px; border-radius: 16px; display: flex; align-items: center; justify-content: center; }
 
-/* Expand button */
-.btn-gallery-expand {
-    position: absolute;
-    bottom: 14px;
-    right: 14px;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(255,255,255,0.15);
-    color: #fff;
-    border-radius: 10px;
-    padding: 8px 12px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: background 0.2s;
-    z-index: 2;
-    letter-spacing: 0.02em;
-}
-.btn-gallery-expand:hover {
-    background: rgba(0,0,0,0.85);
-}
+@media (max-width: 991px) { .gallery-main, .gallery-no-img { height: 380px; } }
+@media (max-width: 575px) { .gallery-main, .gallery-no-img { height: 290px; border-radius: 12px; } }
 
-/* Image counter badge */
-.gallery-counter {
-    position: absolute;
-    top: 14px;
-    left: 14px;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.8);
-    border-radius: 8px;
-    padding: 4px 10px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    z-index: 2;
-    letter-spacing: 0.05em;
+/* Expand badge */
+.btn-expand-gallery {
+    position: absolute; bottom: 14px; right: 14px;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.18); color: #fff;
+    border-radius: 10px; padding: 7px 13px; font-size: 0.75rem;
+    font-weight: 600; cursor: pointer; display: flex; align-items: center;
+    gap: 6px; transition: background 0.2s; z-index: 2; letter-spacing: 0.03em;
+}
+.btn-expand-gallery:hover { background: rgba(0,0,0,0.8); }
+
+/* Counter badge */
+.gallery-img-counter {
+    position: absolute; top: 14px; left: 14px;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.85);
+    border-radius: 8px; padding: 4px 10px; font-size: 0.7rem; font-weight: 600; z-index: 2;
 }
 
 /* Thumbnails */
-.thumbs-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    padding-bottom: 2px;
-}
+.thumbs-row { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
 .thumbs-row::-webkit-scrollbar { display: none; }
+@media (max-width: 575px) { .gallery-thumb-item { width: 60px; height: 60px; } }
 
-.thumb {
-    flex-shrink: 0;
-    width: 76px;
-    height: 76px;
-    border-radius: 10px;
-    overflow: hidden;
-    cursor: pointer;
-    border: 2.5px solid transparent;
-    transition: border-color 0.2s, transform 0.18s, opacity 0.2s;
-    background: #111;
-    opacity: 0.65;
-}
-.thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-.thumb:hover { opacity: 1; transform: translateY(-2px); }
-.thumb.active { border-color: var(--primary-color); opacity: 1; }
+/* ── Product info col ── */
+.product-info-col { padding-left: 2.5rem; }
+@media (max-width: 991px) { .product-info-col { padding-left: 0; margin-top: 2rem; } }
 
-/* ═══════════════════════════════════════
-   PRODUCT INFO
-═══════════════════════════════════════ */
-.product-info-col {
-    padding-left: 2.5rem;
+/* Badges row */
+.badge-brand {
+    display: inline-block; background: var(--primary-color); color: #000;
+    font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.12em; padding: 4px 12px; border-radius: 6px; margin-right: 6px; margin-bottom: 12px;
 }
-@media (max-width: 991px) {
-    .product-info-col { padding-left: 0; margin-top: 2rem; }
-    .gallery-col { position: static; }
-    .gallery-main { height: 380px; }
-    .gallery-main-placeholder { height: 380px; }
-}
-@media (max-width: 575px) {
-    .gallery-main { height: 300px; }
-    .gallery-main-placeholder { height: 300px; }
-    .thumb { width: 60px; height: 60px; }
+.badge-cat {
+    display: inline-block; background: var(--card-bg); border: 1px solid var(--card-border);
+    color: var(--text-muted); font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.1em; padding: 4px 12px; border-radius: 6px; margin-right: 6px; margin-bottom: 12px;
 }
 
-.product-brand-badge {
-    display: inline-block;
-    background: var(--primary-color);
-    color: #000;
-    font-size: 0.7rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    padding: 4px 12px;
-    border-radius: 6px;
-    margin-bottom: 14px;
-}
-.product-cat-badge {
-    display: inline-block;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.12);
-    color: rgba(255,255,255,0.6);
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 4px 12px;
-    border-radius: 6px;
-    margin-bottom: 14px;
-    margin-left: 6px;
-}
+/* Price */
+.price-display { font-size: 2rem; font-weight: 800; color: var(--primary-color); letter-spacing: -0.02em; margin-bottom: 1rem; line-height: 1; }
 
-.product-name {
-    font-size: clamp(1.5rem, 3.5vw, 2.1rem);
-    font-weight: 800;
-    color: #fff;
-    line-height: 1.2;
-    margin-bottom: 0.75rem;
-}
+/* Attr grid */
+.attr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.5rem; }
 
-.product-price {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--primary-color);
-    letter-spacing: -0.02em;
-    margin-bottom: 1rem;
-}
-
-/* Stock pill */
-.stock-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    border-radius: 30px;
-    font-size: 0.78rem;
-    font-weight: 700;
-    margin-bottom: 1.25rem;
-}
-.stock-pill.in  { background: rgba(39,174,96,.13); color: #27ae60; border: 1px solid rgba(39,174,96,.25); }
-.stock-pill.out { background: rgba(231,76,60,.13); color: #e74c3c; border: 1px solid rgba(231,76,60,.25); }
-.stock-pill.ask { background: rgba(255,255,255,.06); color: rgba(255,255,255,.45); border: 1px solid rgba(255,255,255,.1); }
-
-/* Divider */
-.info-divider { border-color: rgba(255,255,255,0.07); margin: 1.25rem 0; }
-
-/* Descripción */
-.product-description {
-    color: rgba(255,255,255,0.55);
-    font-size: 0.92rem;
-    line-height: 1.75;
-    margin-bottom: 1.25rem;
-}
-
-/* Atributos */
-.attr-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 1.5rem;
-}
-.attr-item {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 10px;
-    padding: 10px 14px;
-}
-.attr-label {
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: rgba(255,255,255,0.35);
-    margin-bottom: 3px;
-}
-.attr-value {
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: rgba(255,255,255,0.85);
-}
-
-/* CTA Buttons */
-.btn-whatsapp {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    padding: 15px;
-    border-radius: 12px;
-    background: #25d366;
-    color: #fff;
-    font-weight: 800;
-    font-size: 0.95rem;
-    letter-spacing: 0.04em;
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.2s, transform 0.15s;
-    margin-bottom: 10px;
-}
-.btn-whatsapp:hover { background: #1da851; transform: translateY(-1px); color: #fff; }
-.btn-whatsapp:active { transform: translateY(0); }
-
-.btn-back {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding: 12px;
-    border-radius: 12px;
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.12);
-    color: rgba(255,255,255,0.5);
-    font-size: 0.85rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: border-color 0.2s, color 0.2s;
-}
-.btn-back:hover { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.8); }
-
-/* Garantías */
-.guarantees {
-    display: flex;
-    gap: 0;
-    margin-top: 1.5rem;
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 12px;
-    overflow: hidden;
-}
-.guarantee-item {
-    flex: 1;
-    padding: 14px 8px;
-    text-align: center;
-    border-right: 1px solid rgba(255,255,255,0.07);
-}
-.guarantee-item:last-child { border-right: none; }
-.guarantee-item i { font-size: 1.1rem; margin-bottom: 5px; display: block; }
-.guarantee-item span { font-size: 0.65rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.05em; }
-
-/* ═══════════════════════════════════════
-   LIGHTBOX
-═══════════════════════════════════════ */
+/* ══════════════════════
+   LIGHTBOX — blur modal
+══════════════════════ */
 .lb-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.96);
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     z-index: 10000;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 24px 16px;
 }
 .lb-overlay.open { display: flex; }
 
-.lb-main {
-    flex: 1;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 80px 20px;
-    min-height: 0;
+/* Dialog box — centered, not covering 100% */
+.lb-dialog {
     position: relative;
-}
-@media (max-width: 575px) { .lb-main { padding: 60px 16px 20px; } }
-
-.lb-main img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
-    user-select: none;
-    display: block;
-}
-
-/* Nav arrows */
-.lb-arrow {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
-    color: #fff;
-    border-radius: 50%;
-    width: 52px;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.2s;
-    z-index: 10001;
-}
-.lb-arrow:hover { background: rgba(255,255,255,0.2); }
-.lb-arrow.lb-prev { left: 16px; }
-.lb-arrow.lb-next { right: 16px; }
-
-/* Close */
-.lb-close {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
-    color: #fff;
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.2s;
-    z-index: 10001;
-}
-.lb-close:hover { background: rgba(220,50,50,0.5); }
-
-/* Counter + thumbnails bottom bar */
-.lb-bottom {
-    flex-shrink: 0;
-    width: 100%;
-    padding: 12px 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 14px;
+    max-width: min(880px, 96vw);
+    width: 100%;
 }
-.lb-counter-text {
-    color: rgba(255,255,255,0.4);
-    font-size: 0.78rem;
-    letter-spacing: 0.1em;
-}
-.lb-thumbs {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    max-width: 100%;
-    padding: 2px 4px;
-}
-.lb-thumbs::-webkit-scrollbar { display: none; }
-.lb-thumb {
-    flex-shrink: 0;
-    width: 58px;
-    height: 58px;
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-    border: 2px solid transparent;
-    opacity: 0.55;
-    transition: opacity 0.2s, border-color 0.2s;
-}
-.lb-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.lb-thumb:hover { opacity: 0.85; }
-.lb-thumb.active { border-color: var(--primary-color); opacity: 1; }
 
-/* ═══════════════════════════════════════
-   RELATED PRODUCTS
-═══════════════════════════════════════ */
-.section-related { margin-top: 80px; padding-top: 48px; border-top: 1px solid rgba(255,255,255,0.07); }
-.section-related h2 { font-size: 1.3rem; font-weight: 800; color: #fff; margin-bottom: 1.5rem; letter-spacing: 0.04em; }
-
-.related-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.07);
+/* Image container */
+.lb-img-wrap {
+    position: relative;
+    background: rgba(0,0,0,0.3);
     border-radius: 14px;
     overflow: hidden;
-    text-decoration: none;
-    display: block;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s;
-}
-.related-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.5);
-    border-color: rgba(255,255,255,0.14);
-}
-.related-card-img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    display: block;
-}
-.related-card-no-img {
-    width: 100%;
-    height: 200px;
-    background: #111;
     display: flex;
     align-items: center;
     justify-content: center;
+    max-height: 72vh;
+    width: 100%;
 }
-.related-card-body { padding: 14px 16px; }
-.related-card-name { font-weight: 700; font-size: 0.88rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
-.related-card-price { font-size: 0.92rem; font-weight: 800; color: var(--primary-color); }
-.related-card-stock { font-size: 0.7rem; color: rgba(255,255,255,0.35); margin-top: 2px; }
+.lb-img-wrap img {
+    max-width: 100%;
+    max-height: 72vh;
+    object-fit: contain;
+    display: block;
+    border-radius: 14px;
+    user-select: none;
+}
+
+/* Nav arrows — over the image */
+.lb-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #fff;
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; cursor: pointer;
+    transition: background 0.2s; z-index: 2;
+}
+.lb-arrow:hover { background: rgba(0,0,0,0.75); }
+.lb-arrow-prev { left: 10px; }
+.lb-arrow-next { right: 10px; }
+
+/* Close button */
+.lb-close {
+    position: absolute;
+    top: -14px; right: -14px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #fff; border-radius: 50%;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; cursor: pointer;
+    transition: background 0.2s; z-index: 3;
+}
+.lb-close:hover { background: rgba(200,30,30,0.7); }
+
+/* Bottom bar */
+.lb-bottom { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.lb-counter { color: rgba(255,255,255,0.5); font-size: 0.75rem; letter-spacing: 0.1em; }
+.lb-thumbs-bar { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 4px; max-width: 100%; }
+.lb-thumbs-bar::-webkit-scrollbar { display: none; }
+.lb-t { flex-shrink: 0; width: 54px; height: 54px; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid transparent; opacity: 0.55; transition: opacity 0.2s, border-color 0.2s; }
+.lb-t img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lb-t:hover { opacity: 0.85; }
+.lb-t.active { border-color: var(--primary-color); opacity: 1; }
+
+/* ══════════════════════
+   SECTIONS BELOW
+══════════════════════ */
+.product-sections { margin-top: 72px; }
+.prod-section { padding-top: 48px; border-top: 1px solid var(--card-border); margin-top: 48px; }
+.prod-section:first-child { margin-top: 0; }
 </style>
 @endpush
 
 @section('content')
 @php
-    $allImages  = $product->todas_imagenes_urls; // [{path, url, main}]
-    $totalImgs  = count($allImages);
-    $mainUrl    = $totalImgs > 0 ? $allImages[0]['url'] : null;
-    $stock      = $product->inventario ? $product->inventario->cantidad : null;
+    $allImages   = $product->todas_imagenes_urls;
+    $totalImgs   = count($allImages);
+    $mainUrl     = $totalImgs > 0 ? $allImages[0]['url'] : null;
+    $stock       = optional($product->inventario)->cantidad;
     $marcaNombre = optional(optional($product->marca)->caracteristica)->nombre;
     $catNombre   = optional(optional($product->categoria)->caracteristica)->nombre;
 @endphp
@@ -472,135 +189,126 @@
 <div class="container px-4 px-md-5">
 <div class="row gx-lg-5">
 
-    {{-- ═══ GALERÍA ═══ --}}
+    {{-- ══ GALERÍA ══ --}}
     <div class="col-lg-7 gallery-col">
-
         @if($mainUrl)
-            {{-- Imagen principal --}}
-            <div class="gallery-main" id="galleryMain" onclick="lbOpen(0)" title="Clic para ampliar">
+            <div class="gallery-main gallery-main-bg" id="galleryMain"
+                 onclick="lbOpen(currentIdx)" title="Clic para ampliar">
                 <img id="mainImg" src="{{ $mainUrl }}" alt="{{ $product->nombre }}" />
 
                 @if($totalImgs > 1)
-                    <div class="gallery-counter">
+                    <div class="gallery-img-counter">
                         <i class="fas fa-images me-1"></i>
-                        <span id="mainCounter">1</span> / {{ $totalImgs }}
+                        <span id="mainCounterLabel">1</span>&nbsp;/&nbsp;{{ $totalImgs }}
                     </div>
                 @endif
 
-                <button class="btn-gallery-expand" onclick="event.stopPropagation(); lbOpen(currentThumb)">
-                    <i class="fas fa-expand-alt"></i> Ver ampliado
+                <button class="btn-expand-gallery"
+                        onclick="event.stopPropagation(); lbOpen(currentIdx)">
+                    <i class="fas fa-expand-alt"></i> Ampliar
                 </button>
             </div>
 
-            {{-- Miniaturas --}}
             @if($totalImgs > 1)
                 <div class="thumbs-row" id="thumbsRow">
                     @foreach($allImages as $i => $img)
-                        <div class="thumb {{ $i === 0 ? 'active' : '' }}"
-                             onclick="selectThumb({{ $i }})"
-                             title="Foto {{ $i + 1 }}">
+                        <div class="gallery-thumb-item {{ $i === 0 ? 'active' : '' }}"
+                             onclick="selectImg({{ $i }})" title="Foto {{ $i + 1 }}">
                             <img src="{{ $img['url'] }}" alt="Foto {{ $i + 1 }}" loading="lazy" />
                         </div>
                     @endforeach
                 </div>
             @endif
-
         @else
-            <div class="gallery-main-placeholder">
-                <i class="fas fa-vest fa-4x" style="color: rgba(255,255,255,0.1);"></i>
+            <div class="gallery-no-img gallery-main-bg">
+                <i class="fas fa-vest fa-4x" style="color:var(--card-border);"></i>
             </div>
         @endif
     </div>
 
-    {{-- ═══ INFO DEL PRODUCTO ═══ --}}
+    {{-- ══ INFO ══ --}}
     <div class="col-lg-5 product-info-col">
 
-        {{-- Badges de marca / categoría --}}
+        {{-- Badges --}}
         <div>
-            @if($marcaNombre)
-                <span class="product-brand-badge">{{ $marcaNombre }}</span>
-            @endif
-            @if($catNombre)
-                <span class="product-cat-badge">{{ $catNombre }}</span>
-            @endif
-            @if($product->genero)
-                <span class="product-cat-badge">{{ $product->genero }}</span>
-            @endif
+            @if($marcaNombre) <span class="badge-brand">{{ $marcaNombre }}</span> @endif
+            @if($catNombre)   <span class="badge-cat">{{ $catNombre }}</span> @endif
+            @if($product->genero) <span class="badge-cat">{{ $product->genero }}</span> @endif
         </div>
 
         {{-- Nombre --}}
-        <h1 class="product-name">{{ $product->nombre }}</h1>
+        <h1 class="product-heading fw-bold mb-2" style="font-size:clamp(1.4rem,3.2vw,2rem);line-height:1.2;">
+            {{ $product->nombre }}
+        </h1>
 
         {{-- Precio --}}
-        <div class="product-price">${{ number_format($product->precio, 0) }}</div>
+        <div class="price-display">${{ number_format($product->precio, 0) }}</div>
 
         {{-- Stock --}}
         @if($stock !== null)
             @if($stock > 0)
-                <div class="stock-pill in">
-                    <i class="fas fa-check-circle"></i>
-                    En stock &mdash; {{ $stock }} disponibles
+                <div class="stock-pill-pub stock-pill-in">
+                    <i class="fas fa-check-circle"></i> En stock &mdash; {{ $stock }} disponibles
                 </div>
             @else
-                <div class="stock-pill out">
+                <div class="stock-pill-pub stock-pill-out">
                     <i class="fas fa-times-circle"></i> Agotado
                 </div>
             @endif
         @else
-            <div class="stock-pill ask">
+            <div class="stock-pill-pub stock-pill-ask">
                 <i class="fas fa-question-circle"></i> Consultar disponibilidad
             </div>
         @endif
 
-        <hr class="info-divider">
+        <hr class="info-sep">
 
         {{-- Descripción --}}
         @if($product->descripcion)
-            <p class="product-description">{{ $product->descripcion }}</p>
+            <p class="product-desc-text mb-4">{{ $product->descripcion }}</p>
         @endif
 
         {{-- Atributos --}}
         @php
             $attrs = [];
-            if ($product->codigo)       $attrs[] = ['label' => 'Código',       'value' => $product->codigo];
-            if ($product->color)        $attrs[] = ['label' => 'Color',         'value' => $product->color];
-            if ($product->material)     $attrs[] = ['label' => 'Material',      'value' => $product->material];
-            if ($product->presentacione) $attrs[] = ['label' => 'Talla / Unidad', 'value' => $product->presentacione->nombre];
+            if ($product->codigo)        $attrs[] = ['l' => 'Código',        'v' => $product->codigo];
+            if ($product->color)         $attrs[] = ['l' => 'Color',         'v' => $product->color];
+            if ($product->material)      $attrs[] = ['l' => 'Material',      'v' => $product->material];
+            if ($product->presentacione) $attrs[] = ['l' => 'Talla / Und.',  'v' => $product->presentacione->nombre];
         @endphp
         @if(count($attrs))
-            <div class="attr-grid">
-                @foreach($attrs as $attr)
-                    <div class="attr-item">
-                        <div class="attr-label">{{ $attr['label'] }}</div>
-                        <div class="attr-value">{{ $attr['value'] }}</div>
+            <div class="attr-grid mb-4">
+                @foreach($attrs as $a)
+                    <div class="attr-card">
+                        <div class="attr-label">{{ $a['l'] }}</div>
+                        <div class="attr-value">{{ $a['v'] }}</div>
                     </div>
                 @endforeach
             </div>
         @endif
 
         {{-- CTA --}}
-        <a href="https://wa.me/573001234567?text={{ urlencode('Hola! Me interesa el producto: ' . $product->nombre . ' — Precio: $' . number_format($product->precio, 0)) }}"
-           target="_blank" rel="noopener" class="btn-whatsapp">
-            <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i>
+        <a href="https://wa.me/573001234567?text={{ urlencode('Hola! Me interesa: ' . $product->nombre . ' — $' . number_format($product->precio, 0)) }}"
+           target="_blank" rel="noopener" class="btn-wsp">
+            <i class="fab fa-whatsapp" style="font-size:1.15rem;"></i>
             CONSULTAR POR WHATSAPP
         </a>
-
-        <a href="{{ route('collection') }}" class="btn-back">
+        <a href="{{ route('collection') }}" class="btn-back-cat">
             <i class="fas fa-arrow-left"></i> Volver al catálogo
         </a>
 
         {{-- Garantías --}}
-        <div class="guarantees">
-            <div class="guarantee-item">
-                <i class="fas fa-truck" style="color: var(--primary-color);"></i>
+        <div class="guarantee-bar">
+            <div class="guarantee-bar-item">
+                <i class="fas fa-truck" style="color:var(--primary-color);"></i>
                 <span>Envío Colombia</span>
             </div>
-            <div class="guarantee-item">
-                <i class="fas fa-shield-alt" style="color: #27ae60;"></i>
+            <div class="guarantee-bar-item">
+                <i class="fas fa-shield-alt" style="color:#27ae60;"></i>
                 <span>Garantía 30 días</span>
             </div>
-            <div class="guarantee-item">
-                <i class="fab fa-whatsapp" style="color: #25d366;"></i>
+            <div class="guarantee-bar-item">
+                <i class="fab fa-whatsapp" style="color:#25d366;"></i>
                 <span>Atención directa</span>
             </div>
         </div>
@@ -608,65 +316,102 @@
     </div>
 </div>
 
-{{-- ═══ PRODUCTOS RELACIONADOS ═══ --}}
-@if($relatedProducts->isNotEmpty())
-<div class="section-related">
-    <h2>PRODUCTOS RELACIONADOS</h2>
-    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3">
-        @foreach($relatedProducts as $rel)
-            @php $relStock = optional($rel->inventario)->cantidad ?? 0; @endphp
-            <div class="col">
-                <a href="{{ route('product.show', $rel->id) }}" class="related-card">
-                    @if($rel->img_path)
-                        <img class="related-card-img" src="{{ $rel->image_url }}" alt="{{ $rel->nombre }}" loading="lazy" />
-                    @else
-                        <div class="related-card-no-img">
-                            <i class="fas fa-vest fa-2x" style="color:rgba(255,255,255,0.1);"></i>
-                        </div>
-                    @endif
-                    <div class="related-card-body">
-                        <div class="related-card-name">{{ $rel->nombre }}</div>
-                        <div class="related-card-price">${{ number_format($rel->precio, 0) }}</div>
-                        <div class="related-card-stock">
-                            @if($relStock > 0) En stock @else Agotado @endif
-                        </div>
-                    </div>
-                </a>
-            </div>
-        @endforeach
-    </div>
-</div>
-@endif
+{{-- ══ SECCIONES INFERIORES ══ --}}
+<div class="product-sections">
 
+    {{-- Productos relacionados --}}
+    @if($relatedProducts->isNotEmpty())
+    <div class="prod-section">
+        <div class="section-title-pub">Productos relacionados</div>
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3">
+            @foreach($relatedProducts as $rel)
+                @php $rs = optional($rel->inventario)->cantidad ?? 0; @endphp
+                <div class="col">
+                    <a href="{{ route('product.show', $rel->id) }}" class="pub-product-card">
+                        @if($rel->img_path)
+                            <img class="pub-product-card-img" src="{{ $rel->image_url }}" alt="{{ $rel->nombre }}" loading="lazy" />
+                        @else
+                            <div class="pub-product-card-noimg">
+                                <i class="fas fa-vest fa-2x" style="color:var(--card-border);"></i>
+                            </div>
+                        @endif
+                        <div class="pub-product-card-body">
+                            <div class="pub-product-card-name">{{ $rel->nombre }}</div>
+                            <div class="pub-product-card-price">${{ number_format($rel->precio, 0) }}</div>
+                            <div class="pub-product-card-stock">{{ $rs > 0 ? 'En stock' : 'Agotado' }}</div>
+                        </div>
+                    </a>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Productos destacados --}}
+    @if($featuredProducts->isNotEmpty())
+    <div class="prod-section">
+        <div class="section-title-pub">También te puede interesar</div>
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3">
+            @foreach($featuredProducts as $feat)
+                @php $fs = optional($feat->inventario)->cantidad ?? 0; @endphp
+                <div class="col">
+                    <a href="{{ route('product.show', $feat->id) }}" class="pub-product-card">
+                        @if($feat->img_path)
+                            <img class="pub-product-card-img" src="{{ $feat->image_url }}" alt="{{ $feat->nombre }}" loading="lazy" />
+                        @else
+                            <div class="pub-product-card-noimg">
+                                <i class="fas fa-vest fa-2x" style="color:var(--card-border);"></i>
+                            </div>
+                        @endif
+                        <div class="pub-product-card-body">
+                            <div class="pub-product-card-name">{{ $feat->nombre }}</div>
+                            <div class="pub-product-card-price">${{ number_format($feat->precio, 0) }}</div>
+                            <div class="pub-product-card-stock">{{ $fs > 0 ? 'En stock' : 'Agotado' }}</div>
+                        </div>
+                    </a>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+</div>{{-- /product-sections --}}
 </div>{{-- /container --}}
 </div>{{-- /product-page --}}
 
-{{-- ═══ LIGHTBOX ═══ --}}
+{{-- ══ LIGHTBOX ══ --}}
 @if($totalImgs > 0)
-<div class="lb-overlay" id="lbOverlay">
-    <button class="lb-close" onclick="lbClose()"><i class="fas fa-times"></i></button>
+<div class="lb-overlay" id="lbOverlay" onclick="lbBgClick(event)">
+    <div class="lb-dialog" id="lbDialog">
+        <button class="lb-close" onclick="lbClose()" title="Cerrar (Esc)">
+            <i class="fas fa-times"></i>
+        </button>
 
-    @if($totalImgs > 1)
-        <button class="lb-arrow lb-prev" onclick="lbNav(-1)"><i class="fas fa-chevron-left"></i></button>
-        <button class="lb-arrow lb-next" onclick="lbNav(1)"><i class="fas fa-chevron-right"></i></button>
-    @endif
+        <div class="lb-img-wrap" id="lbImgWrap">
+            @if($totalImgs > 1)
+                <button class="lb-arrow lb-arrow-prev" onclick="event.stopPropagation(); lbNav(-1)">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="lb-arrow lb-arrow-next" onclick="event.stopPropagation(); lbNav(1)">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            @endif
+            <img id="lbImg" src="" alt="{{ $product->nombre }}" onclick="event.stopPropagation()" />
+        </div>
 
-    <div class="lb-main">
-        <img id="lbImg" src="" alt="{{ $product->nombre }}" />
-    </div>
-
-    <div class="lb-bottom">
-        <div class="lb-counter-text" id="lbCounter">1 / {{ $totalImgs }}</div>
-        @if($totalImgs > 1)
-            <div class="lb-thumbs" id="lbThumbs">
-                @foreach($allImages as $i => $img)
-                    <div class="lb-thumb {{ $i === 0 ? 'active' : '' }}"
-                         onclick="lbGoTo({{ $i }})">
-                        <img src="{{ $img['url'] }}" alt="Foto {{ $i + 1 }}" loading="lazy" />
-                    </div>
-                @endforeach
-            </div>
-        @endif
+        <div class="lb-bottom">
+            <div class="lb-counter" id="lbCounter">1 / {{ $totalImgs }}</div>
+            @if($totalImgs > 1)
+                <div class="lb-thumbs-bar" id="lbThumbsBar">
+                    @foreach($allImages as $i => $img)
+                        <div class="lb-t {{ $i === 0 ? 'active' : '' }}"
+                             onclick="lbGoTo({{ $i }})">
+                            <img src="{{ $img['url'] }}" alt="Foto {{ $i+1 }}" loading="lazy" />
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
     </div>
 </div>
 @endif
@@ -676,20 +421,19 @@
 @push('js')
 <script>
 const IMGS = @json(array_values(array_map(fn($img) => $img['url'], $allImages)));
-let currentThumb = 0;
+let currentIdx = 0;
 
-/* ── Select thumbnail (gallery page) ── */
-function selectThumb(index) {
-    currentThumb = index;
-    document.getElementById('mainImg').src = IMGS[index];
-    document.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === index));
-    const counter = document.getElementById('mainCounter');
-    if (counter) counter.textContent = index + 1;
+function selectImg(i) {
+    currentIdx = i;
+    const mi = document.getElementById('mainImg');
+    if (mi) mi.src = IMGS[i];
+    document.querySelectorAll('.gallery-thumb-item').forEach((t,j) => t.classList.toggle('active', j===i));
+    const lbl = document.getElementById('mainCounterLabel');
+    if (lbl) lbl.textContent = i + 1;
 }
 
-/* ── Lightbox ── */
-function lbOpen(index) {
-    currentThumb = index;
+function lbOpen(i) {
+    currentIdx = i;
     lbRender();
     document.getElementById('lbOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -698,47 +442,44 @@ function lbClose() {
     document.getElementById('lbOverlay').classList.remove('open');
     document.body.style.overflow = '';
 }
-function lbNav(dir) {
-    lbGoTo((currentThumb + dir + IMGS.length) % IMGS.length);
+function lbBgClick(e) {
+    // Close only when clicking the dark backdrop (not the dialog itself)
+    if (e.target === document.getElementById('lbOverlay')) lbClose();
 }
-function lbGoTo(index) {
-    currentThumb = index;
+function lbNav(dir) { lbGoTo((currentIdx + dir + IMGS.length) % IMGS.length); }
+function lbGoTo(i) {
+    currentIdx = i;
     lbRender();
-    // Sync gallery thumbnails too
-    selectThumb(index);
+    selectImg(i);
 }
 function lbRender() {
-    document.getElementById('lbImg').src = IMGS[currentThumb];
-    const counter = document.getElementById('lbCounter');
-    if (counter) counter.textContent = (currentThumb + 1) + ' / ' + IMGS.length;
-    document.querySelectorAll('.lb-thumb').forEach((t, i) => t.classList.toggle('active', i === currentThumb));
-    // Scroll lb-thumb into view
-    const active = document.querySelector('.lb-thumb.active');
-    if (active) active.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    document.getElementById('lbImg').src = IMGS[currentIdx];
+    const c = document.getElementById('lbCounter');
+    if (c) c.textContent = (currentIdx + 1) + ' / ' + IMGS.length;
+    document.querySelectorAll('.lb-t').forEach((t,i) => t.classList.toggle('active', i===currentIdx));
+    const at = document.querySelector('.lb-t.active');
+    if (at) at.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
 }
 
-/* ── Keyboard ── */
-document.addEventListener('keydown', function(e) {
+document.addEventListener('keydown', e => {
     if (!document.getElementById('lbOverlay')?.classList.contains('open')) return;
-    if (e.key === 'Escape')      lbClose();
-    if (e.key === 'ArrowLeft')   lbNav(-1);
-    if (e.key === 'ArrowRight')  lbNav(1);
+    if (e.key === 'Escape')     lbClose();
+    if (e.key === 'ArrowLeft')  lbNav(-1);
+    if (e.key === 'ArrowRight') lbNav(1);
 });
 
-/* ── Touch swipe (lightbox) ── */
-(function() {
-    let startX = null;
-    const el = document.getElementById('lbOverlay');
+// Touch swipe
+(function(){
+    let sx = null;
+    const el = document.getElementById('lbImgWrap');
     if (!el) return;
-    el.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+    el.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, {passive:true});
     el.addEventListener('touchend', e => {
-        if (startX === null) return;
-        const dx = startX - e.changedTouches[0].clientX;
+        if (sx === null) return;
+        const dx = sx - e.changedTouches[0].clientX;
         if (Math.abs(dx) > 40) lbNav(dx > 0 ? 1 : -1);
-        startX = null;
+        sx = null;
     });
-    // Close on backdrop click
-    el.addEventListener('click', e => { if (e.target === el) lbClose(); });
 })();
 </script>
 @endpush
