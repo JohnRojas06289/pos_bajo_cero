@@ -26,6 +26,7 @@ use App\Http\Controllers\proveedorController;
 use App\Http\Controllers\roleController;
 use App\Http\Controllers\userController;
 use App\Http\Controllers\AgenteIAController;
+use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\ventaController;
 use App\Http\Controllers\ReservaController;
 use Illuminate\Support\Facades\Auth;
@@ -126,6 +127,7 @@ Route::get('/debug-layout-data', function () {
 })->middleware('auth');
 
 Route::middleware('auth')->get('/panel', [homeController::class, 'index'])->name('panel');
+Route::middleware('auth')->get('/admin/estadisticas', [EstadisticasController::class, 'index'])->name('estadisticas.index');
 
 
 

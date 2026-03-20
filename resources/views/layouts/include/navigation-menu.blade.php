@@ -6,7 +6,10 @@
                 {{-- ══ INICIO ══ --}}
                 @can('ver-panel')
                 <div class="sb-sidenav-menu-heading">Inicio</div>
-                <x-nav.nav-link content='Panel'      icon='fas fa-chart-line'   :href="route('panel')" />
+                <x-nav.nav-link content='Panel'         icon='fas fa-chart-line'   :href="route('panel')" />
+                @endcan
+                @can('ver-estadisticas')
+                <x-nav.nav-link content='Estadísticas'  icon='fas fa-chart-bar'    :href="route('estadisticas.index')" />
                 @endcan
 
                 {{-- ══ VENTAS ══ --}}
