@@ -43,7 +43,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 use App\Http\Controllers\PublicController;
-use App\Http\Controllers\ReservaController;
 
 Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/coleccion', [PublicController::class, 'collection'])->name('collection');
