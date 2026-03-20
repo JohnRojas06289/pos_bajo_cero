@@ -1,6 +1,10 @@
 <?php
 use App\Models\Empresa;
-$empresa = Empresa::first();
+try {
+    $empresa = Empresa::first();
+} catch (\Throwable $e) {
+    $empresa = null;
+}
 if (!$empresa) {
     $empresa = (object)['nombre' => 'Bajo Cero'];
 }
