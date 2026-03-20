@@ -100,9 +100,9 @@
                     <div class="footer-heading">Bajo Cero</div>
                     <p class="text-muted mb-4">Ropa urbana inspirada en la montaña. Chaquetas, gorras y prendas para quienes desafían el frío. Estilo, calidad y actitud colombiana.</p>
                     <div class="d-flex gap-3">
-                        <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
-                        <a href="#" class="text-white"><i class="fab fa-facebook fa-lg"></i></a>
-                        <a href="#" class="text-white"><i class="fab fa-tiktok fa-lg"></i></a>
+                        <a href="#" style="color:rgba(255,255,255,0.75);font-size:1.2rem;transition:color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='rgba(255,255,255,0.75)'"><i class="fab fa-instagram"></i></a>
+                        <a href="#" style="color:rgba(255,255,255,0.75);font-size:1.2rem;transition:color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='rgba(255,255,255,0.75)'"><i class="fab fa-facebook"></i></a>
+                        <a href="#" style="color:rgba(255,255,255,0.75);font-size:1.2rem;transition:color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='rgba(255,255,255,0.75)'"><i class="fab fa-tiktok"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-4 mb-5 mb-lg-0">
@@ -116,23 +116,23 @@
                 <div class="col-lg-3 col-md-4 mb-5 mb-lg-0">
                     <div class="footer-heading">Contacto</div>
                     <div class="footer-links">
-                        <div class="mb-2"><i class="fas fa-map-marker-alt me-2 text-primary"></i> Bogotá, Colombia</div>
-                        <div class="mb-2"><i class="fab fa-whatsapp me-2 text-success"></i> +57 300 123 4567</div>
-                        <div class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i> contacto@bajocero.co</div>
+                        <div class="mb-2" style="color:rgba(255,255,255,0.65);font-size:0.85rem;"><i class="fas fa-map-marker-alt me-2" style="color:var(--primary-color);"></i> Bogotá, Colombia</div>
+                        <div class="mb-2" style="color:rgba(255,255,255,0.65);font-size:0.85rem;"><i class="fab fa-whatsapp me-2" style="color:#25d366;"></i> +57 300 123 4567</div>
+                        <div class="mb-2" style="color:rgba(255,255,255,0.65);font-size:0.85rem;"><i class="fas fa-envelope me-2" style="color:var(--primary-color);"></i> contacto@bajocero.co</div>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-4">
                     <div class="footer-heading">Pagos Seguros</div>
-                    <p class="text-muted small">Procesamos tus pagos con la máxima seguridad.</p>
-                    <div class="d-flex gap-3 text-white fs-4">
+                    <p class="text-muted mb-3">Procesamos tus pagos con la máxima seguridad.</p>
+                    <div class="d-flex gap-3 align-items-center" style="color:rgba(255,255,255,0.8);font-size:1.6rem;">
                         <i class="fab fa-cc-visa"></i>
                         <i class="fab fa-cc-mastercard"></i>
-                        <i class="fas fa-money-bill-wave"></i>
+                        <i class="fas fa-money-bill-wave" style="font-size:1.3rem;"></i>
                     </div>
                 </div>
             </div>
-            <div class="text-center mt-5 pt-4" style="border-top: 1px solid rgba(255,255,255,0.08);">
-                <small style="color: rgba(255,255,255,0.3); font-size: 0.75rem;">&copy; 2026 Bajo Cero. Todos los derechos reservados.</small>
+            <div class="footer-divider text-center">
+                <small class="footer-copyright">&copy; 2026 Bajo Cero. Todos los derechos reservados.</small>
             </div>
         </div>
     </footer>

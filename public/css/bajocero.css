@@ -1380,3 +1380,36 @@ html { scroll-behavior: smooth; }
     animation: skeleton-shine 1.5s infinite;
     border-radius: 6px;
 }
+
+/* ── FOOTER DARK MODE FIXES ──────────────────────────────────────
+   Bootstrap .text-muted usa #6c757d !important que se lee muy faint
+   sobre fondos oscuros. Overrideamos específicamente dentro de footer.
+   El footer siempre es oscuro (dark: #000, light: #1e293b) así que
+   usamos blanco con opacidad para ambos temas.
+────────────────────────────────────────────────────────────────── */
+footer .text-muted,
+footer p.text-muted,
+footer small.text-muted,
+footer .small.text-muted {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Iconos de pago y redes sociales: forzar color blanco en footer.
+   Font Awesome en modo JS reemplaza <i> con <svg> que usa currentColor.
+   Aplicamos el color al contenedor y también a las SVGs directamente. */
+footer .d-flex.gap-3 i,
+footer .d-flex.gap-3 svg {
+    color: rgba(255, 255, 255, 0.85) !important;
+    fill: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Separador y copyright del footer: más visible */
+.footer-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    margin-top: 2.5rem;
+    padding-top: 1.25rem;
+}
+.footer-copyright {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.75rem;
+}
