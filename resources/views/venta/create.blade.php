@@ -995,7 +995,7 @@ $allProductsData = $productos->map(fn($p) => [
     'codigo'      => $p->codigo ?? '',
     'precio'      => (float)($p->precio ?? 0),
     'stock'       => (int)($p->cantidad ?? 0),
-    'img_path'    => $p->img_path,
+    'img'         => $p->image_url,
     'categoria_id'=> $p->categoria_id,
     'talla'       => $p->talla_nombre ?? '',
     'genero'      => $p->genero ?? '',
@@ -1110,8 +1110,8 @@ function renderCard(p) {
     else                  stockBadge = `<span class="stock-badge ok">${p.stock} uds</span>`;
 
     let imgHtml = '';
-    if (p.img_path) {
-        imgHtml = `<img src="${p.img_path}" alt="${p.nombre}" loading="lazy">`;
+    if (p.img) {
+        imgHtml = `<img src="${p.img}" alt="${p.nombre}" loading="lazy">`;
     } else {
         imgHtml = `<div class="card-img-placeholder"><i class="fas fa-vest"></i></div>`;
     }
