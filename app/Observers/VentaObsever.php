@@ -23,7 +23,9 @@ class VentaObsever
                 throw new \Exception('No hay una caja abierta para este usuario');
             }
             
-            $tipoComprobante = Comprobante::findOrFail($venta->comprobante_id)->nombre;
+            $tipoComprobante = $venta->comprobante_id
+                ? (Comprobante::find($venta->comprobante_id)?->nombre ?? 'Boleta')
+                : 'Boleta';
 
             $venta->user_id = Auth::id();
             $venta->caja_id = $caja->id;

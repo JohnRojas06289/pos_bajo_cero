@@ -1764,10 +1764,12 @@ Swal.fire({
     title: '¡Venta registrada!',
     text: '{{ session('success') }}',
     confirmButtonText: 'Nueva venta',
-    confirmButtonColor: 'var(--success)',
+    confirmButtonColor: '#27AE60',
     timer: 4000,
     timerProgressBar: true,
-    showClass: { popup: 'animate__animated animate__fadeInDown' },
+}).then(function() {
+    renderProducts();
+    renderCart();
 });
 @endif
 
@@ -1776,7 +1778,10 @@ Swal.fire({
     icon: 'error',
     title: 'Error',
     text: '{{ session('error') }}',
-    confirmButtonColor: 'var(--danger)',
+    confirmButtonColor: '#E74C3C',
+}).then(function() {
+    renderProducts();
+    renderCart();
 });
 @endif
 
