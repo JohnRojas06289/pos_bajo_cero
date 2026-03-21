@@ -988,7 +988,8 @@ document.addEventListener('DOMContentLoaded', function () {
 /* ══════════════════════════════════════
    DATA: Products from Blade
 ══════════════════════════════════════ */
-const allProducts = @json($productos->map(fn($p) => [
+@php
+$allProductsData = $productos->map(fn($p) => [
     'id'          => $p->id,
     'nombre'      => $p->nombre,
     'codigo'      => $p->codigo ?? '',
@@ -998,7 +999,9 @@ const allProducts = @json($productos->map(fn($p) => [
     'categoria_id'=> $p->categoria_id,
     'talla'       => $p->talla_nombre ?? '',
     'genero'      => $p->genero ?? '',
-])->sortBy('nombre')->values());
+])->sortBy('nombre')->values();
+@endphp
+const allProducts = @json($allProductsData);
 
 /* ══════════════════════════════════════
    STATE
