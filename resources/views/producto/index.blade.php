@@ -232,12 +232,12 @@
 
                 @can('eliminar-producto')
                 {{-- Inactivar / Activar --}}
-                <form action="{{ route('productos.toggle-estado', $item) }}" method="POST" class="d-inline">
+                <form action="{{ route('productos.toggle-estado', $item) }}" method="POST" style="flex:1;display:flex;">
                     @csrf @method('PATCH')
                     <button type="submit"
-                            class="btn btn-sm {{ $item->estado ? 'btn-outline-secondary' : 'btn-outline-success' }}"
+                            class="btn btn-sm w-100 {{ $item->estado ? 'btn-outline-warning' : 'btn-outline-success' }}"
                             title="{{ $item->estado ? 'Inactivar producto' : 'Activar producto' }}">
-                        <i class="fas {{ $item->estado ? 'fa-toggle-off' : 'fa-toggle-on' }}"></i>
+                        <i class="fas {{ $item->estado ? 'fa-ban' : 'fa-check-circle' }}"></i>
                     </button>
                 </form>
 
