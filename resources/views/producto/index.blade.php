@@ -245,8 +245,7 @@
                 <button type="button"
                         class="btn btn-sm btn-outline-danger"
                         title="Eliminar permanentemente"
-                        data-bs-toggle="modal"
-                        data-bs-target="#deleteModal-{{ $item->id }}">
+                        onclick="confirmarEliminar('{{ $item->id }}', '{{ addslashes($item->nombre) }}')">
                     <i class="fas fa-trash"></i>
                 </button>
                 @endcan
@@ -328,33 +327,6 @@
             </div>
         </div>
 
-        {{-- Modal confirmar eliminación --}}
-        @can('eliminar-producto')
-        <div class="modal fade" id="deleteModal-{{ $item->id }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Eliminar producto</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p class="mb-1">¿Eliminar permanentemente <strong>{{ $item->nombre }}</strong>?</p>
-                        <p class="text-danger small mb-0"><i class="fas fa-info-circle me-1"></i>Esta acción no se puede deshacer. Se eliminarán también todas sus variantes.</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <form action="{{ route('productos.destroy', $item) }}" method="POST" class="d-inline">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-trash me-1"></i>Eliminar
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endcan
-
         @empty
         <div class="empty-state">
             <i class="fas fa-box-open"></i>
@@ -384,6 +356,12 @@
 
 @push('js')
 <script>
+function confirmarEliminar(id, nombre) {
+    document.getElementById('deleteModalNombre').textContent = nombre;
+    document.getElementById('deleteModalForm').action = '/admin/productos/' + id;
+    new bootstrap.Modal(document.getElementById('deleteModalShared')).show();
+}
+
     let currentView = 'grid';
 
     function clearFilters() {
@@ -853,6 +831,40 @@ document.getElementById('crearDesdeImagenesModal').addEventListener('hidden.bs.m
         </div>
     </div>
 </div>
+
+{{-- Modal único para confirmar eliminación --}}
+@can('eliminar-producto')
+<div class="modal fade" id="deleteModalShared" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header text-white" style="background:#dc3545;">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Eliminar producto
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body py-4 px-4">
+                <p class="mb-2 fs-6">¿Eliminar permanentemente <strong id="deleteModalNombre"></strong>?</p>
+                <div class="alert alert-danger py-2 mb-0 d-flex align-items-center gap-2">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    <span class="small">Esta acción no se puede deshacer. Se eliminarán también todas sus variantes.</span>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancelar
+                </button>
+                <form id="deleteModalForm" method="POST" class="d-inline">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="fas fa-trash me-1"></i>Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endcan
 
 {{-- AI Descriptions progress toast --}}
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999;">
