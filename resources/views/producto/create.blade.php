@@ -571,6 +571,40 @@ function updateRemoveButtons() {
     });
 }
 
+function checkVariantDuplicates() {
+    const rows = document.querySelectorAll('.variant-row');
+    const seen = {};
+    let hasDups = false;
+
+    rows.forEach(row => {
+        const talla = row.querySelector('select')?.value ?? '';
+        const color = (row.querySelector('input[name$="[color]"]')?.value ?? '').trim().toLowerCase();
+        const key   = talla + '|' + color;
+
+        if (seen[key]) {
+            row.classList.add('border', 'border-danger', 'rounded');
+            seen[key].classList.add('border', 'border-danger', 'rounded');
+            hasDups = true;
+        } else {
+            seen[key] = row;
+            row.classList.remove('border', 'border-danger', 'rounded');
+        }
+    });
+    return hasDups;
+}
+
+// Escuchar cambios en talla/color para marcar duplicados en tiempo real
+document.getElementById('variantesContainer').addEventListener('change', () => checkVariantDuplicates());
+document.getElementById('variantesContainer').addEventListener('input',  () => checkVariantDuplicates());
+
+// Bloquear envío si hay duplicados
+document.getElementById('createForm').addEventListener('submit', function(e) {
+    if (checkVariantDuplicates()) {
+        e.preventDefault();
+        alert('Hay variantes duplicadas (misma talla y color). Corrígelas antes de guardar.');
+    }
+});
+
 // Inicializar con una fila vacía al cargar
 document.addEventListener('DOMContentLoaded', () => {
     addVariantRow();

@@ -482,6 +482,32 @@ function updateRemoveButtons() {
     });
 }
 
+function checkVariantDuplicates() {
+    const rows = document.querySelectorAll('.variant-row');
+    const seen = {};
+    let hasDups = false;
+
+    rows.forEach(row => {
+        const talla = row.querySelector('select')?.value ?? '';
+        const color = (row.querySelector('input[name$="[color]"]')?.value ?? '').trim().toLowerCase();
+        const key   = talla + '|' + color;
+
+        if (seen[key]) {
+            row.classList.add('border', 'border-danger', 'rounded');
+            seen[key].classList.add('border', 'border-danger', 'rounded');
+            hasDups = true;
+        } else {
+            seen[key] = row;
+            row.classList.remove('border', 'border-danger', 'rounded');
+        }
+    });
+    return hasDups;
+}
+
+// Escuchar cambios en talla/color para marcar duplicados en tiempo real
+document.getElementById('variantesContainer').addEventListener('change', () => checkVariantDuplicates());
+document.getElementById('variantesContainer').addEventListener('input',  () => checkVariantDuplicates());
+
 /* ─── Existing images from server ─────────────────── */
 // Each item: { path, url, main, isNew: false }
 // New items : { file, previewUrl, isNew: true }
@@ -623,8 +649,13 @@ gallery.addEventListener('drop', e => {
     if (e.dataTransfer.files.length) handleNewFilePicker(e.dataTransfer.files);
 });
 
-// Pre-submit: populate hidden inputs for new images
-document.getElementById('editForm').addEventListener('submit', function () {
+// Pre-submit: validate duplicates + populate hidden inputs for new images
+document.getElementById('editForm').addEventListener('submit', function (e) {
+    if (checkVariantDuplicates()) {
+        e.preventDefault();
+        alert('Hay variantes duplicadas (misma talla y color). Corrígelas antes de guardar.');
+        return;
+    }
     const container = document.getElementById('hiddenImgInputs');
     container.innerHTML = '';
     newImages.forEach(img => {

@@ -100,6 +100,14 @@ class ProductoService
      */
     public function crearVariante(array $data, Producto $producto): Variante
     {
+        // Evitar duplicado: si ya existe una variante con misma talla+color, retornarla
+        $existing = Variante::where('producto_id', $producto->id)
+            ->where('presentacione_id', $data['presentacione_id'] ?: null)
+            ->whereRaw('LOWER(TRIM(COALESCE(color,\'\'))) = ?', [strtolower(trim($data['color'] ?? ''))])
+            ->first();
+
+        if ($existing) return $existing;
+
         $imgPath = null;
         if (!empty($data['img_path']) && $data['img_path'] instanceof UploadedFile) {
             $imgPath = $this->handleUploadImage($data['img_path']);
@@ -129,8 +137,13 @@ class ProductoService
     public function actualizarVariantes(array $variantesData, Producto $producto, array $files = []): void
     {
         $idsEnviados = [];
+        $seen        = [];
 
         foreach ($variantesData as $index => $vData) {
+            // Omitir duplicados (misma talla + mismo color)
+            $dupKey = ($vData['presentacione_id'] ?: '') . '|' . strtolower(trim($vData['color'] ?? ''));
+            if (isset($seen[$dupKey])) continue;
+            $seen[$dupKey] = true;
             $file = $files[$index] ?? null;
 
             if (!empty($vData['id'])) {
