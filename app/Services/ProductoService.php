@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Producto;
+use App\Models\Variante;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -90,6 +91,105 @@ class ProductoService
         return $producto;
     }
 
+
+    /**
+     * Crear una variante para un producto.
+     *
+     * $data puede contener:
+     *   presentacione_id, color, codigo, stock, img_path (UploadedFile o string)
+     */
+    public function crearVariante(array $data, Producto $producto): Variante
+    {
+        $imgPath = null;
+        if (!empty($data['img_path']) && $data['img_path'] instanceof UploadedFile) {
+            $imgPath = $this->handleUploadImage($data['img_path']);
+        }
+
+        return Variante::create([
+            'producto_id'      => $producto->id,
+            'presentacione_id' => $data['presentacione_id'] ?: null,
+            'color'            => $data['color'] ?: null,
+            'codigo'           => $data['codigo'] ?: null,
+            'stock'            => (int) ($data['stock'] ?? 0),
+            'img_path'         => $imgPath,
+        ]);
+    }
+
+    /**
+     * Sincronizar variantes de un producto al editar.
+     *
+     * - Si la variante tiene 'id' → actualizar
+     * - Si no tiene 'id' → crear nueva
+     * - Variantes existentes que no estén en $variantesData → eliminar
+     *
+     * $variantesData = array de arrays con keys:
+     *   id?, presentacione_id, color, codigo, stock, img_path?
+     * $files = array de UploadedFile indexado igual que $variantesData
+     */
+    public function actualizarVariantes(array $variantesData, Producto $producto, array $files = []): void
+    {
+        $idsEnviados = [];
+
+        foreach ($variantesData as $index => $vData) {
+            $file = $files[$index] ?? null;
+
+            if (!empty($vData['id'])) {
+                // Actualizar variante existente
+                $variante = Variante::where('id', $vData['id'])
+                    ->where('producto_id', $producto->id)
+                    ->first();
+
+                if (!$variante) continue;
+
+                $imgPath = $variante->img_path;
+                if ($file instanceof UploadedFile && $file->isValid()) {
+                    $imgPath = $this->handleUploadImage($file, $variante->img_path);
+                }
+
+                $variante->update([
+                    'presentacione_id' => $vData['presentacione_id'] ?: null,
+                    'color'            => $vData['color'] ?: null,
+                    'codigo'           => $vData['codigo'] ?: null,
+                    'stock'            => (int) ($vData['stock'] ?? 0),
+                    'img_path'         => $imgPath,
+                ]);
+
+                $idsEnviados[] = $variante->id;
+            } else {
+                // Nueva variante
+                $imgPath = null;
+                if ($file instanceof UploadedFile && $file->isValid()) {
+                    $imgPath = $this->handleUploadImage($file);
+                }
+
+                $nueva = Variante::create([
+                    'producto_id'      => $producto->id,
+                    'presentacione_id' => $vData['presentacione_id'] ?: null,
+                    'color'            => $vData['color'] ?: null,
+                    'codigo'           => $vData['codigo'] ?: null,
+                    'stock'            => (int) ($vData['stock'] ?? 0),
+                    'img_path'         => $imgPath,
+                ]);
+
+                $idsEnviados[] = $nueva->id;
+            }
+        }
+
+        // Eliminar variantes que ya no están en el formulario
+        if (!empty($idsEnviados)) {
+            Variante::where('producto_id', $producto->id)
+                ->whereNotIn('id', $idsEnviados)
+                ->delete();
+        }
+
+        // Garantizar al menos una variante
+        if (Variante::where('producto_id', $producto->id)->count() === 0) {
+            Variante::create([
+                'producto_id' => $producto->id,
+                'stock'       => 0,
+            ]);
+        }
+    }
 
     /**
      * Guarda una imagen en el Storage
