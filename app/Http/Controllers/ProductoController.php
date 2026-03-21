@@ -141,6 +141,9 @@ class ProductoController extends Controller
                 $sharedImgPath = $this->productoService->handleUploadImage($request->file('img_path'));
             }
 
+            // Shared family ID links all variants as one product family
+            $familiaId = (string) \Illuminate\Support\Str::uuid();
+
             $tallasIds = $request->input('tallas_ids', []);
             $created = 0;
             $skipped = [];
@@ -162,6 +165,7 @@ class ProductoController extends Controller
                 $codigo = ($lastCodigo && $lastCodigo->codigo) ? (string)((int)$lastCodigo->codigo + 1) : '1';
 
                 Producto::create([
+                    'familia_id'       => $familiaId,
                     'codigo'           => $codigo,
                     'nombre'           => $nombre,
                     'descripcion'      => $request->input('descripcion'),

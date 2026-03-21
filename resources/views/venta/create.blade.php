@@ -220,6 +220,55 @@ main { padding: 0 !important; }
     margin-top: auto;
 }
 
+/* ── Family card size picker ── */
+.family-card { cursor: default; }
+.family-card:hover { transform: none; box-shadow: var(--shadow-sm); }
+
+.size-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.size-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1.5px solid var(--border-color);
+    border-radius: 7px;
+    background: var(--card-bg);
+    cursor: pointer;
+    padding: 3px 7px 2px;
+    min-width: 36px;
+    transition: border-color .15s, background .15s, transform .1s;
+    line-height: 1.2;
+}
+.size-btn:hover:not(.size-out) {
+    border-color: var(--accent);
+    background: rgba(29,150,200,0.08);
+    transform: scale(1.06);
+}
+.size-btn.size-out { opacity: 0.4; cursor: not-allowed; }
+.size-btn.size-added { border-color: var(--success) !important; background: rgba(39,174,96,0.12) !important; }
+
+.size-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.size-stock {
+    font-size: 0.6rem;
+    font-weight: 600;
+}
+.size-stock.ok  { color: #1a7a41; }
+.size-stock.low { color: #b45309; }
+.size-stock.out { color: #c0392b; }
+
+[data-theme="dark"] .size-stock.ok  { color: #4ade80; }
+[data-theme="dark"] .size-stock.low { color: #fbbf24; }
+[data-theme="dark"] .size-stock.out { color: #f87171; }
+
 /* ── Alphabetical bar ── */
 .alpha-bar {
     width: 20px;
@@ -997,8 +1046,9 @@ $allProductsData = $productos->map(fn($p) => [
     'stock'       => (int)($p->cantidad ?? 0),
     'img'         => $p->image_url,
     'categoria_id'=> $p->categoria_id,
-    'talla'       => $p->talla_nombre ?? '',
+    'talla'       => $p->presentacione?->sigla ?? '',
     'genero'      => $p->genero ?? '',
+    'familia_id'  => $p->familia_id ?? null,
 ])->sortBy('nombre')->values();
 @endphp
 const allProducts = @json($allProductsData);
@@ -1035,6 +1085,23 @@ function filteredProducts() {
     return list;
 }
 
+/** Group flat product list into families (one entry per card) */
+function buildFamilies(products) {
+    const families = new Map();
+    products.forEach(p => {
+        const key = p.familia_id || ('__solo__' + p.id);
+        if (!families.has(key)) families.set(key, []);
+        families.get(key).push(p);
+    });
+    // Sort variants within each family by talla label
+    const result = [];
+    families.forEach(variants => {
+        variants.sort((a, b) => a.talla.localeCompare(b.talla));
+        result.push(variants);
+    });
+    return result;
+}
+
 function renderProducts() {
     const grid    = document.getElementById('productGrid');
     const alphaEl = document.getElementById('alphaBar');
@@ -1049,12 +1116,15 @@ function renderProducts() {
         return;
     }
 
-    // Group by first letter
+    const families = buildFamilies(products);
+
+    // Group families by first letter of base name
     const groups = {};
-    products.forEach(p => {
-        const letter = p.nombre.charAt(0).toUpperCase();
+    families.forEach(variants => {
+        const baseName = getBaseName(variants[0]);
+        const letter = baseName.charAt(0).toUpperCase();
         if (!groups[letter]) groups[letter] = [];
-        groups[letter].push(p);
+        groups[letter].push(variants);
     });
 
     // Render grid with letter anchors
@@ -1062,8 +1132,8 @@ function renderProducts() {
     const letters = Object.keys(groups).sort();
     letters.forEach(letter => {
         html += `<div class="product-letter-anchor" id="anchor-${letter}" data-letter="${letter}">${letter}</div>`;
-        groups[letter].forEach(p => {
-            html += renderCard(p);
+        groups[letter].forEach(variants => {
+            html += variants.length > 1 ? renderFamilyCard(variants) : renderCard(variants[0]);
         });
     });
     grid.innerHTML = html;
@@ -1076,15 +1146,24 @@ function renderProducts() {
                      data-letter="${l}">${l}</div>`;
     }).join('');
 
-    // Attach click handlers to products
+    // Single-product card click → add to cart
     grid.querySelectorAll('.product-card[data-product-id]').forEach(card => {
         card.addEventListener('click', function () {
             if (this.classList.contains('out-of-stock')) return;
-            const id = this.dataset.productId;
-            addToCart(id);
-            // Flash
+            addToCart(this.dataset.productId);
             this.classList.add('added');
             setTimeout(() => this.classList.remove('added'), 600);
+        });
+    });
+
+    // Family size-button click → add specific variant
+    grid.querySelectorAll('.size-btn[data-variant-id]').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (this.classList.contains('size-out')) return;
+            addToCart(this.dataset.variantId);
+            this.classList.add('size-added');
+            setTimeout(() => this.classList.remove('size-added'), 500);
         });
     });
 
@@ -1099,22 +1178,26 @@ function renderProducts() {
     setupAlphaDrag(alphaEl);
 }
 
+/** Strip " - TALLA" suffix to get the display base name */
+function getBaseName(p) {
+    if (!p.talla) return p.nombre;
+    const suffix = ' - ' + p.talla;
+    return p.nombre.endsWith(suffix) ? p.nombre.slice(0, -suffix.length) : p.nombre;
+}
+
 function renderCard(p) {
     const inCart   = cart.find(c => c.id == p.id)?.cantidad || 0;
     const available = p.stock - inCart;
     const outOfStock = available <= 0;
 
     let stockBadge = '';
-    if (outOfStock)       stockBadge = `<span class="stock-badge out">Agotado</span>`;
+    if (outOfStock)        stockBadge = `<span class="stock-badge out">Agotado</span>`;
     else if (p.stock <= 3) stockBadge = `<span class="stock-badge low">${p.stock} ud${p.stock!==1?'s':''}</span>`;
-    else                  stockBadge = `<span class="stock-badge ok">${p.stock} uds</span>`;
+    else                   stockBadge = `<span class="stock-badge ok">${p.stock} uds</span>`;
 
-    let imgHtml = '';
-    if (p.img) {
-        imgHtml = `<img src="${p.img}" alt="${p.nombre}" loading="lazy">`;
-    } else {
-        imgHtml = `<div class="card-img-placeholder"><i class="fas fa-vest"></i></div>`;
-    }
+    const imgHtml = p.img
+        ? `<img src="${p.img}" alt="${p.nombre}" loading="lazy">`
+        : `<div class="card-img-placeholder"><i class="fas fa-vest"></i></div>`;
 
     return `<div class="product-card ${outOfStock ? 'out-of-stock' : ''}"
                  data-product-id="${p.id}"
@@ -1126,6 +1209,38 @@ function renderCard(p) {
         <div class="card-body-sm">
             <div class="card-product-name">${p.nombre}</div>
             <div class="card-product-price">${fmt(p.precio)}</div>
+        </div>
+    </div>`;
+}
+
+function renderFamilyCard(variants) {
+    const main = variants[0];
+    const baseName = getBaseName(main);
+
+    const imgHtml = main.img
+        ? `<img src="${main.img}" alt="${baseName}" loading="lazy">`
+        : `<div class="card-img-placeholder"><i class="fas fa-vest"></i></div>`;
+
+    const sizeBtns = variants.map(v => {
+        const inCart   = cart.find(c => c.id == v.id)?.cantidad || 0;
+        const avail    = v.stock - inCart;
+        const out      = avail <= 0;
+        const label    = v.talla || 'T.U.';
+        const stockTip = out ? 'Agotado' : (avail <= 3 ? `${avail}u` : `${avail}u`);
+        return `<button class="size-btn ${out ? 'size-out' : ''}" data-variant-id="${v.id}" title="${label} — ${stockTip}">
+            <span class="size-label">${label}</span>
+            <span class="size-stock ${out ? 'out' : avail <= 3 ? 'low' : 'ok'}">${out ? '✕' : stockTip}</span>
+        </button>`;
+    }).join('');
+
+    return `<div class="product-card family-card" data-nombre="${baseName.toLowerCase()}">
+        <div class="card-img-wrap">
+            ${imgHtml}
+        </div>
+        <div class="card-body-sm">
+            <div class="card-product-name">${baseName}</div>
+            <div class="card-product-price">${fmt(main.precio)}</div>
+            <div class="size-picker">${sizeBtns}</div>
         </div>
     </div>`;
 }

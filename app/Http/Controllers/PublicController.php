@@ -45,7 +45,25 @@ class PublicController extends Controller
             });
         }
 
-        $products   = $query->latest()->paginate(12)->withQueryString();
+        // Group by familia_id so variants appear as one card
+        $all = $query->orderBy('nombre')->get();
+        $families = $all->groupBy(fn($p) => $p->familia_id ?? ('solo_' . $p->id));
+        $groups = $families->map(fn($variants) => [
+            'main'        => $variants->first(),
+            'variants'    => $variants->sortBy(fn($v) => $v->presentacione?->sigla ?? ''),
+            'total_stock' => $variants->sum(fn($v) => $v->inventario?->cantidad ?? 0),
+        ])->values();
+
+        $perPage = 12;
+        $page    = $request->input('page', 1);
+        $products = new \Illuminate\Pagination\LengthAwarePaginator(
+            $groups->slice(($page - 1) * $perPage, $perPage)->values(),
+            $groups->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         $categorias = Categoria::with('caracteristica')
             ->whereHas('caracteristica', fn ($q) => $q->where('estado', 1))
             ->get();
