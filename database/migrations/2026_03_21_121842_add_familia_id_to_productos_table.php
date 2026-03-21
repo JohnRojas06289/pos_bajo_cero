@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('productos', function (Blueprint $table) {
-            $table->uuid('familia_id')->nullable()->index()->after('id');
+            $table->uuid('familia_id')->nullable()->index();
         });
     }
 
