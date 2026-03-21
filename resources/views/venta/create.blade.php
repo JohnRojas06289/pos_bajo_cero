@@ -354,7 +354,7 @@ main { padding: 0 !important; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.875rem 1rem;
+    padding: 0.5rem 0.75rem;
     border-bottom: 1px solid var(--border-color);
     background: var(--bg-secondary);
     flex-shrink: 0;
@@ -515,18 +515,18 @@ main { padding: 0 !important; }
     flex-shrink: 0;
     border-top: 1px solid var(--border-color);
     background: var(--bg-secondary);
-    padding: 0.75rem;
+    padding: 0.5rem 0.625rem;
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
+    gap: 0.35rem;
 }
 
 /* Totals */
 .cart-totals {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
-    padding: 0.375rem 0;
+    gap: 0.1rem;
+    padding: 0.15rem 0;
 }
 .total-row {
     display: flex;
@@ -551,8 +551,8 @@ main { padding: 0 !important; }
 /* Form fields */
 .cart-select {
     width: 100%;
-    height: 38px;
-    padding: 0 0.75rem;
+    height: 34px;
+    padding: 0 0.6rem;
     background: var(--input-bg);
     border: 1.5px solid var(--input-border);
     border-radius: 8px;
@@ -566,12 +566,12 @@ main { padding: 0 !important; }
 .cart-select:focus { border-color: var(--accent); }
 
 .cart-field-label {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--text-muted);
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.15rem;
     display: block;
 }
 
@@ -651,8 +651,11 @@ main { padding: 0 !important; }
 .cash-suggestions {
     display: flex;
     gap: 0.25rem;
-    flex-wrap: wrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
 }
+.cash-suggestions::-webkit-scrollbar { display: none; }
 .cash-sugg {
     font-size: 0.72rem;
     font-weight: 700;
@@ -664,6 +667,8 @@ main { padding: 0 !important; }
     cursor: pointer;
     transition: all 0.12s ease;
     font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 .cash-sugg:hover { border-color: var(--accent); color: var(--accent); background: rgba(230,126,34,0.07); }
 .cash-sugg-exact { border-color: var(--accent); color: var(--accent); line-height: 1.2; padding: 3px 10px; }
@@ -956,7 +961,7 @@ main { padding: 0 !important; }
 
             {{-- Cliente --}}
             <div>
-                <span class="cart-field-label">Cliente <small style="font-weight:400;opacity:0.6;">(opcional)</small></span>
+                <span class="cart-field-label" id="clienteLabel">Cliente <small id="clienteOpcional" style="font-weight:400;opacity:0.6;">(opcional)</small></span>
                 <select class="cart-select" id="clienteSelect">
                     <option value="">— Seleccionar cliente —</option>
                     @foreach($clientes as $c)
@@ -972,7 +977,6 @@ main { padding: 0 !important; }
                 <span class="cart-field-label">Método de pago</span>
                 <div class="payment-pills" id="paymentPills">
                     <button type="button" class="pay-pill active" data-method="EFECTIVO">💵 Efectivo</button>
-                    <button type="button" class="pay-pill" data-method="TARJETA">💳 Tarjeta</button>
                     <button type="button" class="pay-pill" data-method="VENTA_DIGITAL">📲 Venta Digital</button>
                     <button type="button" class="pay-pill" data-method="FIADO">🤝 Fiado</button>
                 </div>
@@ -1445,11 +1449,27 @@ function setPaymentMethod(method) {
         updateCashSection();
     } else {
         cashSection.classList.remove('visible');
-        // For digital payment: recibido = total, vuelto = 0
+        // For digital/fiado: recibido = total, vuelto = 0
         const total = getTotal();
         document.getElementById('f_monto_recibido').value   = total;
         document.getElementById('f_vuelto_entregado').value = 0;
     }
+
+    // Fiado: cliente obligatorio
+    const opcional = document.getElementById('clienteOpcional');
+    const clienteSelect = document.getElementById('clienteSelect');
+    if (method === 'FIADO') {
+        opcional.textContent = '(obligatorio)';
+        opcional.style.color = 'var(--danger)';
+        opcional.style.opacity = '1';
+        clienteSelect.style.borderColor = 'var(--danger)';
+    } else {
+        opcional.textContent = '(opcional)';
+        opcional.style.color = '';
+        opcional.style.opacity = '0.6';
+        clienteSelect.style.borderColor = '';
+    }
+
     updatePayButton();
 }
 
@@ -1463,12 +1483,13 @@ function updateCashSection() {
     document.getElementById('f_monto_recibido').value     = recibido || total;
     document.getElementById('f_vuelto_entregado').value   = vuelto;
 
-    // Cash suggestions — billetes colombianos comunes
+    // Cash suggestions — billetes colombianos + montos redondos inteligentes
     const sugg = document.getElementById('cashSuggestions');
-    const bills = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000];
-    const suggestions = bills.filter(v => v >= total).slice(0, 5);
+    const bills = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000];
+    const roundUps = [5000, 10000, 20000, 50000, 100000].map(r => Math.ceil(total / r) * r);
+    const all = [...new Set([...bills, ...roundUps])].filter(v => v > total).sort((a,b) => a - b);
     const exactSugg = `<button class="cash-sugg cash-sugg-exact" onclick="setCash(${total})">Exacto<br><small>${fmt(total)}</small></button>`;
-    sugg.innerHTML = exactSugg + suggestions.map(v =>
+    sugg.innerHTML = exactSugg + all.map(v =>
         `<button class="cash-sugg" onclick="setCash(${v})">${fmt(v)}</button>`
     ).join('');
 }
@@ -1501,9 +1522,12 @@ function updatePayButton() {
         }
     }
 
-    const canPay = hasItems && (paymentMethod !== 'EFECTIVO' || cashOk) && total > 0;
+    const clienteId = document.getElementById('clienteSelect').value;
+    const clienteOk = paymentMethod !== 'FIADO' || !!clienteId;
+    const canPay = hasItems && clienteOk && (paymentMethod !== 'EFECTIVO' || cashOk) && total > 0;
     btn.disabled = !canPay;
     if (canPay) label.textContent = `PAGAR ${fmt(total)}`;
+    else if (!clienteOk) label.textContent = 'Selecciona un cliente';
 }
 
 /* ══════════════════════════════════════
@@ -1542,6 +1566,10 @@ document.getElementById('btnPagar').addEventListener('click', function () {
     if (cart.length === 0) { alert('El carrito está vacío.'); return; }
 
     const clienteId = document.getElementById('clienteSelect').value;
+    if (paymentMethod === 'FIADO' && !clienteId) {
+        alert('Para ventas fiadas debes seleccionar un cliente.');
+        return;
+    }
     document.getElementById('f_cliente_id').value = clienteId;
 
     // Loading state
