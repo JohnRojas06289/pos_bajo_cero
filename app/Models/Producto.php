@@ -74,6 +74,28 @@ class Producto extends Model
         return $this->hasMany(Kardex::class);
     }
 
+    public function variantes(): HasMany
+    {
+        return $this->hasMany(Variante::class)->orderBy('color')->orderBy('id');
+    }
+
+    /**
+     * Stock total sumando todas las variantes.
+     */
+    public function getTotalStockAttribute(): int
+    {
+        return $this->variantes->sum('stock');
+    }
+
+    /**
+     * Primera variante disponible (con stock > 0), o la primera en general.
+     */
+    public function getDefaultVarianteAttribute(): ?Variante
+    {
+        return $this->variantes->firstWhere('stock', '>', 0)
+            ?? $this->variantes->first();
+    }
+
     protected static function booted()
     {
         static::creating(function ($producto) {
