@@ -135,6 +135,12 @@ class ProductoController extends Controller
                 return redirect()->back()->withErrors(['nombre' => 'El nombre es requerido.'])->withInput();
             }
 
+            // Upload shared image once for all variants
+            $sharedImgPath = null;
+            if ($request->hasFile('img_path') && $request->file('img_path')->isValid()) {
+                $sharedImgPath = $this->productoService->handleUploadImage($request->file('img_path'));
+            }
+
             $tallasIds = $request->input('tallas_ids', []);
             $created = 0;
             $skipped = [];
@@ -159,7 +165,7 @@ class ProductoController extends Controller
                     'codigo'           => $codigo,
                     'nombre'           => $nombre,
                     'descripcion'      => $request->input('descripcion'),
-                    'img_path'         => null, // imágenes se agregan individualmente por edición
+                    'img_path'         => $sharedImgPath,
                     'marca_id'         => $request->input('marca_id') ?: null,
                     'categoria_id'     => $request->input('categoria_id') ?: null,
                     'presentacione_id' => $presentacione_id,

@@ -95,7 +95,7 @@ class ProductoService
      * Guarda una imagen en el Storage
      * 
      */
-    private function handleUploadImage(UploadedFile $image, $img_path = null): string
+    public function handleUploadImage(UploadedFile $image, $img_path = null): string
     {
         // FORCE Cloudinary if properly configured (Vercel Fix)
         // We use config() because env() returns null if config is cached
