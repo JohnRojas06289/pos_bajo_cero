@@ -1388,8 +1388,7 @@ function renderCart() {
     const subtotal = getSubtotal();
     const total    = getTotal();
 
-    document.getElementById('displaySubtotal').textContent = fmt(subtotal);
-    document.getElementById('displayTotal').textContent    = fmt(total);
+    document.getElementById('displayTotal').textContent = fmt(total);
     const mobileTotal = document.getElementById('mobileTotalDisplay');
     if (mobileTotal) mobileTotal.textContent = fmt(total);
 
