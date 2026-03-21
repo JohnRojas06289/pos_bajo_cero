@@ -1757,6 +1757,29 @@ setPaymentMethod('EFECTIVO');
 renderProducts();
 renderCart();
 
+// Confirmación de venta realizada
+@if(session('success'))
+Swal.fire({
+    icon: 'success',
+    title: '¡Venta registrada!',
+    text: '{{ session('success') }}',
+    confirmButtonText: 'Nueva venta',
+    confirmButtonColor: 'var(--success)',
+    timer: 4000,
+    timerProgressBar: true,
+    showClass: { popup: 'animate__animated animate__fadeInDown' },
+});
+@endif
+
+@if(session('error'))
+Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text: '{{ session('error') }}',
+    confirmButtonColor: 'var(--danger)',
+});
+@endif
+
 });
 </script>
 @endpush
