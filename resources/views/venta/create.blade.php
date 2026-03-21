@@ -8,6 +8,9 @@
 body { overflow: hidden !important; }
 main { padding: 0 !important; }
 
+/* Ocultar botón IA en POS */
+#aiChatBtn, #aiChatPanel { display: none !important; }
+
 /* ── POS wrapper: 65 / 35 ── */
 .pos-wrapper {
     display: flex;
@@ -347,6 +350,7 @@ main { padding: 0 !important; }
     background: var(--bg-secondary);
     border-left: 1px solid var(--border-color);
     overflow: hidden;
+    min-height: 0;
 }
 
 /* Cart header */
@@ -398,7 +402,8 @@ main { padding: 0 !important; }
 .cart-items-wrap {
     flex: 1;
     overflow-y: auto;
-    padding: 0.5rem;
+    padding: 0.4rem;
+    min-height: 60px;
     scrollbar-width: thin;
     scrollbar-color: var(--border-color) transparent;
 }
@@ -515,11 +520,14 @@ main { padding: 0 !important; }
     flex-shrink: 0;
     border-top: 1px solid var(--border-color);
     background: var(--bg-secondary);
-    padding: 0.5rem 0.625rem;
+    padding: 0.45rem 0.625rem;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.3rem;
+    overflow-y: auto;
+    scrollbar-width: none;
 }
+.cart-footer::-webkit-scrollbar { display: none; }
 
 /* Totals */
 .cart-totals {
@@ -618,7 +626,7 @@ main { padding: 0 !important; }
 }
 .cash-input {
     flex: 1;
-    height: 36px;
+    height: 32px;
     padding: 0 0.6rem;
     background: var(--input-bg);
     border: 1.5px solid var(--input-border);
@@ -677,7 +685,7 @@ main { padding: 0 !important; }
 /* Pay button */
 .btn-pay {
     width: 100%;
-    height: 52px;
+    height: 44px;
     border: none;
     border-radius: 10px;
     background: var(--success);
@@ -947,16 +955,10 @@ main { padding: 0 !important; }
         {{-- Footer --}}
         <div class="cart-footer">
 
-            {{-- Totals --}}
-            <div class="cart-totals">
-                <div class="total-row">
-                    <span>Subtotal</span>
-                    <span class="total-amount" id="displaySubtotal">$0</span>
-                </div>
-                <div class="total-row grand">
-                    <span>TOTAL</span>
-                    <span class="total-amount" id="displayTotal">$0</span>
-                </div>
+            {{-- Total --}}
+            <div class="total-row grand" style="padding: 0.2rem 0;">
+                <span>TOTAL</span>
+                <span class="total-amount" id="displayTotal">$0</span>
             </div>
 
             {{-- Cliente --}}
@@ -984,13 +986,10 @@ main { padding: 0 !important; }
 
             {{-- Cash section --}}
             <div class="cash-section" id="cashSection">
-                <div class="cash-suggestions-wrap">
-                    <span class="cash-sugg-label">¿Cuánto recibió?</span>
-                    <div class="cash-suggestions" id="cashSuggestions"></div>
-                </div>
+                <div class="cash-suggestions" id="cashSuggestions"></div>
                 <div class="cash-row">
                     <span class="cash-label">Recibido</span>
-                    <input class="cash-input" id="montoRecibido" type="number" min="0" step="1000" placeholder="Escribir monto...">
+                    <input class="cash-input" id="montoRecibido" type="number" min="0" step="1000" placeholder="Monto...">
                 </div>
                 <div class="cash-row">
                     <span class="cash-label">Vuelto</span>
