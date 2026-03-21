@@ -22,7 +22,8 @@ class CreateVentaDetalleEvent
         public Venta $venta,
         public $producto_id,
         public $cantidad,
-        public $precio_venta
+        public $precio_venta,
+        public $variante_id = null
     ) {}
 
     /**

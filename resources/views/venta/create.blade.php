@@ -1038,18 +1038,40 @@ document.addEventListener('DOMContentLoaded', function () {
    DATA: Products from Blade
 ══════════════════════════════════════ */
 @php
-$allProductsData = $productos->map(fn($p) => [
-    'id'          => $p->id,
-    'nombre'      => $p->nombre,
-    'codigo'      => $p->codigo ?? '',
-    'precio'      => (float)($p->precio ?? 0),
-    'stock'       => (int)($p->cantidad ?? 0),
-    'img'         => $p->image_url,
-    'categoria_id'=> $p->categoria_id,
-    'talla'       => $p->presentacione?->sigla ?? '',
-    'genero'      => $p->genero ?? '',
-    'familia_id'  => $p->familia_id ?? null,
-])->sortBy('nombre')->values();
+// Resolver URL de imagen: preferir la de la variante, si no la del producto
+$allProductsData = $productos->map(function($p) {
+    $imgPath = $p->variante_img ?: $p->img_path;
+    $imgUrl  = '';
+    if ($imgPath) {
+        if (str_starts_with($imgPath, 'http')) {
+            $imgUrl = $imgPath;
+        } else {
+            $cloudName = config('filesystems.disks.cloudinary.cloud_name')
+                      ?: parse_url(env('CLOUDINARY_URL', ''), PHP_URL_HOST);
+            $imgUrl = $cloudName
+                ? "https://res.cloudinary.com/{$cloudName}/image/upload/{$imgPath}"
+                : \Illuminate\Support\Facades\Storage::url($imgPath);
+        }
+    }
+    // Etiqueta de variante para mostrar (talla / color)
+    $varLabel = implode(' / ', array_filter([$p->sigla ?: null, $p->color ?: null])) ?: null;
+    $productoId = $p->producto_uuid ?? $p->producto_id;
+    return [
+        'variante_id' => (string)$p->variante_id,
+        'id'          => $productoId,      // producto_id (para pivot venta-producto)
+        'nombre'      => $p->nombre,
+        'codigo'      => $p->codigo ?? '',
+        'precio'      => (float)($p->precio ?? 0),
+        'stock'       => (int)($p->cantidad ?? 0),
+        'img'         => $imgUrl,
+        'categoria_id'=> $p->categoria_id,
+        'talla'       => $p->sigla ?? '',
+        'color'       => $p->color ?? '',
+        'var_label'   => $varLabel,        // "M / Negro", "L", "Rojo", etc.
+        'genero'      => $p->genero ?? '',
+        'producto_id' => $productoId,      // alias explícito para agrupación
+    ];
+})->sortBy('nombre')->values();
 @endphp
 const allProducts = @json($allProductsData);
 
@@ -1085,18 +1107,23 @@ function filteredProducts() {
     return list;
 }
 
-/** Group flat product list into families (one entry per card) */
+/** Group variantes by producto_id (one card per product, with size/color buttons) */
 function buildFamilies(products) {
     const families = new Map();
     products.forEach(p => {
-        const key = p.familia_id || ('__solo__' + p.id);
+        const key = p.producto_id;
         if (!families.has(key)) families.set(key, []);
         families.get(key).push(p);
     });
-    // Sort variants within each family by talla label
     const result = [];
     families.forEach(variants => {
-        variants.sort((a, b) => a.talla.localeCompare(b.talla));
+        // Sort by talla then color
+        variants.sort((a, b) => {
+            const ta = a.talla || 'ZZZ';
+            const tb = b.talla || 'ZZZ';
+            if (ta !== tb) return ta.localeCompare(tb);
+            return (a.color || '').localeCompare(b.color || '');
+        });
         result.push(variants);
     });
     return result;
@@ -1178,15 +1205,13 @@ function renderProducts() {
     setupAlphaDrag(alphaEl);
 }
 
-/** Strip " - TALLA" suffix to get the display base name */
+/** Base name for the product card (producto.nombre without any suffix) */
 function getBaseName(p) {
-    if (!p.talla) return p.nombre;
-    const suffix = ' - ' + p.talla;
-    return p.nombre.endsWith(suffix) ? p.nombre.slice(0, -suffix.length) : p.nombre;
+    return p.nombre;
 }
 
 function renderCard(p) {
-    const inCart   = cart.find(c => c.id == p.id)?.cantidad || 0;
+    const inCart    = cart.find(c => c.variante_id == p.variante_id)?.cantidad || 0;
     const available = p.stock - inCart;
     const outOfStock = available <= 0;
 
@@ -1199,8 +1224,12 @@ function renderCard(p) {
         ? `<img src="${p.img}" alt="${p.nombre}" loading="lazy">`
         : `<div class="card-img-placeholder"><i class="fas fa-vest"></i></div>`;
 
+    const labelHtml = p.var_label
+        ? `<div class="card-product-variant">${p.var_label}</div>`
+        : '';
+
     return `<div class="product-card ${outOfStock ? 'out-of-stock' : ''}"
-                 data-product-id="${p.id}"
+                 data-product-id="${p.variante_id}"
                  data-nombre="${p.nombre.toLowerCase()}">
         <div class="card-img-wrap">
             ${imgHtml}
@@ -1208,6 +1237,7 @@ function renderCard(p) {
         </div>
         <div class="card-body-sm">
             <div class="card-product-name">${p.nombre}</div>
+            ${labelHtml}
             <div class="card-product-price">${fmt(p.precio)}</div>
         </div>
     </div>`;
@@ -1222,12 +1252,12 @@ function renderFamilyCard(variants) {
         : `<div class="card-img-placeholder"><i class="fas fa-vest"></i></div>`;
 
     const sizeBtns = variants.map(v => {
-        const inCart   = cart.find(c => c.id == v.id)?.cantidad || 0;
+        const inCart   = cart.find(c => c.variante_id == v.variante_id)?.cantidad || 0;
         const avail    = v.stock - inCart;
         const out      = avail <= 0;
-        const label    = v.talla || 'T.U.';
-        const stockTip = out ? 'Agotado' : (avail <= 3 ? `${avail}u` : `${avail}u`);
-        return `<button class="size-btn ${out ? 'size-out' : ''}" data-variant-id="${v.id}" title="${label} — ${stockTip}">
+        const label    = v.var_label || v.talla || 'T.U.';
+        const stockTip = out ? 'Agotado' : `${avail}u`;
+        return `<button class="size-btn ${out ? 'size-out' : ''}" data-variant-id="${v.variante_id}" title="${label} — ${stockTip}">
             <span class="size-label">${label}</span>
             <span class="size-stock ${out ? 'out' : avail <= 3 ? 'low' : 'ok'}">${out ? '✕' : stockTip}</span>
         </button>`;
@@ -1284,37 +1314,45 @@ function setupAlphaDrag(bar) {
 /* ══════════════════════════════════════
    CART LOGIC
 ══════════════════════════════════════ */
-function addToCart(productId) {
-    const product = allProducts.find(p => p.id == productId);
+function addToCart(varianteId) {
+    const product = allProducts.find(p => p.variante_id == varianteId);
     if (!product) return;
 
-    const item = cart.find(c => c.id == productId);
+    const item = cart.find(c => c.variante_id == varianteId);
     const currentInCart = item ? item.cantidad : 0;
     if (currentInCart >= product.stock && product.stock > 0) return;
+
+    const label = product.var_label ? `${product.nombre} (${product.var_label})` : product.nombre;
 
     if (item) {
         item.cantidad++;
     } else {
-        cart.push({ id: product.id, nombre: product.nombre, precio: product.precio,
-                    cantidad: 1, stock: product.stock });
+        cart.push({
+            variante_id: product.variante_id,
+            id:          product.id,          // producto_id para el pivot
+            nombre:      label,
+            precio:      product.precio,
+            cantidad:    1,
+            stock:       product.stock,
+        });
     }
-    renderCart();
-    renderProducts(); // update stock badges
-    updateFormFields();
-}
-
-function changeQty(productId, delta) {
-    const item = cart.find(c => c.id == productId);
-    if (!item) return;
-    item.cantidad += delta;
-    if (item.cantidad <= 0) cart = cart.filter(c => c.id != productId);
     renderCart();
     renderProducts();
     updateFormFields();
 }
 
-function removeItem(productId) {
-    cart = cart.filter(c => c.id != productId);
+function changeQty(varianteId, delta) {
+    const item = cart.find(c => c.variante_id == varianteId);
+    if (!item) return;
+    item.cantidad += delta;
+    if (item.cantidad <= 0) cart = cart.filter(c => c.variante_id != varianteId);
+    renderCart();
+    renderProducts();
+    updateFormFields();
+}
+
+function removeItem(varianteId) {
+    cart = cart.filter(c => c.variante_id != varianteId);
     renderCart();
     renderProducts();
     updateFormFields();
@@ -1368,13 +1406,13 @@ function renderCart() {
                 <div class="cart-item-price">${fmt(item.precio)} / ud</div>
             </div>
             <div class="qty-controls">
-                <button class="qty-btn" onclick="changeQty('${item.id}', -1)">−</button>
+                <button class="qty-btn" onclick="changeQty('${item.variante_id}', -1)">−</button>
                 <span class="qty-value">${item.cantidad}</span>
-                <button class="qty-btn" onclick="changeQty('${item.id}', +1)"
+                <button class="qty-btn" onclick="changeQty('${item.variante_id}', +1)"
                         ${item.cantidad >= item.stock ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>+</button>
             </div>
             <div class="cart-item-subtotal">${fmt(item.precio * item.cantidad)}</div>
-            <button class="cart-remove-btn" onclick="removeItem('${item.id}')">
+            <button class="cart-remove-btn" onclick="removeItem('${item.variante_id}')">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -1484,9 +1522,10 @@ function updateFormFields() {
     container.innerHTML = '';
     cart.forEach(item => {
         container.innerHTML += `
-            <input type="hidden" name="arrayidproducto[]"  value="${item.id}">
-            <input type="hidden" name="arraycantidad[]"    value="${item.cantidad}">
-            <input type="hidden" name="arrayprecioventa[]" value="${item.precio}">
+            <input type="hidden" name="arrayidproducto[]"    value="${item.id}">
+            <input type="hidden" name="arrayvariante_id[]"   value="${item.variante_id}">
+            <input type="hidden" name="arraycantidad[]"      value="${item.cantidad}">
+            <input type="hidden" name="arrayprecioventa[]"   value="${item.precio}">
         `;
     });
 
@@ -1662,7 +1701,7 @@ searchInputEl.addEventListener('keydown', function (e) {
         return;
     }
 
-    const inCart  = cart.find(c => c.id == product.id)?.cantidad || 0;
+    const inCart  = cart.find(c => c.variante_id == product.variante_id)?.cantidad || 0;
     if (product.stock > 0 && inCart >= product.stock) {
         showScanFeedback(product.nombre + ' — Stock agotado en carrito', 'err', 2200);
         return;
@@ -1672,11 +1711,11 @@ searchInputEl.addEventListener('keydown', function (e) {
         return;
     }
 
-    addToCart(product.id);
+    addToCart(product.variante_id);
     showScanFeedback('+ ' + product.nombre, 'ok', 1800);
 
     // Flash card if visible
-    const card = document.querySelector(`.product-card[data-product-id="${product.id}"]`);
+    const card = document.querySelector(`.product-card[data-product-id="${product.variante_id}"]`);
     if (card) {
         card.classList.add('added');
         setTimeout(() => card.classList.remove('added'), 600);

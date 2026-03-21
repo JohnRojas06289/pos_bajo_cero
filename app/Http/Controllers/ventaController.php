@@ -67,28 +67,28 @@ class ventaController extends Controller
                     ->with('error', 'Debe crear al menos un cliente antes de realizar ventas. Vaya a Clientes > Nuevo Cliente.');
             }
 
-            $productos = Producto::leftJoin('inventario as i', function ($join) {
-                $join->on('i.producto_id', '=', 'productos.id');
-            })
-                ->leftJoin('presentaciones as p', function ($join) {
-                    $join->on('p.id', '=', 'productos.presentacione_id');
-                })
-                ->leftJoin('caracteristicas as cp', function ($join) {
-                    $join->on('cp.id', '=', 'p.caracteristica_id');
-                })
+            // Cargar variantes de productos activos (una fila por variante)
+            $productos = DB::table('variantes as v')
+                ->join('productos as p', 'v.producto_id', '=', 'p.id')
+                ->leftJoin('presentaciones as pr', 'v.presentacione_id', '=', 'pr.id')
+                ->leftJoin('caracteristicas as cp', 'cp.id', '=', 'pr.caracteristica_id')
                 ->select(
-                    DB::raw("COALESCE(p.sigla, 'UND') as sigla"),
+                    'v.id as variante_id',
+                    'v.producto_id',
+                    'v.color',
+                    'v.stock as cantidad',
+                    'v.img_path as variante_img',
+                    DB::raw("COALESCE(pr.sigla, '') as sigla"),
                     DB::raw("COALESCE(cp.nombre, '') as talla_nombre"),
-                    'productos.nombre',
-                    'productos.codigo',
-                    'productos.id',
-                    DB::raw("COALESCE(i.cantidad, 0) as cantidad"),
-                    'productos.precio',
-                    'productos.img_path',
-                    'productos.categoria_id',
-                    'productos.genero'
+                    'p.nombre',
+                    'p.codigo',
+                    'p.id as producto_uuid',
+                    'p.precio',
+                    'p.img_path',
+                    'p.categoria_id',
+                    'p.genero'
                 )
-                ->where('productos.estado', 1)
+                ->where('p.estado', 1)
                 ->get();
 
             $categorias = Cache::remember('categorias_activas', 3600, function () {
@@ -128,16 +128,17 @@ class ventaController extends Controller
 
             //Llenar mi tabla venta_producto
             //1. Recuperar los arrays
-            $arrayProducto_id = $request->get('arrayidproducto');
-            $arrayCantidad = $request->get('arraycantidad');
-            $arrayPrecioVenta = $request->get('arrayprecioventa');
+            $arrayProducto_id  = $request->get('arrayidproducto');
+            $arrayVarianteId   = $request->get('arrayvariante_id', []);
+            $arrayCantidad     = $request->get('arraycantidad');
+            $arrayPrecioVenta  = $request->get('arrayprecioventa');
 
             if (empty($arrayProducto_id)) {
                 DB::rollBack();
                 return redirect()->route('ventas.create')->with('error', 'Debe agregar al menos un producto a la venta.');
             }
 
-            //2.Realizar el llenado
+            //2. Realizar el llenado
             $siseArray = count($arrayProducto_id);
             $cont = 0;
 
@@ -150,12 +151,13 @@ class ventaController extends Controller
                     ]
                 ]);
 
-                //Despachar evento
+                // Despachar evento — incluye variante_id para descontar stock correcto
                 CreateVentaDetalleEvent::dispatch(
                     $venta,
                     $arrayProducto_id[$cont],
                     $arrayCantidad[$cont],
-                    $arrayPrecioVenta[$cont]
+                    $arrayPrecioVenta[$cont],
+                    $arrayVarianteId[$cont] ?? null
                 );
 
                 $cont++;
