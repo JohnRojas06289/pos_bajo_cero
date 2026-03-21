@@ -9,7 +9,6 @@ use App\Models\User;
 use App\Services\ActivityLogService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -56,8 +55,9 @@ class userController extends Controller
     {
         DB::beginTransaction();
         try {
-            $request->merge(['password' =>  Hash::make($request->password)]);
-            $user = User::create($request->all());
+            $data = $request->validated();
+            $data['password'] = Hash::make($data['password']);
+            $user = User::create($data);
             $user->assignRole($request->role);
 
             DB::commit();
@@ -95,13 +95,13 @@ class userController extends Controller
         DB::beginTransaction();
         try {
 
-            /*Comprobar el password y aplicar el Hash*/
-            if (empty($request->password)) {
-                $request = Arr::except($request, array('password'));
+            $data = $request->validated();
+            if (empty($data['password'])) {
+                unset($data['password']);
             } else {
-                $request->merge(['password' => Hash::make($request->password)]);
+                $data['password'] = Hash::make($data['password']);
             }
-            $user->update($request->all());
+            $user->update($data);
             $user->syncRoles([$request->role]);
 
             DB::commit();

@@ -65,7 +65,7 @@ main { padding: 0 !important; }
     transition: border-color 0.2s ease;
     outline: none;
 }
-#searchInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(230,126,34,0.1); }
+#searchInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(29,150,200,0.15); }
 #searchInput::placeholder { color: var(--text-muted); }
 
 /* Category chips */

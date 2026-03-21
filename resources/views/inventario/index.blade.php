@@ -77,7 +77,7 @@
                         @foreach ($productos as $item)
                         <tr>
                             <td>
-                                <span class="badge" style="background:#f1f5f9;color:#475569;font-size:0.72rem;font-weight:600;border-radius:5px;">
+                                <span class="badge" style="background:var(--hover-bg);color:var(--text-secondary);font-size:0.72rem;font-weight:600;border-radius:5px;">
                                     {{ $item->codigo }}
                                 </span>
                             </td>
@@ -90,15 +90,15 @@
                             <td>
                                 @php $qty = $item->inventario->cantidad ?? 0; @endphp
                                 @if($qty <= 0)
-                                    <span class="badge" style="background:#fee2e2;color:#991b1b;">
+                                    <span class="badge bg-danger">
                                         <i class="fas fa-exclamation-triangle me-1"></i>Agotado
                                     </span>
                                 @elseif($qty <= 3)
-                                    <span class="badge" style="background:#fef3c7;color:#92400e;">
+                                    <span class="badge bg-warning">
                                         <i class="fas fa-exclamation-circle me-1"></i>{{ $qty }} uds
                                     </span>
                                 @else
-                                    <span class="badge" style="background:#d1fae5;color:#065f46;">
+                                    <span class="badge bg-success">
                                         <i class="fas fa-check me-1"></i>{{ $qty }} uds
                                     </span>
                                 @endif
@@ -121,7 +121,7 @@
                                             </button>
                                         </form>
                                     @else
-                                        <span class="badge" style="background:#f1f5f9;color:#94a3b8;font-size:0.72rem;">
+                                        <span class="badge" style="background:var(--hover-bg);color:var(--text-muted);font-size:0.72rem;">
                                             Sin inventario
                                         </span>
                                     @endif

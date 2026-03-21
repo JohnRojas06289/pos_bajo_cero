@@ -37,7 +37,7 @@
             @endcan
             @endif
             @can('crear-producto')
-            <a href="{{route('productos.create')}}" class="btn btn-sm" style="background:white;color:#2563eb;font-weight:700;border:none;">
+            <a href="{{route('productos.create')}}" class="btn btn-sm" style="background:rgba(255,255,255,0.95);color:#1B4F72;font-weight:700;border:none;">
                 <i class="fas fa-plus me-1"></i> Nuevo Producto
             </a>
             @endcan
@@ -154,7 +154,7 @@
                 <div class="d-flex align-items-start gap-2 mb-1 flex-wrap">
                     <h5 class="product-name mb-0" title="{{ $item->nombreCompleto }}">{{ $item->nombre }}</h5>
                     @if($item->presentacione && $item->presentacione->sigla)
-                    <span class="badge" style="background:#f59e0b;color:#fff;font-size:0.75rem;white-space:nowrap;align-self:center;">
+                    <span class="badge bg-warning" style="font-size:0.75rem;white-space:nowrap;align-self:center;">
                         {{ $item->presentacione->sigla }}
                     </span>
                     @endif
@@ -232,7 +232,7 @@
                             <i class="fas fa-box-open me-2"></i>
                             Detalles del Producto
                         </h1>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-4">
                         <div class="row g-4">
@@ -545,7 +545,7 @@
             <div class="toast-body" id="aiToastBody">
                 <i class="fas fa-spinner fa-spin me-2"></i> Generando descripciones con IA...
             </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     </div>
 </div>

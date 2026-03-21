@@ -35,7 +35,7 @@
         @forelse ($clientes as $item)
         <div class="item-card" data-search="{{ strtolower(($item->persona?->razon_social ?? '') . ' ' . ($item->persona?->numero_documento ?? '') . ($item->persona?->es_mayorista ? ' mayorista' : '')) }}">
             <!-- Client Icon -->
-            <div class="item-image d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, {{ $item->persona?->es_mayorista ? '#db2777, #ec4899' : '#0ea5e9, #38bdf8' }} 100%);">
+            <div class="item-image d-flex align-items-center justify-content-center" style="background: {{ $item->persona?->es_mayorista ? 'linear-gradient(135deg,#1B4F72,#2C3E50)' : 'linear-gradient(135deg,#1D96C8,#1275A0)' }};">
                 <i class="fas {{ $item->persona?->es_mayorista ? 'fa-handshake' : 'fa-user' }} fa-3x text-white"></i>
             </div>
 
@@ -44,7 +44,7 @@
                 <h3>
                     {{ $item->persona?->razon_social ?? 'N/A' }}
                     @if($item->persona?->es_mayorista)
-                    <span class="badge bg-pink-light text-pink ms-2" style="background: #fdf2f8; color: #db2777; border: 1px solid #fbcfe8; font-size: 0.7rem;">
+                    <span class="badge ms-2" style="background:var(--warning);color:#fff;font-size:0.7rem;">
                         <i class="fas fa-star me-1"></i>MAYORISTA
                     </span>
                     @endif
@@ -117,12 +117,12 @@
         <div class="modal fade" id="verModal-{{$item->id}}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-scrollable modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header" style="background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%); color: white;">
+                    <div class="modal-header" style="background: linear-gradient(135deg, #1B4F72 0%, #0A1628 100%); color: white;">
                         <h1 class="modal-title fs-4">
                             <i class="fas fa-user me-2"></i>
                             Información del Cliente
                         </h1>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4">
                         <div class="row g-4">
@@ -157,7 +157,7 @@
                                     <label>Tipo Cliente</label>
                                     <div class="p-3 bg-light rounded">
                                         @if($item->persona?->es_mayorista)
-                                        <span class="text-pink fw-bold" style="color: #db2777;"><i class="fas fa-handshake me-2"></i>Mayorista</span>
+                                        <span class="fw-bold" style="color:var(--warning);"><i class="fas fa-handshake me-2"></i>Mayorista</span>
                                         @else
                                         <span class="text-primary fw-bold"><i class="fas fa-user me-2"></i>Minorista</span>
                                         @endif

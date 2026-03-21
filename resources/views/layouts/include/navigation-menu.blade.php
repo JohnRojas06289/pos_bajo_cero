@@ -42,7 +42,7 @@
                     <div class="sb-nav-link-icon"><i class="fas fa-calendar-check"></i></div>
                     Reservas
                     @if($pendientesReservas > 0)
-                        <span style="margin-left:auto;background:#f39c12;color:#fff;border-radius:999px;font-size:0.65rem;font-weight:700;padding:1px 7px;min-width:18px;text-align:center;">{{ $pendientesReservas }}</span>
+                        <span style="margin-left:auto;background:var(--warning);color:#fff;border-radius:999px;font-size:0.65rem;font-weight:700;padding:1px 7px;min-width:18px;text-align:center;">{{ $pendientesReservas }}</span>
                     @endif
                 </a>
                 @endcanany

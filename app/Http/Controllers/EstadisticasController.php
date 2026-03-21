@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class EstadisticasController extends Controller
 {
@@ -110,7 +111,8 @@ class EstadisticasController extends Controller
             ));
 
         } catch (\Exception $e) {
-            return response("Error en Estadísticas: " . $e->getMessage() . " | Line: " . $e->getLine());
+            Log::error('Error en EstadisticasController', ['error' => $e->getMessage(), 'line' => $e->getLine()]);
+            return redirect()->route('panel')->with('error', 'Error al cargar las estadísticas. Intenta de nuevo.');
         }
     }
 }

@@ -1134,7 +1134,11 @@ textarea.form-control { height: auto; }
 [data-theme="dark"] .text-dark { color: var(--text-primary) !important; }
 [data-theme="dark"] .text-muted { color: var(--text-muted) !important; }
 [data-theme="dark"] .bg-light { background: var(--hover-bg) !important; }
+[data-theme="dark"] .bg-white { background: var(--card-bg) !important; }
+[data-theme="dark"] .bg-body { background: var(--bg-primary) !important; }
 [data-theme="dark"] .border { border-color: var(--border-color) !important; }
+[data-theme="dark"] .text-body { color: var(--text-primary) !important; }
+[data-theme="dark"] .border-light { border-color: var(--border-color) !important; }
 
 /* ════════════════════════════════════════════
    POLISH GLOBAL — micro-interactions

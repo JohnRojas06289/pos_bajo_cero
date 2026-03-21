@@ -432,7 +432,7 @@
                 <h6 class="modal-title fw-700" id="modalVentaTitle" style="color:var(--text-primary);">
                     <i class="fas fa-receipt me-2" style="color:#E67E22;"></i>Detalle de Venta
                 </h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-3">
                 <div class="row g-2 mb-3" id="modalMeta" style="font-size:0.78rem;"></div>

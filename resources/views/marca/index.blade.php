@@ -73,7 +73,7 @@
                                     @can('eliminar-marca')
                                     <button title="{{ $item->caracteristica->estado == 1 ? 'Eliminar' : 'Restaurar' }}"
                                             class="btn-icon-sm {{ $item->caracteristica->estado == 1 ? 'btn-delete' : '' }}"
-                                            style="{{ $item->caracteristica->estado != 1 ? 'color:#059669;border-color:#e2e8f0;' : '' }}"
+                                            style="{{ $item->caracteristica->estado != 1 ? 'color:#059669;border-color:var(--border-color);' : '' }}"
                                             data-bs-toggle="modal"
                                             data-bs-target="#confirmModal-{{ $item->id }}">
                                         <i class="fas {{ $item->caracteristica->estado == 1 ? 'fa-trash' : 'fa-rotate' }}"></i>

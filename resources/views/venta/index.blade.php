@@ -91,7 +91,7 @@
 
                                     <button type="button"
                                             class="btn-icon-sm"
-                                            style="color:#8b5cf6;border-color:#e2e8f0;"
+                                            style="color:#8b5cf6;border-color:var(--border-color);"
                                             data-bs-toggle="modal"
                                             data-bs-target="#verPDFModal-{{ $item->id }}"
                                             title="Ver PDF">

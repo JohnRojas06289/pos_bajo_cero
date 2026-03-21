@@ -45,7 +45,7 @@
 }
 .db-section-title::before {
     content: ''; display: inline-block; width: 3px; height: 14px;
-    background: #E67E22; border-radius: 2px;
+    background: var(--warning, #E67E22); border-radius: 2px;
 }
 
 .chart-card {
@@ -83,6 +83,13 @@
 .badge-transferencia { background: rgba(41,128,185,0.15); color: #1A5276; }
 .badge-fiado         { background: rgba(230,126,34,0.15); color: #D35400; }
 
+/* Dark mode — texto más claro para legibilidad */
+[data-theme="dark"] .badge-efectivo      { color: #4ade80; }
+[data-theme="dark"] .badge-nequi         { color: #c084fc; }
+[data-theme="dark"] .badge-daviplata     { color: #f87171; }
+[data-theme="dark"] .badge-transferencia { color: #60a5fa; }
+[data-theme="dark"] .badge-fiado         { color: #fb923c; }
+
 .btn-detail {
     padding: 0.25rem 0.6rem; border-radius: 6px; border: 1.5px solid var(--border-color, #e2e8f0);
     background: transparent; color: var(--text-secondary, #64748b); font-size: 0.72rem; cursor: pointer;
@@ -113,7 +120,7 @@
             <div style="font-size:0.78rem;color:var(--text-secondary);">{{ \Carbon\Carbon::today()->isoFormat('dddd, D [de] MMMM [de] Y') }}</div>
         </div>
         @can('ver-estadisticas')
-        <a href="{{ route('estadisticas.index') }}" class="btn btn-sm" style="background:#E67E22;color:#fff;border-radius:8px;font-weight:600;font-size:0.78rem;">
+        <a href="{{ route('estadisticas.index') }}" class="btn btn-sm btn-warning">
             <i class="fas fa-chart-bar me-1"></i>Ver estadísticas
         </a>
         @endcan
@@ -293,7 +300,7 @@
                 <h6 class="modal-title fw-700" id="modalVentaTitle" style="color:var(--text-primary);">
                     <i class="fas fa-receipt me-2" style="color:#E67E22;"></i>Detalle de Venta
                 </h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-3">
                 <div class="row g-2 mb-3" id="modalMeta" style="font-size:0.78rem;"></div>

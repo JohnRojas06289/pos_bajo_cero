@@ -6,6 +6,7 @@ use App\Http\Requests\loginRequest;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 
 class loginController extends Controller
 {
@@ -24,13 +25,25 @@ class loginController extends Controller
 
     public function login(loginRequest $request): RedirectResponse
     {
+        $key = 'login:' . $request->ip();
 
-        //Validar credenciales
+        // Protección contra fuerza bruta: máx 5 intentos por minuto por IP
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $seconds = RateLimiter::availableIn($key);
+            return redirect()->to('login')->withErrors(
+                "Demasiados intentos fallidos. Intenta de nuevo en {$seconds} segundos."
+            );
+        }
+
+        // Validar credenciales
         if (!Auth::validate($request->only('email', 'password'))) {
+            RateLimiter::hit($key, 60);
             return redirect()->to('login')->withErrors('Credenciales incorrectas');
         }
 
-        //Crear una sesión
+        // Login exitoso — limpiar intentos
+        RateLimiter::clear($key);
+
         $user = Auth::getProvider()->retrieveByCredentials($request->only('email', 'password'));
         Auth::login($user);
 

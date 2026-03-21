@@ -73,7 +73,7 @@
                                 @can('eliminar-categoria')
                                 <button title="{{ $categoria->caracteristica->estado == 1 ? 'Eliminar' : 'Restaurar' }}"
                                         class="btn-icon-sm {{ $categoria->caracteristica->estado == 1 ? 'btn-delete' : '' }}"
-                                        style="{{ $categoria->caracteristica->estado != 1 ? 'color:#059669;border-color:#e2e8f0;' : '' }}"
+                                        style="{{ $categoria->caracteristica->estado != 1 ? 'color:#059669;border-color:var(--border-color);' : '' }}"
                                         data-bs-toggle="modal"
                                         data-bs-target="#confirmModal-{{ $categoria->id }}">
                                     <i class="fas {{ $categoria->caracteristica->estado == 1 ? 'fa-trash' : 'fa-rotate' }}"></i>

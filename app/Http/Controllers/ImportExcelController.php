@@ -15,7 +15,7 @@ class ImportExcelController extends Controller
     public function importExcelEmpleados(Request $request): RedirectResponse
     {
         $request->validate([
-            'file' => 'required|file|mimes:xlsx,xls'
+            'file' => 'required|file|mimes:xlsx,xls|max:5120'
         ]);
 
         Excel::import(new EmpleadosImport, $request->file('file'));
