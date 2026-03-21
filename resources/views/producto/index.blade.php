@@ -611,24 +611,34 @@ async function crearDesdeImagenesIA() {
     let   done    = 0;
     const results = [];
 
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '{{ csrf_token() }}';
+
     for (const file of aiFiles) {
-        progressLbl.textContent = `Analizando: ${file.name}`;
+        progressLbl.textContent = `Comprimiendo: ${file.name}`;
         progressFrc.textContent = `${done} / ${total}`;
         progressBar.style.width = `${Math.round((done / total) * 100)}%`;
 
         try {
+            // Compress image to ~1024px JPEG before sending (avoids Vercel 4.5MB payload limit)
+            const compressed = await compressImageForAI(file, 1024, 0.82);
+            if (!compressed) throw new Error('No se pudo leer la imagen');
+
+            progressLbl.textContent = `Analizando con IA: ${file.name}`;
+
             const fd = new FormData();
-            fd.append('_token', document.querySelector('meta[name="csrf-token"]')?.content ?? '{{ csrf_token() }}');
-            fd.append('imagenes[]', file);
+            fd.append('_token', csrf);
+            fd.append('image_base64', compressed.base64);
+            fd.append('image_mime',   compressed.mime);
+            fd.append('image_name',   file.name);
 
             const res  = await fetch('{{ route("productos.crear-desde-imagenes") }}', { method: 'POST', body: fd });
-            const data = await res.json();
+            const text = await res.text();
+            let data;
+            try { data = JSON.parse(text); } catch { throw new Error('Respuesta inválida del servidor (HTTP ' + res.status + ')'); }
 
-            if (data.error) {
-                results.push({ success: false, nombre: file.name, error: data.error });
-            } else {
-                (data.results || []).forEach(r => results.push({ ...r, filename: file.name }));
-            }
+            if (!res.ok || !data.success) throw new Error(data?.error ?? `Error ${res.status}`);
+
+            results.push({ ...data, filename: file.name });
         } catch (e) {
             results.push({ success: false, nombre: file.name, error: e.message });
         }
@@ -682,6 +692,26 @@ async function crearDesdeImagenesIA() {
     if (ok.length > 0) {
         setTimeout(() => window.location.reload(), 3500);
     }
+}
+
+/** Compress an image File to base64 JPEG via canvas, max maxPx on longest side */
+function compressImageForAI(file, maxPx = 1024, quality = 0.82) {
+    return new Promise(resolve => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            const ratio  = Math.min(maxPx / img.width, maxPx / img.height, 1);
+            const canvas = document.createElement('canvas');
+            canvas.width  = Math.round(img.width  * ratio);
+            canvas.height = Math.round(img.height * ratio);
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve({ base64: dataUrl.split(',')[1], mime: 'image/jpeg' });
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+        img.src = url;
+    });
 }
 
 // Reset modal state when closed

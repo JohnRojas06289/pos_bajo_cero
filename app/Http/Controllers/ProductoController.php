@@ -450,89 +450,83 @@ class ProductoController extends Controller
         }
 
         $request->validate([
-            'imagenes'   => 'required|array|min:1|max:15',
-            'imagenes.*' => 'required|image|max:5120',
+            'image_base64' => 'required|string',
+            'image_mime'   => 'nullable|string',
+            'image_name'   => 'nullable|string',
         ]);
 
         $marcas     = Marca::with('caracteristica')->get();
         $categorias = Categoria::with('caracteristica')->get();
-        $results    = [];
 
-        foreach ($request->file('imagenes') as $imageFile) {
-            RateLimiter::hit($key, 3600);
-            try {
-                // Convert to base64 for Gemini vision
-                $b64  = base64_encode(file_get_contents($imageFile->getRealPath()));
-                $mime = $imageFile->getMimeType() ?: 'image/jpeg';
+        RateLimiter::hit($key, 3600);
+        try {
+            $b64  = $request->input('image_base64');
+            $mime = $request->input('image_mime', 'image/jpeg') ?: 'image/jpeg';
+            $name = $request->input('image_name', 'product.jpg') ?: 'product.jpg';
 
-                // Call Gemini to analyze the product in the image
-                $ai = $this->analyzeProductImage($b64, $mime, $apiKey);
+            $ai = $this->analyzeProductImage($b64, $mime, $apiKey);
 
-                // Fuzzy-match marca
-                $marcaId = null;
-                if (!empty($ai['marca'])) {
-                    $needle = strtolower($ai['marca']);
-                    $match  = $marcas->first(fn($m) =>
-                        str_contains(strtolower($m->caracteristica?->nombre ?? ''), $needle) ||
-                        str_contains($needle, strtolower($m->caracteristica?->nombre ?? ''))
-                    );
-                    $marcaId = $match?->id;
-                }
-
-                // Fuzzy-match categoria
-                $categoriaId = null;
-                if (!empty($ai['categoria'])) {
-                    $needle = strtolower($ai['categoria']);
-                    $match  = $categorias->first(fn($c) =>
-                        str_contains(strtolower($c->caracteristica?->nombre ?? ''), $needle) ||
-                        str_contains($needle, strtolower($c->caracteristica?->nombre ?? ''))
-                    );
-                    $categoriaId = $match?->id;
-                }
-
-                // Upload image to Cloudinary / storage
-                $imgPath = $this->productoService->handleUploadImage($imageFile);
-
-                $genero = in_array($ai['genero'] ?? '', ['Hombre', 'Mujer', 'Unisex'])
-                    ? $ai['genero']
-                    : 'Unisex';
-
-                $precio = is_numeric($ai['precio'] ?? null) ? (float) $ai['precio'] : null;
-
-                $producto = Producto::create([
-                    'nombre'       => $ai['titulo'] ?? 'Producto sin nombre',
-                    'descripcion'  => $ai['descripcion'] ?? null,
-                    'img_path'     => $imgPath,
-                    'marca_id'     => $marcaId,
-                    'categoria_id' => $categoriaId,
-                    'color'        => $ai['color'] ?? null,
-                    'material'     => $ai['material'] ?? null,
-                    'genero'       => $genero,
-                    'precio'       => $precio,
-                    'estado'       => 0,
-                ]);
-
-                ActivityLogService::log('Producto creado con IA desde imagen', 'Productos', [
-                    'id'     => $producto->id,
-                    'nombre' => $producto->nombre,
-                ]);
-
-                $results[] = [
-                    'success'  => true,
-                    'nombre'   => $producto->nombre,
-                    'id'       => $producto->id,
-                    'edit_url' => route('productos.edit', $producto),
-                ];
-            } catch (Throwable $e) {
-                Log::error('crearDesdeImagenes: error procesando imagen', ['error' => $e->getMessage()]);
-                $results[] = [
-                    'success' => false,
-                    'error'   => $e->getMessage(),
-                ];
+            // Fuzzy-match marca
+            $marcaId = null;
+            if (!empty($ai['marca'])) {
+                $needle = strtolower($ai['marca']);
+                $match  = $marcas->first(fn($m) =>
+                    str_contains(strtolower($m->caracteristica?->nombre ?? ''), $needle) ||
+                    str_contains($needle, strtolower($m->caracteristica?->nombre ?? ''))
+                );
+                $marcaId = $match?->id;
             }
-        }
 
-        return response()->json(['results' => $results]);
+            // Fuzzy-match categoria
+            $categoriaId = null;
+            if (!empty($ai['categoria'])) {
+                $needle = strtolower($ai['categoria']);
+                $match  = $categorias->first(fn($c) =>
+                    str_contains(strtolower($c->caracteristica?->nombre ?? ''), $needle) ||
+                    str_contains($needle, strtolower($c->caracteristica?->nombre ?? ''))
+                );
+                $categoriaId = $match?->id;
+            }
+
+            // Decode base64 → temp file → upload to Cloudinary
+            $tmpPath   = tempnam(sys_get_temp_dir(), 'ai_img_') . '.jpg';
+            file_put_contents($tmpPath, base64_decode($b64));
+            $imageFile = new \Illuminate\Http\UploadedFile($tmpPath, $name, $mime, null, true);
+            $imgPath   = $this->productoService->handleUploadImage($imageFile);
+            @unlink($tmpPath);
+
+            $genero = in_array($ai['genero'] ?? '', ['Hombre', 'Mujer', 'Unisex'])
+                ? $ai['genero'] : 'Unisex';
+            $precio = is_numeric($ai['precio'] ?? null) ? (float) $ai['precio'] : null;
+
+            $producto = Producto::create([
+                'nombre'       => $ai['titulo'] ?? 'Producto sin nombre',
+                'descripcion'  => $ai['descripcion'] ?? null,
+                'img_path'     => $imgPath,
+                'marca_id'     => $marcaId,
+                'categoria_id' => $categoriaId,
+                'color'        => $ai['color'] ?? null,
+                'material'     => $ai['material'] ?? null,
+                'genero'       => $genero,
+                'precio'       => $precio,
+                'estado'       => 0,
+            ]);
+
+            ActivityLogService::log('Producto creado con IA desde imagen', 'Productos', [
+                'id'     => $producto->id,
+                'nombre' => $producto->nombre,
+            ]);
+
+            return response()->json([
+                'success'  => true,
+                'nombre'   => $producto->nombre,
+                'id'       => $producto->id,
+                'edit_url' => route('productos.edit', $producto),
+            ]);
+        } catch (Throwable $e) {
+            Log::error('crearDesdeImagenes: error procesando imagen', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
     /**
