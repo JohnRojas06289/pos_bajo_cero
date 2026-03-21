@@ -82,10 +82,6 @@
                                     <input type="number" id="precio_compra" class="form-control" step="0.1" placeholder="0.00" min="0">
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <label for="fecha_vencimiento" class="form-label fw-semibold">Vencimiento <small class="text-muted">(opcional)</small></label>
-                                <input type="date" id="fecha_vencimiento" class="form-control">
-                            </div>
                             <div class="col-md-3 ms-auto d-grid">
                                 <button id="btn_agregar" class="btn btn-add" type="button">
                                     <i class="fas fa-plus me-1"></i> Agregar
@@ -129,28 +125,54 @@
             <div class="col-lg-4">
                 <div class="card card-custom">
                     <div class="card-header card-header-custom bg-secondary">
-                        <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Datos de Factura</h5>
+                        <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Datos de Factura <small class="fw-normal opacity-75">(opcional)</small></h5>
                     </div>
                     <div class="card-body">
+
+                        {{-- Adjuntar comprobante con IA --}}
+                        <div class="mb-3 p-3 rounded" style="background:#f0f4ff;border:1.5px dashed #6c8ebf;">
+                            <label class="form-label fw-semibold mb-1">
+                                <i class="fas fa-camera me-1 text-primary"></i> Foto o archivo del comprobante
+                            </label>
+                            <div class="d-flex gap-2 flex-wrap align-items-center">
+                                <input type="file" name="file_comprobante" id="file_comprobante"
+                                       class="form-control flex-grow-1"
+                                       accept="image/*,.pdf"
+                                       style="max-width:calc(100% - 130px);">
+                                <button type="button" id="btn_camara" class="btn btn-outline-secondary btn-sm"
+                                        title="Tomar foto directamente">
+                                    <i class="fas fa-camera me-1"></i>Cámara
+                                </button>
+                                <input type="file" id="input_camara" accept="image/*" capture="environment"
+                                       style="display:none;">
+                            </div>
+                            <div class="mt-2">
+                                <button type="button" id="btn_ia" class="btn btn-sm btn-primary w-100" disabled>
+                                    <i class="fas fa-magic me-1"></i> Rellenar campos con IA
+                                </button>
+                            </div>
+                            <div id="ia_status" class="mt-2 small" style="display:none;"></div>
+                        </div>
+
                         <div class="mb-3">
-                            <label for="proveedore_id" class="form-label">Proveedor <span class="text-danger">*</span></label>
-                            <select name="proveedore_id" id="proveedore_id" required class="form-control selectpicker show-tick" data-live-search="true" title="Seleccionar...">
+                            <label for="proveedore_id" class="form-label">Proveedor</label>
+                            <select name="proveedore_id" id="proveedore_id" class="form-control selectpicker show-tick" data-live-search="true" title="Seleccionar...">
                                 @foreach ($proveedores as $item)
-                                <option value="{{$item->id}}">{{$item->nombre_documento}}</option>
+                                <option value="{{$item->id}}" data-nombre="{{ strtolower($item->nombre_documento) }}">{{$item->nombre_documento}}</option>
                                 @endforeach
                             </select>
                             @error('proveedore_id') <small class="text-danger">{{ $message }}</small> @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label for="fecha_hora" class="form-label">Fecha y Hora <span class="text-danger">*</span></label>
-                            <input required type="datetime-local" name="fecha_hora" id="fecha_hora" class="form-control" value="{{ \Carbon\Carbon::now()->format('Y-m-d\TH:i') }}">
+                            <label for="fecha_hora" class="form-label">Fecha y Hora</label>
+                            <input type="datetime-local" name="fecha_hora" id="fecha_hora" class="form-control" value="{{ \Carbon\Carbon::now()->format('Y-m-d\TH:i') }}">
                             @error('fecha_hora') <small class="text-danger">{{ $message }}</small> @enderror
                         </div>
 
                         <div class="mb-3">
-                             <label for="metodo_pago" class="form-label">Método de Pago <span class="text-danger">*</span></label>
-                             <select required name="metodo_pago" id="metodo_pago" class="form-control selectpicker" title="Seleccionar...">
+                             <label for="metodo_pago" class="form-label">Método de Pago</label>
+                             <select name="metodo_pago" id="metodo_pago" class="form-control selectpicker" title="Seleccionar...">
                                  @foreach ($optionsMetodoPago as $item)
                                  <option value="{{$item->value}}">{{$item->name}}</option>
                                  @endforeach
@@ -160,8 +182,8 @@
 
                         <div class="row g-2 mb-3">
                             <div class="col-6">
-                                <label for="comprobante_id" class="form-label">Tipo Comp. <span class="text-danger">*</span></label>
-                                <select name="comprobante_id" id="comprobante_id" required class="form-control selectpicker" title="Tipo">
+                                <label for="comprobante_id" class="form-label">Tipo Comp.</label>
+                                <select name="comprobante_id" id="comprobante_id" class="form-control selectpicker" title="Tipo">
                                     @foreach ($comprobantes as $item)
                                     <option value="{{$item->id}}">{{$item->nombre}}</option>
                                     @endforeach
@@ -172,11 +194,6 @@
                                 <input type="text" name="numero_comprobante" id="numero_comprobante" class="form-control">
                             </div>
                         </div>
-
-                         <div class="mb-4">
-                             <label for="file_comprobante" class="form-label">Adjuntar PDF</label>
-                             <input type="file" name="file_comprobante" id="file_comprobante" class="form-control" accept=".pdf">
-                         </div>
 
                          <div class="d-grid gap-2">
                              <button type="submit" class="btn btn-primary btn-lg" id="guardar">
@@ -257,9 +274,7 @@
         let stockProducto = parseInt($selected.data('stock')) || 0;
         let cantidad = parseInt($('#cantidad').val());
         let precioCompra = parseFloat($('#precio_compra').val());
-        let fechaVencimiento = $('#fecha_vencimiento').val();
-
-        if (!idProducto || !textProducto.trim()) {
+            if (!idProducto || !textProducto.trim()) {
             showModal('Selecciona un producto', 'warning'); return;
         }
         if (isNaN(cantidad) || cantidad < 1) {
@@ -305,7 +320,7 @@
                 '<span class="text-muted">$</span>' + precioCompra.toLocaleString() +
             '</td>' +
             '<td class="text-center fw-bold text-success">' +
-                '<input type="hidden" name="arrayfechavencimiento[]" value="' + fechaVencimiento + '">' +
+                '<input type="hidden" name="arrayfechavencimiento[]" value="">' +
                 '$<span id="subtotal-fila' + cont + '">' + subtotal[cont] + '</span>' +
             '</td>' +
             '<td class="text-center">' +
@@ -362,7 +377,6 @@
         $('#stockInfo').hide();
         $('#cantidad').val('');
         $('#precio_compra').val('');
-        $('#fecha_vencimiento').val('');
     }
 
     function round(num, decimales = 2) {
@@ -385,6 +399,157 @@
         });
         Toast.fire({ icon: icon, title: message });
     }
+
+    // ── Helpers base64 (mismo patrón que productos) ───────────────────────────
+    function fileToBase64(file) {
+        return new Promise(function (resolve, reject) {
+            var reader = new FileReader();
+            reader.onload  = function (e) { resolve(e.target.result.split(',')[1]); };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Comprime imagen con canvas antes de enviar (≈ 800px, 80% calidad)
+    function compressImage(file, maxPx, quality) {
+        maxPx   = maxPx   || 800;
+        quality = quality || 0.80;
+        return new Promise(function (resolve) {
+            var url = URL.createObjectURL(file);
+            var img = new Image();
+            img.onload = function () {
+                URL.revokeObjectURL(url);
+                var ratio  = Math.min(1, maxPx / Math.max(img.width, img.height));
+                var canvas = document.createElement('canvas');
+                canvas.width  = Math.round(img.width  * ratio);
+                canvas.height = Math.round(img.height * ratio);
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                var dataUrl = canvas.toDataURL('image/jpeg', quality);
+                resolve({ base64: dataUrl.split(',')[1], mime: 'image/jpeg' });
+            };
+            img.onerror = function () { URL.revokeObjectURL(url); resolve(null); };
+            img.src = url;
+        });
+    }
+
+    // ── Cámara / archivo ──────────────────────────────────────────────────────
+    $('#btn_camara').on('click', function () {
+        $('#input_camara').val('').trigger('click');
+    });
+
+    // Al tomar foto con cámara, transferir al input principal
+    $('#input_camara').on('change', function () {
+        if (this.files && this.files[0]) {
+            var dt = new DataTransfer();
+            dt.items.add(this.files[0]);
+            document.getElementById('file_comprobante').files = dt.files;
+            $('#file_comprobante').trigger('change');
+        }
+    });
+
+    // Habilitar botón IA cuando hay archivo seleccionado
+    $('#file_comprobante').on('change', function () {
+        var hasFile = this.files && this.files.length > 0;
+        $('#btn_ia').prop('disabled', !hasFile);
+        if (!hasFile) $('#ia_status').hide();
+    });
+
+    // ── Extracción con IA ─────────────────────────────────────────────────────
+    $('#btn_ia').on('click', async function () {
+        var fileInput = document.getElementById('file_comprobante');
+        if (!fileInput.files || !fileInput.files[0]) return;
+
+        var file = fileInput.files[0];
+        var $btn = $(this);
+        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Analizando...');
+        $('#ia_status').html('<span class="text-info"><i class="fas fa-circle-notch fa-spin me-1"></i> Procesando imagen...</span>').show();
+
+        var b64, mime;
+        try {
+            if (file.type === 'application/pdf') {
+                // PDF: enviar directo en base64
+                b64  = await fileToBase64(file);
+                mime = 'application/pdf';
+            } else {
+                // Imagen: comprimir antes de enviar (igual que en productos)
+                var compressed = await compressImage(file, 800, 0.80);
+                b64  = compressed.base64;
+                mime = compressed.mime;
+            }
+        } catch (e) {
+            $('#ia_status').html('<span class="text-danger"><i class="fas fa-times-circle me-1"></i> Error al procesar el archivo.</span>');
+            $btn.prop('disabled', false).html('<i class="fas fa-magic me-1"></i> Rellenar campos con IA');
+            return;
+        }
+
+        var formData = new FormData();
+        formData.append('_token',       '{{ csrf_token() }}');
+        formData.append('image_base64', b64);
+        formData.append('image_mime',   mime);
+
+        $.ajax({
+            url: '{{ route("compras.extract-factura") }}',
+            method: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                if (data.error) {
+                    $('#ia_status').html('<span class="text-danger"><i class="fas fa-times-circle me-1"></i>' + data.error + '</span>');
+                    $btn.prop('disabled', false).html('<i class="fas fa-magic me-1"></i> Rellenar campos con IA');
+                    return;
+                }
+
+                var filled = [];
+
+                if (data.proveedore_id) {
+                    $('#proveedore_id').selectpicker('val', String(data.proveedore_id));
+                    $('#proveedore_id').selectpicker('refresh');
+                    filled.push('Proveedor');
+                } else if (data.proveedor_nombre) {
+                    var needle = data.proveedor_nombre.toLowerCase();
+                    $('#proveedore_id option').each(function () {
+                        var opt = $(this).data('nombre') || '';
+                        if (opt && opt.indexOf(needle) !== -1) {
+                            $('#proveedore_id').selectpicker('val', $(this).val());
+                            $('#proveedore_id').selectpicker('refresh');
+                            filled.push('Proveedor');
+                            return false;
+                        }
+                    });
+                }
+
+                if (data.fecha_hora) {
+                    $('#fecha_hora').val(data.fecha_hora);
+                    filled.push('Fecha');
+                }
+
+                if (data.metodo_pago) {
+                    $('#metodo_pago').selectpicker('val', data.metodo_pago.toUpperCase());
+                    $('#metodo_pago').selectpicker('refresh');
+                    filled.push('Método de pago');
+                }
+
+                if (data.numero_comprobante) {
+                    $('#numero_comprobante').val(data.numero_comprobante);
+                    filled.push('N° comprobante');
+                }
+
+                if (filled.length > 0) {
+                    $('#ia_status').html('<span class="text-success"><i class="fas fa-check-circle me-1"></i> Completado: ' + filled.join(', ') + '</span>');
+                } else {
+                    $('#ia_status').html('<span class="text-warning"><i class="fas fa-exclamation-circle me-1"></i> No se encontraron datos legibles.</span>');
+                }
+
+                $btn.prop('disabled', false).html('<i class="fas fa-magic me-1"></i> Rellenar campos con IA');
+            },
+            error: function (xhr) {
+                var msg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error al procesar el archivo.';
+                $('#ia_status').html('<span class="text-danger"><i class="fas fa-times-circle me-1"></i>' + msg + '</span>');
+                $btn.prop('disabled', false).html('<i class="fas fa-magic me-1"></i> Rellenar campos con IA');
+            }
+        });
+    });
 </script>
 @endpush
 

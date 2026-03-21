@@ -75,6 +75,7 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
     Route::patch('productos/{producto}/toggle-estado', [ProductoController::class, 'toggleEstado'])->name('productos.toggle-estado');
     Route::resource('clientes', clienteController::class)->except('show');
     Route::resource('proveedores', proveedorController::class)->except('show');
+    Route::post('compras/extract-factura', [compraController::class, 'extractFromFile'])->name('compras.extract-factura');
     Route::resource('compras', compraController::class)->except('edit', 'update', 'destroy');
     Route::resource('ventas', ventaController::class)->except('edit', 'update', 'destroy');
     Route::resource('users', userController::class)->except('show');

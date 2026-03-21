@@ -10,6 +10,9 @@ use App\Models\Comprobante;
 use App\Models\Empresa;
 use App\Models\Producto;
 use App\Models\Proveedore;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 use App\Services\ActivityLogService;
 use App\Services\ComprobanteService;
 use App\Services\EmpresaService;
@@ -141,6 +144,92 @@ class compraController extends Controller
     {
         $empresa = $this->empresaService->obtenerEmpresa();
         return view('compra.show', compact('compra', 'empresa'));
+    }
+
+    /**
+     * Extract invoice fields from an image/PDF using Gemini Vision (same pattern as ProductoController).
+     */
+    public function extractFromFile(Request $request): JsonResponse
+    {
+        $apiKey = config('services.gemini.api_key');
+        if (!$apiKey) {
+            return response()->json(['error' => 'IA no configurada (GEMINI_API_KEY faltante).'], 503);
+        }
+
+        $key = 'extract_factura:' . auth()->id();
+        if (RateLimiter::tooManyAttempts($key, 20)) {
+            return response()->json(['error' => 'Demasiadas solicitudes. Intenta más tarde.'], 429);
+        }
+        RateLimiter::hit($key, 3600);
+
+        $request->validate([
+            'image_base64' => 'required|string',
+            'image_mime'   => 'nullable|string',
+        ]);
+
+        $b64  = $request->input('image_base64');
+        $mime = $request->input('image_mime', 'image/jpeg') ?: 'image/jpeg';
+
+        $metodosValidos = 'EFECTIVO, TARJETA, NEQUI, DAVIPLATA, FIADO, VENTA_DIGITAL';
+
+        $prompt = "Analiza esta imagen de una factura, remisión o comprobante de compra.\n"
+            . "Responde ÚNICAMENTE con un JSON válido (sin markdown, sin bloques de código) con esta estructura:\n"
+            . "{\n"
+            . "  \"numero_comprobante\": \"número o código de la factura/comprobante\",\n"
+            . "  \"fecha\": \"fecha en formato YYYY-MM-DDTHH:mm (si no hay hora usa T00:00)\",\n"
+            . "  \"metodo_pago\": \"uno de: {$metodosValidos}\",\n"
+            . "  \"proveedor_nombre\": \"nombre o razón social del proveedor/empresa emisora\"\n"
+            . "}\n"
+            . "Si no puedes extraer un campo con certeza, usa null. Solo el JSON.";
+
+        try {
+            $response = Http::timeout(25)
+                ->withHeaders(['Content-Type' => 'application/json'])
+                ->post(
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
+                    [
+                        'contents' => [['parts' => [
+                            ['inline_data' => ['mime_type' => $mime, 'data' => $b64]],
+                            ['text' => $prompt],
+                        ]]],
+                        'generationConfig' => [
+                            'temperature'     => 0.1,
+                            'maxOutputTokens' => 300,
+                        ],
+                    ]
+                );
+
+            if ($response->failed()) {
+                return response()->json(['error' => 'Error IA: HTTP ' . $response->status()], 500);
+            }
+
+            $data = $response->json();
+            $raw  = $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
+            $raw  = preg_replace('/```(?:json)?\s*|\s*```/', '', trim($raw));
+            $extracted = json_decode($raw, true) ?? [];
+
+            // Intentar encontrar proveedor por razón social
+            $proveedorId = null;
+            if (!empty($extracted['proveedor_nombre'])) {
+                $needle = $extracted['proveedor_nombre'];
+                $proveedor = Proveedore::whereHas('persona', function ($q) use ($needle) {
+                    $q->where('razon_social', 'like', '%' . $needle . '%');
+                })->first();
+                if ($proveedor) $proveedorId = $proveedor->id;
+            }
+
+            return response()->json([
+                'numero_comprobante' => $extracted['numero_comprobante'] ?? null,
+                'fecha_hora'         => $extracted['fecha'] ?? null,
+                'metodo_pago'        => $extracted['metodo_pago'] ?? null,
+                'proveedor_nombre'   => $extracted['proveedor_nombre'] ?? null,
+                'proveedore_id'      => $proveedorId,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('extractFromFile error', ['msg' => $e->getMessage()]);
+            return response()->json(['error' => 'Error: ' . $e->getMessage()], 500);
+        }
     }
 
     /**
