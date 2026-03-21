@@ -11,7 +11,8 @@ main { padding: 0 !important; }
 /* ── POS wrapper: 65 / 35 ── */
 .pos-wrapper {
     display: flex;
-    height: calc(100vh - 60px);
+    height: calc(100vh - 56px);
+    margin-top: 56px;
     overflow: hidden;
     background: var(--bg-primary);
 }
@@ -635,15 +636,27 @@ main { padding: 0 !important; }
     cursor: default;
     color: var(--success);
 }
+.cash-suggestions-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+.cash-sugg-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
 .cash-suggestions {
     display: flex;
     gap: 0.25rem;
     flex-wrap: wrap;
 }
 .cash-sugg {
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    padding: 3px 8px;
+    padding: 4px 10px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
     background: var(--input-bg);
@@ -653,6 +666,8 @@ main { padding: 0 !important; }
     font-family: 'JetBrains Mono', monospace;
 }
 .cash-sugg:hover { border-color: var(--accent); color: var(--accent); background: rgba(230,126,34,0.07); }
+.cash-sugg-exact { border-color: var(--accent); color: var(--accent); line-height: 1.2; padding: 3px 10px; }
+.cash-sugg-exact small { font-size: 0.6rem; opacity: 0.85; font-weight: 600; }
 
 /* Pay button */
 .btn-pay {
@@ -771,7 +786,7 @@ main { padding: 0 !important; }
 
 /* Responsive breakpoints */
 @media (max-width: 767px) {
-    .pos-wrapper { flex-direction: column; height: calc(100vh - 60px - 64px); }
+    .pos-wrapper { flex-direction: column; height: calc(100vh - 56px - 64px); margin-top: 56px; }
     .pos-products { flex: 1; }
     .pos-cart { display: none; }
     .mobile-bottom-bar { display: flex; }
@@ -844,7 +859,7 @@ main { padding: 0 !important; }
 <form id="ventaForm" action="{{ route('ventas.store') }}" method="POST">
     @csrf
     <input type="hidden" id="f_cliente_id"       name="cliente_id">
-    <input type="hidden" id="f_comprobante_id"    name="comprobante_id">
+    <input type="hidden" id="f_comprobante_id"    name="comprobante_id" value="{{ $comprobantes->first()?->id }}">
     <input type="hidden" id="f_metodo_pago"       name="metodo_pago"       value="EFECTIVO">
     <input type="hidden" id="f_subtotal"          name="subtotal"          value="0">
     <input type="hidden" id="f_total"             name="total"             value="0">
@@ -941,7 +956,7 @@ main { padding: 0 !important; }
 
             {{-- Cliente --}}
             <div>
-                <span class="cart-field-label">Cliente</span>
+                <span class="cart-field-label">Cliente <small style="font-weight:400;opacity:0.6;">(opcional)</small></span>
                 <select class="cart-select" id="clienteSelect">
                     <option value="">— Seleccionar cliente —</option>
                     @foreach($clientes as $c)
@@ -952,43 +967,26 @@ main { padding: 0 !important; }
                 </select>
             </div>
 
-            {{-- Comprobante --}}
-            <div>
-                <span class="cart-field-label">Comprobante</span>
-                <select class="cart-select" id="comprobanteSelect">
-                    <option value="">— Tipo comprobante —</option>
-                    @foreach($comprobantes as $comp)
-                    <option value="{{ $comp->id }}">{{ $comp->nombre }}</option>
-                    @endforeach
-                </select>
-            </div>
-
             {{-- Método de pago --}}
             <div>
                 <span class="cart-field-label">Método de pago</span>
                 <div class="payment-pills" id="paymentPills">
-                    @foreach($optionsMetodoPago as $method)
-                    <button type="button" class="pay-pill {{ $loop->first ? 'active' : '' }}"
-                            data-method="{{ $method->value }}">
-                        {{ $method->value === 'EFECTIVO'     ? '💵 Efectivo' :
-                           ($method->value === 'NEQUI'       ? '📱 Nequi' :
-                           ($method->value === 'DAVIPLATA'   ? '📲 Daviplata' :
-                           ($method->value === 'TARJETA'     ? '💳 Tarjeta' :
-                           ($method->value === 'FIADO'       ? '🤝 Fiado' :
-                           ($method->value === 'TRANSFERENCIA'? '🏦 Transf.' : $method->value))))) }}
-                    </button>
-                    @endforeach
+                    <button type="button" class="pay-pill active" data-method="EFECTIVO">💵 Efectivo</button>
+                    <button type="button" class="pay-pill" data-method="TARJETA">💳 Tarjeta</button>
+                    <button type="button" class="pay-pill" data-method="VENTA_DIGITAL">📲 Venta Digital</button>
+                    <button type="button" class="pay-pill" data-method="FIADO">🤝 Fiado</button>
                 </div>
             </div>
 
             {{-- Cash section --}}
             <div class="cash-section" id="cashSection">
-                <div>
+                <div class="cash-suggestions-wrap">
+                    <span class="cash-sugg-label">¿Cuánto recibió?</span>
                     <div class="cash-suggestions" id="cashSuggestions"></div>
                 </div>
                 <div class="cash-row">
                     <span class="cash-label">Recibido</span>
-                    <input class="cash-input" id="montoRecibido" type="number" min="0" step="1000" placeholder="0">
+                    <input class="cash-input" id="montoRecibido" type="number" min="0" step="1000" placeholder="Escribir monto...">
                 </div>
                 <div class="cash-row">
                     <span class="cash-label">Vuelto</span>
@@ -1465,14 +1463,12 @@ function updateCashSection() {
     document.getElementById('f_monto_recibido').value     = recibido || total;
     document.getElementById('f_vuelto_entregado').value   = vuelto;
 
-    // Cash suggestions
+    // Cash suggestions — billetes colombianos comunes
     const sugg = document.getElementById('cashSuggestions');
-    const suggestions = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000]
-        .filter(v => v >= total);
-    const top5 = suggestions.slice(0, 5);
-    // Also add exact
-    const exactSugg = `<button class="cash-sugg" onclick="setCash(${total})">Exacto</button>`;
-    sugg.innerHTML = exactSugg + top5.map(v =>
+    const bills = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000];
+    const suggestions = bills.filter(v => v >= total).slice(0, 5);
+    const exactSugg = `<button class="cash-sugg cash-sugg-exact" onclick="setCash(${total})">Exacto<br><small>${fmt(total)}</small></button>`;
+    sugg.innerHTML = exactSugg + suggestions.map(v =>
         `<button class="cash-sugg" onclick="setCash(${v})">${fmt(v)}</button>`
     ).join('');
 }
@@ -1489,13 +1485,11 @@ document.getElementById('montoRecibido').addEventListener('input', function() {
 });
 
 function updatePayButton() {
-    const btn          = document.getElementById('btnPagar');
-    const label        = document.getElementById('btnPagarLabel');
-    const total        = getTotal();
-    const clienteId    = document.getElementById('clienteSelect').value;
-    const comprobanteId= document.getElementById('comprobanteSelect').value;
-    const hasItems     = cart.length > 0;
-    let   cashOk       = true;
+    const btn      = document.getElementById('btnPagar');
+    const label    = document.getElementById('btnPagarLabel');
+    const total    = getTotal();
+    const hasItems = cart.length > 0;
+    let   cashOk   = true;
 
     if (paymentMethod === 'EFECTIVO') {
         const recibido = parseFloat(document.getElementById('montoRecibido').value) || 0;
@@ -1507,7 +1501,7 @@ function updatePayButton() {
         }
     }
 
-    const canPay = hasItems && clienteId && comprobanteId && (paymentMethod !== 'EFECTIVO' || cashOk) && total > 0;
+    const canPay = hasItems && (paymentMethod !== 'EFECTIVO' || cashOk) && total > 0;
     btn.disabled = !canPay;
     if (canPay) label.textContent = `PAGAR ${fmt(total)}`;
 }
@@ -1545,15 +1539,10 @@ function updateFormFields() {
 document.getElementById('btnPagar').addEventListener('click', function () {
     if (this.disabled) return;
 
-    const clienteId     = document.getElementById('clienteSelect').value;
-    const comprobanteId = document.getElementById('comprobanteSelect').value;
-
-    if (!clienteId)     { alert('Selecciona un cliente.'); return; }
-    if (!comprobanteId) { alert('Selecciona un comprobante.'); return; }
     if (cart.length === 0) { alert('El carrito está vacío.'); return; }
 
-    document.getElementById('f_cliente_id').value    = clienteId;
-    document.getElementById('f_comprobante_id').value = comprobanteId;
+    const clienteId = document.getElementById('clienteSelect').value;
+    document.getElementById('f_cliente_id').value = clienteId;
 
     // Loading state
     this.classList.add('loading');
@@ -1594,9 +1583,8 @@ document.getElementById('paymentPills').addEventListener('click', function (e) {
     setPaymentMethod(pill.dataset.method);
 });
 
-// Client + Comprobante change
+// Client change
 document.getElementById('clienteSelect').addEventListener('change', updatePayButton);
-document.getElementById('comprobanteSelect').addEventListener('change', updatePayButton);
 
 // Clear cart
 document.getElementById('btnClearCart').addEventListener('click', clearCart);
@@ -1734,12 +1722,7 @@ window.addToCart    = addToCart;
 window.changeQty    = changeQty;
 window.removeItem   = removeItem;
 
-// Set initial comprobante if only one
-const comprobanteEl = document.getElementById('comprobanteSelect');
-if (comprobanteEl.options.length === 2) {
-    comprobanteEl.selectedIndex = 1;
-    document.getElementById('f_comprobante_id').value = comprobanteEl.value;
-}
+// f_comprobante_id is pre-set in the hidden input via Blade
 
 // Set initial payment method
 setPaymentMethod('EFECTIVO');
