@@ -23,9 +23,11 @@
             {{$slot}}
         </div>
 
+        @isset($footer)
         <div class="card-footer text-center">
             {{$footer}}
         </div>
+        @endisset
 
     </form>
 </div>

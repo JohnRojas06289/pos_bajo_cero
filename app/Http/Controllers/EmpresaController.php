@@ -18,19 +18,25 @@ class EmpresaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index()
     {
-        $empresa = Empresa::first();
-        // Buscar o crear la moneda por defecto
-        $moneda = Moneda::firstOrCreate(
-            ['estandar_iso' => 'COP'],
-            [
-                'nombre' => 'Peso Colombiano',
-                'simbolo' => '$',
-                'pais' => 'Colombia',
-            ]
-        );
-        
+        try {
+            $empresa = Empresa::first();
+
+            if (!$empresa) {
+                return redirect()->route('panel')
+                    ->with('error', 'No se encontró información de empresa. Contacte al administrador.');
+            }
+
+            $moneda = Moneda::where('estandar_iso', 'COP')->first()
+                ?? Moneda::first();
+
+        } catch (\Throwable $e) {
+            Log::error('Error al cargar empresa', ['error' => $e->getMessage()]);
+            return redirect()->route('panel')
+                ->with('error', 'Error al cargar empresa: ' . $e->getMessage());
+        }
+
         return view('empresa.index', compact('empresa', 'moneda'));
     }
 

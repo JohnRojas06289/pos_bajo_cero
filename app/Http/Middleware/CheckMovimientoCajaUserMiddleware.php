@@ -18,6 +18,11 @@ class CheckMovimientoCajaUserMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (!$request->caja_id) {
+            return redirect()->route('cajas.index')
+                ->with('error', 'Debe aperturar una caja primero.');
+        }
+
         $caja = Caja::findOrfail($request->caja_id);
         if ($caja->user_id != Auth::id()) {
             throw new HttpException(401, 'No autorizado');

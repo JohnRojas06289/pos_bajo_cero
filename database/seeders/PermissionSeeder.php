@@ -19,6 +19,7 @@ class PermissionSeeder extends Seeder
 
             //Panel
             'ver-panel',
+            'ver-estadisticas',
 
             //Cajas
             'ver-caja',
