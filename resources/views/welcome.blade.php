@@ -63,7 +63,7 @@
                 <div class="col-lg-3 col-md-6 mb-5">
                     <div class="pub-product-card h-100">
                         {{-- Badge de stock real --}}
-                        @php $stock = $product->inventario->cantidad ?? 0; @endphp
+                        @php $stock = $product->total_stock; @endphp
                         @if($stock > 0)
                             <span class="badge-stock-in">DISPONIBLE</span>
                         @else

@@ -13,14 +13,14 @@ class ReservaController extends Controller
 
     public function index(Request $request)
     {
-        $products = Producto::with(['categoria.caracteristica', 'marca.caracteristica', 'inventario'])
+        $products = Producto::with(['categoria.caracteristica', 'marca.caracteristica', 'variantes'])
             ->where('estado', 1)
             ->latest()
             ->get();
 
         $preselected = null;
         if ($request->filled('producto')) {
-            $preselected = Producto::with(['inventario', 'marca.caracteristica'])
+            $preselected = Producto::with(['variantes', 'marca.caracteristica'])
                 ->where('estado', 1)
                 ->find($request->producto);
         }

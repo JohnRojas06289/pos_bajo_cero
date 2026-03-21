@@ -180,9 +180,10 @@
     $allImages   = $product->todas_imagenes_urls;
     $totalImgs   = count($allImages);
     $mainUrl     = $totalImgs > 0 ? $allImages[0]['url'] : null;
-    $stock       = optional($product->inventario)->cantidad;
+    $stock       = $product->total_stock;
     $marcaNombre = optional(optional($product->marca)->caracteristica)->nombre;
     $catNombre   = optional(optional($product->categoria)->caracteristica)->nombre;
+    $variantes   = $product->variantes;
 @endphp
 
 <div class="product-page">
@@ -245,19 +246,13 @@
         <div class="price-display">${{ number_format($product->precio, 0) }}</div>
 
         {{-- Stock --}}
-        @if($stock !== null)
-            @if($stock > 0)
-                <div class="stock-pill-pub stock-pill-in">
-                    <i class="fas fa-check-circle"></i> En stock &mdash; {{ $stock }} disponibles
-                </div>
-            @else
-                <div class="stock-pill-pub stock-pill-out">
-                    <i class="fas fa-times-circle"></i> Agotado
-                </div>
-            @endif
+        @if($stock > 0)
+            <div class="stock-pill-pub stock-pill-in">
+                <i class="fas fa-check-circle"></i> En stock &mdash; {{ $stock }} disponibles
+            </div>
         @else
-            <div class="stock-pill-pub stock-pill-ask">
-                <i class="fas fa-question-circle"></i> Consultar disponibilidad
+            <div class="stock-pill-pub stock-pill-out">
+                <i class="fas fa-times-circle"></i> Agotado
             </div>
         @endif
 
@@ -268,22 +263,40 @@
             <p class="product-desc-text mb-4">{{ $product->descripcion }}</p>
         @endif
 
-        {{-- Atributos --}}
+        {{-- Atributos generales --}}
         @php
             $attrs = [];
-            if ($product->codigo)        $attrs[] = ['l' => 'Código',        'v' => $product->codigo];
-            if ($product->color)         $attrs[] = ['l' => 'Color',         'v' => $product->color];
-            if ($product->material)      $attrs[] = ['l' => 'Material',      'v' => $product->material];
-            if ($product->presentacione) $attrs[] = ['l' => 'Talla / Und.',  'v' => $product->presentacione->nombre];
+            if ($product->codigo)   $attrs[] = ['l' => 'Código',   'v' => $product->codigo];
+            if ($product->material) $attrs[] = ['l' => 'Material', 'v' => $product->material];
+            if ($product->genero)   $attrs[] = ['l' => 'Género',   'v' => $product->genero];
         @endphp
         @if(count($attrs))
-            <div class="attr-grid mb-4">
+            <div class="attr-grid mb-3">
                 @foreach($attrs as $a)
                     <div class="attr-card">
                         <div class="attr-label">{{ $a['l'] }}</div>
                         <div class="attr-value">{{ $a['v'] }}</div>
                     </div>
                 @endforeach
+            </div>
+        @endif
+
+        {{-- Variantes disponibles --}}
+        @if($variantes->isNotEmpty())
+            <div class="mb-4">
+                <div class="attr-label mb-2">VARIANTES DISPONIBLES</div>
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach($variantes as $v)
+                        <span class="badge fs-6 px-3 py-2 {{ $v->stock > 0 ? 'bg-secondary' : 'bg-dark opacity-50' }}"
+                              style="border:1px solid rgba(255,255,255,0.15);"
+                              title="{{ $v->stock > 0 ? $v->stock . ' en stock' : 'Agotado' }}">
+                            {{ $v->label }}
+                            @if($v->stock <= 0)
+                                <span style="font-size:.65rem;opacity:.7;"> — Agotado</span>
+                            @endif
+                        </span>
+                    @endforeach
+                </div>
             </div>
         @endif
 
@@ -325,7 +338,7 @@
         <div class="section-title-pub">Productos relacionados</div>
         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3">
             @foreach($relatedProducts as $rel)
-                @php $rs = optional($rel->inventario)->cantidad ?? 0; @endphp
+                @php $rs = $rel->total_stock; @endphp
                 <div class="col">
                     <a href="{{ route('product.show', $rel->id) }}" class="pub-product-card">
                         @if($rel->img_path)
@@ -353,7 +366,7 @@
         <div class="section-title-pub">También te puede interesar</div>
         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3">
             @foreach($featuredProducts as $feat)
-                @php $fs = optional($feat->inventario)->cantidad ?? 0; @endphp
+                @php $fs = $feat->total_stock; @endphp
                 <div class="col">
                     <a href="{{ route('product.show', $feat->id) }}" class="pub-product-card">
                         @if($feat->img_path)

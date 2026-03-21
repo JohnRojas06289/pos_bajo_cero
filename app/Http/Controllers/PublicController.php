@@ -11,7 +11,7 @@ class PublicController extends Controller
 {
     public function home()
     {
-        $featuredProducts = Producto::with(['categoria.caracteristica', 'marca.caracteristica', 'presentacione', 'inventario'])
+        $featuredProducts = Producto::with(['categoria.caracteristica', 'marca.caracteristica', 'variantes'])
             ->where('estado', 1)
             ->latest()
             ->take(4)
@@ -22,7 +22,7 @@ class PublicController extends Controller
 
     public function collection(Request $request)
     {
-        $query = Producto::with(['categoria.caracteristica', 'marca.caracteristica', 'presentacione', 'inventario'])
+        $query = Producto::with(['categoria.caracteristica', 'marca.caracteristica', 'variantes.presentacione'])
             ->where('estado', 1);
 
         if ($request->filled('categoria') && $request->categoria !== 'all') {
@@ -45,20 +45,13 @@ class PublicController extends Controller
             });
         }
 
-        // Group by familia_id so variants appear as one card
         $all = $query->orderBy('nombre')->get();
-        $families = $all->groupBy(fn($p) => $p->familia_id ?? ('solo_' . $p->id));
-        $groups = $families->map(fn($variants) => [
-            'main'        => $variants->first(),
-            'variants'    => $variants->sortBy(fn($v) => $v->presentacione?->sigla ?? ''),
-            'total_stock' => $variants->sum(fn($v) => $v->inventario?->cantidad ?? 0),
-        ])->values();
 
         $perPage = 12;
         $page    = $request->input('page', 1);
         $products = new \Illuminate\Pagination\LengthAwarePaginator(
-            $groups->slice(($page - 1) * $perPage, $perPage)->values(),
-            $groups->count(),
+            $all->slice(($page - 1) * $perPage, $perPage)->values(),
+            $all->count(),
             $perPage,
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
@@ -76,11 +69,11 @@ class PublicController extends Controller
 
     public function show($id)
     {
-        $product = Producto::with(['categoria.caracteristica', 'marca.caracteristica', 'presentacione', 'inventario'])
+        $product = Producto::with(['categoria.caracteristica', 'marca.caracteristica', 'variantes.presentacione'])
             ->where('estado', 1)
             ->findOrFail($id);
 
-        $relatedProducts = Producto::with(['inventario', 'marca.caracteristica'])
+        $relatedProducts = Producto::with(['variantes', 'marca.caracteristica'])
             ->where('categoria_id', $product->categoria_id)
             ->where('id', '!=', $id)
             ->where('estado', 1)
@@ -88,7 +81,7 @@ class PublicController extends Controller
             ->take(4)
             ->get();
 
-        $featuredProducts = Producto::with(['inventario', 'marca.caracteristica'])
+        $featuredProducts = Producto::with(['variantes', 'marca.caracteristica'])
             ->where('estado', 1)
             ->where('id', '!=', $id)
             ->latest()

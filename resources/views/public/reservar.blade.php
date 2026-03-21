@@ -255,7 +255,7 @@
                         </div>
                         <div class="product-picker" id="productPicker">
                             @foreach($products as $p)
-                                @php $stock = $p->inventario->cantidad ?? 0; @endphp
+                                @php $stock = $p->total_stock; @endphp
                                 <div class="product-pick-item {{ $preselected && $preselected->id === $p->id ? 'selected' : '' }}"
                                      data-id="{{ $p->id }}"
                                      data-nombre="{{ $p->nombre }}"

@@ -89,20 +89,11 @@
             </div>
 
             <div class="row gx-3 gx-md-4 row-cols-2 row-cols-md-3 row-cols-xl-3 justify-content-center">
-                @forelse($products as $group)
+                @forelse($products as $product)
                     @php
-                        $product = $group['main'];
-                        $variants = $group['variants'];
-                        $totalStock = $group['total_stock'];
-                        $hasVariants = $variants->count() > 1;
-                        // Strip " - TALLA" suffix for display
-                        $displayNombre = $product->nombre;
-                        if ($hasVariants && $product->presentacione?->sigla) {
-                            $suffix = ' - ' . $product->presentacione->sigla;
-                            if (str_ends_with($displayNombre, $suffix)) {
-                                $displayNombre = substr($displayNombre, 0, -strlen($suffix));
-                            }
-                        }
+                        $totalStock  = $product->total_stock;
+                        $variantes   = $product->variantes;
+                        $hasVariants = $variantes->count() > 0;
                     @endphp
                     <div class="col mb-5">
                         <div class="card product-card h-100 border-0">
@@ -116,7 +107,7 @@
                             {{-- Imagen --}}
                             <a href="{{ route('product.show', $product->id) }}" class="d-block overflow-hidden" style="height:250px;">
                                 @if($product->img_path)
-                                    <img class="card-img-top h-100 w-100" src="{{ $product->image_url }}" alt="{{ $displayNombre }}" style="object-fit:cover;transition:transform .3s ease;" loading="lazy"
+                                    <img class="card-img-top h-100 w-100" src="{{ $product->image_url }}" alt="{{ $product->nombre }}" style="object-fit:cover;transition:transform .3s ease;" loading="lazy"
                                          onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
                                 @else
                                     <div class="h-100 d-flex align-items-center justify-content-center" style="background:#222;">
@@ -138,23 +129,21 @@
                             <div class="card-body p-4">
                                 <div class="text-start">
                                     <div class="small text-muted text-uppercase mb-1">{{ $product->marca->caracteristica->nombre ?? 'Jacket Store' }}</div>
-                                    <h5 class="fw-bolder text-white text-truncate mb-1">{{ $displayNombre }}</h5>
+                                    <h5 class="fw-bolder text-white text-truncate mb-1">{{ $product->nombre }}</h5>
                                     @if($product->categoria && $product->categoria->caracteristica)
                                         <div class="small text-muted mb-2">{{ $product->categoria->caracteristica->nombre }}</div>
                                     @endif
                                     <div class="text-info fw-bold fs-5">${{ number_format($product->precio, 0) }}</div>
 
-                                    {{-- Selector de tallas si hay variantes --}}
+                                    {{-- Badges de variantes (talla / color) --}}
                                     @if($hasVariants)
                                     <div class="d-flex flex-wrap gap-1 mt-2">
-                                        @foreach($variants as $v)
-                                            @php $vStock = $v->inventario?->cantidad ?? 0; @endphp
-                                            <a href="{{ route('product.show', $v->id) }}"
-                                               class="badge text-decoration-none {{ $vStock > 0 ? 'bg-secondary' : 'bg-dark opacity-50' }}"
-                                               style="font-size:.72rem;padding:4px 8px;"
-                                               title="{{ $vStock > 0 ? $vStock . ' disponibles' : 'Agotado' }}">
-                                                {{ $v->presentacione?->sigla ?? 'T.U.' }}
-                                            </a>
+                                        @foreach($variantes as $v)
+                                            <span class="badge {{ $v->stock > 0 ? 'bg-secondary' : 'bg-dark opacity-50' }}"
+                                                  style="font-size:.72rem;padding:4px 8px;"
+                                                  title="{{ $v->stock > 0 ? $v->stock . ' disponibles' : 'Agotado' }}">
+                                                {{ $v->label }}
+                                            </span>
                                         @endforeach
                                     </div>
                                     @endif
