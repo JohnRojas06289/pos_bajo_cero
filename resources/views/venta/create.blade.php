@@ -780,6 +780,10 @@ main { padding: 0 !important; }
     .alpha-letter { font-size: 0.5rem; }
 }
 
+@media (min-width: 768px) {
+    .cart-sheet, .cart-sheet-overlay, .mobile-bottom-bar { display: none !important; }
+}
+
 @media (min-width: 768px) and (max-width: 991px) {
     .pos-cart { flex: 0 0 42%; max-width: 320px; }
     .product-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }

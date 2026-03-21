@@ -16,9 +16,9 @@ class CheckProductoInicializado
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $producto = Producto::findOrfail($request->producto_id);
-        if ($producto->estado == 1) {
-            return redirect()->route('productos.index')->with('error', 'No es posible acceder');
+        $producto = Producto::with('inventario')->findOrfail($request->producto_id);
+        if ($producto->inventario !== null) {
+            return redirect()->route('productos.index')->with('error', 'Este producto ya tiene inventario inicializado');
         }
         return $next($request);
     }
