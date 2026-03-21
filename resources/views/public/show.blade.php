@@ -301,7 +301,7 @@
         @endif
 
         {{-- CTA --}}
-        <a href="https://wa.me/573001234567?text={{ urlencode('Hola! Me interesa: ' . $product->nombre . ' — $' . number_format($product->precio, 0)) }}"
+        <a href="https://wa.me/573053530749?text={{ urlencode('Hola! Me interesa: ' . $product->nombre . ' — $' . number_format($product->precio, 0)) }}"
            target="_blank" rel="noopener" class="btn-wsp">
             <i class="fab fa-whatsapp" style="font-size:1.15rem;"></i>
             CONSULTAR POR WHATSAPP

@@ -80,7 +80,7 @@ class ReservaController extends Controller
         ]);
 
         // Build WhatsApp message
-        $numero = config('services.whatsapp.numero', env('WHATSAPP_NUMERO', '573001234567'));
+        $numero = config('services.whatsapp.numero', env('WHATSAPP_NUMERO', '573053530749'));
 
         $mensaje  = "¡Hola! Quiero hacer una reserva en *Bajo Cero* 🧊\n\n";
         $mensaje .= "*Mis datos:*\n";
