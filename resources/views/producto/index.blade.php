@@ -26,6 +26,15 @@
             </button>
             @endcan
             @if(config('services.gemini.api_key'))
+            @can('crear-producto')
+            <button type="button" class="btn btn-sm btn-ghost" id="btnCrearDesdeImg"
+                    style="border-color:rgba(255,255,255,0.3);color:white;"
+                    data-bs-toggle="modal" data-bs-target="#crearDesdeImagenesModal"
+                    title="Subir fotos y crear productos automáticamente con IA">
+                <i class="fas fa-camera"></i>
+                <span class="d-none d-sm-inline">Crear con IA</span>
+            </button>
+            @endcan
             @can('editar-producto')
             <button type="button" class="btn btn-sm btn-ghost" id="btnGenAllDesc"
                     style="border-color:rgba(255,255,255,0.3);color:white;"
@@ -460,6 +469,235 @@
             container.innerHTML = '<div class="col-12 text-center text-muted py-4"><i class="fas fa-layer-group fa-3x mb-2 opacity-25"></i><p>No hay productos con variantes de talla</p></div>';
         }
     }
+</script>
+
+{{-- ── Modal: Crear productos desde imágenes con IA ─────────────────── --}}
+<div class="modal fade" id="crearDesdeImagenesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header" style="background:linear-gradient(135deg,#1B4F72 0%,#0A1628 100%);color:#fff;">
+                <h5 class="modal-title">
+                    <i class="fas fa-camera me-2" style="color:#1D96C8;"></i>
+                    Crear Productos con IA desde Fotos
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter:invert(1);"></button>
+            </div>
+            <div class="modal-body p-4">
+
+                {{-- Drop zone --}}
+                <div id="aiDropZone"
+                     style="border:2px dashed var(--border-color);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;"
+                     ondragover="aiDragOver(event)" ondragleave="aiDragLeave(event)" ondrop="aiDrop(event)"
+                     onclick="document.getElementById('aiImgInput').click()">
+                    <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color:var(--accent);opacity:.7;"></i>
+                    <p class="mb-1 fw-semibold">Arrastra las fotos aquí o haz clic para seleccionarlas</p>
+                    <p class="text-muted small mb-0">JPG, PNG, WebP — máx. 5 MB por imagen — hasta 15 fotos</p>
+                    <input type="file" id="aiImgInput" accept="image/*" multiple style="display:none;"
+                           onchange="aiFilesSelected(this.files)">
+                </div>
+
+                {{-- Preview grid --}}
+                <div id="aiPreviewGrid" class="row g-2 mt-3" style="display:none!important;"></div>
+
+                {{-- Progress --}}
+                <div id="aiProgressWrap" class="mt-3" style="display:none;">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="small fw-semibold" id="aiProgressLabel">Analizando imagen 1…</span>
+                        <span class="small text-muted" id="aiProgressFrac">0 / 0</span>
+                    </div>
+                    <div class="progress" style="height:8px;">
+                        <div id="aiProgressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                             style="width:0%;background:var(--accent);"></div>
+                    </div>
+                </div>
+
+                {{-- Results --}}
+                <div id="aiResults" class="mt-3" style="display:none;"></div>
+
+            </div>
+            <div class="modal-footer gap-2">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" id="btnCrearIA" class="btn btn-primary" onclick="crearDesdeImagenesIA()" disabled>
+                    <i class="fas fa-wand-magic-sparkles me-1"></i>
+                    Crear Productos con IA
+                    <span id="aiImgCount" class="badge bg-light text-dark ms-1" style="display:none;"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ─── Crear productos desde imágenes con IA ───────────────────────── */
+let aiFiles = [];
+
+function aiDragOver(e) {
+    e.preventDefault();
+    document.getElementById('aiDropZone').style.borderColor = 'var(--accent)';
+    document.getElementById('aiDropZone').style.background  = 'rgba(29,150,200,0.05)';
+}
+function aiDragLeave(e) {
+    document.getElementById('aiDropZone').style.borderColor = 'var(--border-color)';
+    document.getElementById('aiDropZone').style.background  = '';
+}
+function aiDrop(e) {
+    e.preventDefault();
+    aiDragLeave(e);
+    aiFilesSelected(e.dataTransfer.files);
+}
+function aiFilesSelected(fileList) {
+    const allowed = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+    // merge, deduplicate by name+size, max 15
+    allowed.forEach(f => {
+        if (aiFiles.length < 15 && !aiFiles.find(x => x.name === f.name && x.size === f.size)) {
+            aiFiles.push(f);
+        }
+    });
+    renderAiPreviews();
+}
+function removeAiFile(idx) {
+    aiFiles.splice(idx, 1);
+    renderAiPreviews();
+}
+function renderAiPreviews() {
+    const grid = document.getElementById('aiPreviewGrid');
+    const btn  = document.getElementById('btnCrearIA');
+    const cnt  = document.getElementById('aiImgCount');
+
+    if (aiFiles.length === 0) {
+        grid.style.display = 'none';
+        grid.innerHTML     = '';
+        btn.disabled       = true;
+        cnt.style.display  = 'none';
+        return;
+    }
+
+    grid.style.cssText = '';          // clear display:none!important
+    grid.style.display = 'flex';
+    grid.style.flexWrap = 'wrap';
+    grid.style.gap = '8px';
+    grid.innerHTML = aiFiles.map((f, i) => {
+        const url = URL.createObjectURL(f);
+        return `<div style="position:relative;width:90px;height:90px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border-color);">
+            <img src="${url}" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+            <button onclick="removeAiFile(${i})" type="button"
+                    style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:22px;height:22px;color:#fff;font-size:.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>`;
+    }).join('');
+
+    btn.disabled      = false;
+    cnt.style.display = '';
+    cnt.textContent   = aiFiles.length;
+}
+
+async function crearDesdeImagenesIA() {
+    if (!aiFiles.length) return;
+
+    const btn         = document.getElementById('btnCrearIA');
+    const progressWrap= document.getElementById('aiProgressWrap');
+    const progressBar = document.getElementById('aiProgressBar');
+    const progressLbl = document.getElementById('aiProgressLabel');
+    const progressFrc = document.getElementById('aiProgressFrac');
+    const resultsDiv  = document.getElementById('aiResults');
+
+    btn.disabled      = true;
+    progressWrap.style.display = '';
+    resultsDiv.style.display   = 'none';
+    resultsDiv.innerHTML       = '';
+
+    const total   = aiFiles.length;
+    let   done    = 0;
+    const results = [];
+
+    for (const file of aiFiles) {
+        progressLbl.textContent = `Analizando: ${file.name}`;
+        progressFrc.textContent = `${done} / ${total}`;
+        progressBar.style.width = `${Math.round((done / total) * 100)}%`;
+
+        try {
+            const fd = new FormData();
+            fd.append('_token', document.querySelector('meta[name="csrf-token"]')?.content ?? '{{ csrf_token() }}');
+            fd.append('imagenes[]', file);
+
+            const res  = await fetch('{{ route("productos.crear-desde-imagenes") }}', { method: 'POST', body: fd });
+            const data = await res.json();
+
+            if (data.error) {
+                results.push({ success: false, nombre: file.name, error: data.error });
+            } else {
+                (data.results || []).forEach(r => results.push({ ...r, filename: file.name }));
+            }
+        } catch (e) {
+            results.push({ success: false, nombre: file.name, error: e.message });
+        }
+
+        done++;
+        progressBar.style.width = `${Math.round((done / total) * 100)}%`;
+        progressFrc.textContent  = `${done} / ${total}`;
+    }
+
+    progressLbl.textContent = '¡Listo!';
+    progressBar.classList.remove('progress-bar-animated');
+
+    // Render results
+    const ok  = results.filter(r => r.success);
+    const err = results.filter(r => !r.success);
+
+    let html = '';
+    if (ok.length) {
+        html += `<div class="alert alert-success mb-2 py-2">
+            <i class="fas fa-check-circle me-1"></i>
+            <strong>${ok.length} producto${ok.length !== 1 ? 's' : ''} creado${ok.length !== 1 ? 's' : ''} correctamente.</strong>
+            Los productos se crearon como <em>inactivos</em> para que puedas revisarlos.
+        </div>
+        <div class="list-group list-group-flush mb-2">`;
+        ok.forEach(r => {
+            html += `<a href="${r.edit_url}" target="_blank"
+                       class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2"
+                       style="font-size:.9rem;">
+                <i class="fas fa-box text-success"></i>
+                <span class="flex-grow-1">${r.nombre}</span>
+                <span class="badge bg-warning text-dark">Editar</span>
+            </a>`;
+        });
+        html += '</div>';
+    }
+    if (err.length) {
+        html += `<div class="alert alert-danger mb-0 py-2">
+            <i class="fas fa-exclamation-triangle me-1"></i>
+            <strong>${err.length} imagen${err.length !== 1 ? 'es' : ''} con error:</strong>
+            <ul class="mb-0 mt-1 ps-3 small">`;
+        err.forEach(r => { html += `<li>${r.nombre ?? r.filename ?? ''}: ${r.error}</li>`; });
+        html += '</ul></div>';
+    }
+
+    resultsDiv.innerHTML = html;
+    resultsDiv.style.display = '';
+
+    btn.disabled = false;
+
+    // Reload page after 3s if any products created
+    if (ok.length > 0) {
+        setTimeout(() => window.location.reload(), 3500);
+    }
+}
+
+// Reset modal state when closed
+document.getElementById('crearDesdeImagenesModal').addEventListener('hidden.bs.modal', function () {
+    aiFiles = [];
+    document.getElementById('aiPreviewGrid').innerHTML = '';
+    document.getElementById('aiPreviewGrid').style.display = 'none';
+    document.getElementById('aiProgressWrap').style.display = 'none';
+    document.getElementById('aiProgressBar').style.width = '0%';
+    document.getElementById('aiProgressBar').classList.add('progress-bar-animated');
+    document.getElementById('aiResults').style.display = 'none';
+    document.getElementById('aiResults').innerHTML = '';
+    document.getElementById('btnCrearIA').disabled = true;
+    document.getElementById('aiImgCount').style.display = 'none';
+    document.getElementById('aiImgInput').value = '';
+});
 </script>
 
 <!-- Import Modal -->

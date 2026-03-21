@@ -434,6 +434,157 @@ class ProductoController extends Controller
     }
 
     /**
+     * Bulk-create products from uploaded images using Gemini Vision AI.
+     * Each image is analyzed individually; one Producto is created per image.
+     */
+    public function crearDesdeImagenes(Request $request): JsonResponse
+    {
+        $apiKey = config('services.gemini.api_key');
+        if (!$apiKey) {
+            return response()->json(['error' => 'IA no configurada (GEMINI_API_KEY faltante).'], 503);
+        }
+
+        $key = 'crear_desde_imagenes:' . auth()->id();
+        if (RateLimiter::tooManyAttempts($key, 20)) {
+            return response()->json(['error' => 'Demasiadas solicitudes. Intenta más tarde.'], 429);
+        }
+
+        $request->validate([
+            'imagenes'   => 'required|array|min:1|max:15',
+            'imagenes.*' => 'required|image|max:5120',
+        ]);
+
+        $marcas     = Marca::with('caracteristica')->get();
+        $categorias = Categoria::with('caracteristica')->get();
+        $results    = [];
+
+        foreach ($request->file('imagenes') as $imageFile) {
+            RateLimiter::hit($key, 3600);
+            try {
+                // Convert to base64 for Gemini vision
+                $b64  = base64_encode(file_get_contents($imageFile->getRealPath()));
+                $mime = $imageFile->getMimeType() ?: 'image/jpeg';
+
+                // Call Gemini to analyze the product in the image
+                $ai = $this->analyzeProductImage($b64, $mime, $apiKey);
+
+                // Fuzzy-match marca
+                $marcaId = null;
+                if (!empty($ai['marca'])) {
+                    $needle = strtolower($ai['marca']);
+                    $match  = $marcas->first(fn($m) =>
+                        str_contains(strtolower($m->caracteristica?->nombre ?? ''), $needle) ||
+                        str_contains($needle, strtolower($m->caracteristica?->nombre ?? ''))
+                    );
+                    $marcaId = $match?->id;
+                }
+
+                // Fuzzy-match categoria
+                $categoriaId = null;
+                if (!empty($ai['categoria'])) {
+                    $needle = strtolower($ai['categoria']);
+                    $match  = $categorias->first(fn($c) =>
+                        str_contains(strtolower($c->caracteristica?->nombre ?? ''), $needle) ||
+                        str_contains($needle, strtolower($c->caracteristica?->nombre ?? ''))
+                    );
+                    $categoriaId = $match?->id;
+                }
+
+                // Upload image to Cloudinary / storage
+                $imgPath = $this->productoService->handleUploadImage($imageFile);
+
+                $genero = in_array($ai['genero'] ?? '', ['Hombre', 'Mujer', 'Unisex'])
+                    ? $ai['genero']
+                    : 'Unisex';
+
+                $precio = is_numeric($ai['precio'] ?? null) ? (float) $ai['precio'] : null;
+
+                $producto = Producto::create([
+                    'nombre'       => $ai['titulo'] ?? 'Producto sin nombre',
+                    'descripcion'  => $ai['descripcion'] ?? null,
+                    'img_path'     => $imgPath,
+                    'marca_id'     => $marcaId,
+                    'categoria_id' => $categoriaId,
+                    'color'        => $ai['color'] ?? null,
+                    'material'     => $ai['material'] ?? null,
+                    'genero'       => $genero,
+                    'precio'       => $precio,
+                    'estado'       => 0,
+                ]);
+
+                ActivityLogService::log('Producto creado con IA desde imagen', 'Productos', [
+                    'id'     => $producto->id,
+                    'nombre' => $producto->nombre,
+                ]);
+
+                $results[] = [
+                    'success'  => true,
+                    'nombre'   => $producto->nombre,
+                    'id'       => $producto->id,
+                    'edit_url' => route('productos.edit', $producto),
+                ];
+            } catch (Throwable $e) {
+                Log::error('crearDesdeImagenes: error procesando imagen', ['error' => $e->getMessage()]);
+                $results[] = [
+                    'success' => false,
+                    'error'   => $e->getMessage(),
+                ];
+            }
+        }
+
+        return response()->json(['results' => $results]);
+    }
+
+    /**
+     * Call Gemini Vision to extract full product data from a single image.
+     */
+    private function analyzeProductImage(string $b64, string $mime, string $apiKey): array
+    {
+        $prompt = "Eres experto en moda colombiana y ropa urbana. Analiza la imagen de esta prenda o producto.\n"
+            . "Responde ÚNICAMENTE con un JSON válido (sin markdown) con esta estructura exacta:\n"
+            . "{\n"
+            . "  \"titulo\": \"nombre comercial corto (ej: Chaqueta de Cuero Negra)\",\n"
+            . "  \"marca\": \"nombre de la marca si es claramente visible, si no null\",\n"
+            . "  \"categoria\": \"una de: Chaquetas, Gorras, Camisetas, Pantalones, Accesorios, Ropa deportiva, Zapatos, Otro\",\n"
+            . "  \"descripcion\": \"descripción atractiva de 2-3 oraciones, sin emojis, en español colombiano\",\n"
+            . "  \"color\": \"color principal de la prenda\",\n"
+            . "  \"material\": \"material principal (Cuero, Algodón, Poliéster, Lana, etc.) o null\",\n"
+            . "  \"genero\": \"uno de: Hombre, Mujer, Unisex\",\n"
+            . "  \"precio\": precio sugerido en pesos colombianos como número entero múltiplo de 1000, o null\n"
+            . "}\nSolo el JSON.";
+
+        $response = Http::timeout(25)
+            ->withHeaders(['Content-Type' => 'application/json'])
+            ->post(
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
+                [
+                    'contents'         => [['parts' => [
+                        ['inline_data' => ['mime_type' => $mime, 'data' => $b64]],
+                        ['text'        => $prompt],
+                    ]]],
+                    'generationConfig' => [
+                        'temperature'    => 0.4,
+                        'maxOutputTokens'=> 400,
+                        'thinkingConfig' => ['thinkingBudget' => 0],
+                    ],
+                ]
+            );
+
+        if ($response->failed()) {
+            throw new \Exception('Gemini API error ' . $response->status());
+        }
+
+        $raw  = trim($response->json('candidates.0.content.parts.0.text') ?? '');
+        $json = json_decode($raw, true);
+
+        if (!$json && preg_match('/\{.*\}/s', $raw, $m)) {
+            $json = json_decode($m[0], true);
+        }
+
+        return $json ?? ['titulo' => 'Producto sin nombre'];
+    }
+
+    /**
      * Analyze up to 3 images and return título + marca + descripción in one call
      */
     public function generateFromImages(Request $request): JsonResponse
