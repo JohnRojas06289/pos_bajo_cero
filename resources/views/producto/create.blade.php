@@ -296,50 +296,18 @@
                     @error('descripcion')<small class="text-danger">{{ $message }}</small>@enderror
                 </div>
 
-                {{-- Atributos y tallas --}}
+                {{-- Atributos del producto (nivel base) --}}
                 <div class="create-section">
                     <div class="section-title"><i class="fas fa-sliders-h"></i> Atributos</div>
-
-                    {{-- Modo tallas switch --}}
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" id="modoTallas" onchange="toggleModoTallas(this)">
-                        <label class="form-check-label" for="modoTallas" style="font-size:0.88rem;font-weight:600;">
-                            <i class="fas fa-layer-group me-1 text-warning"></i>
-                            Crear variantes por talla (un producto por talla)
-                        </label>
-                    </div>
-
-                    {{-- Single talla --}}
-                    <div id="singleTallaSection">
-                        <div class="row g-3 mb-3">
-                            <div class="col-sm-4">
-                                <label class="form-label">Talla <small class="text-muted">(opcional)</small></label>
-                                <select data-size="4" title="Sin talla" data-live-search="true"
-                                        name="presentacione_id" id="presentacione_id"
-                                        class="form-control selectpicker show-tick">
-                                    <option value="">Ninguna</option>
-                                    @foreach ($presentaciones as $item)
-                                    <option value="{{ $item->id }}" {{ old('presentacione_id') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->nombre }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                                @error('presentacione_id')<small class="text-danger">{{ $message }}</small>@enderror
-                            </div>
-                            <div class="col-sm-4">
-                                <label class="form-label">Color</label>
-                                <input type="text" name="color" id="colorInput" class="form-control"
-                                       value="{{ old('color') }}" placeholder="Negro, Blanco...">
-                            </div>
-                            <div class="col-sm-4">
-                                <label class="form-label">Material</label>
-                                <input type="text" name="material" id="materialInput" class="form-control"
-                                       value="{{ old('material') }}" placeholder="Cuero, Tela...">
-                            </div>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="form-label">Material <small class="text-muted">(opcional)</small></label>
+                            <input type="text" name="material" class="form-control"
+                                   value="{{ old('material') }}" placeholder="Cuero, Algodón...">
                         </div>
-                        <div>
+                        <div class="col-sm-6">
                             <label class="form-label">Género</label>
-                            <div class="gender-pills">
+                            <div class="gender-pills mt-1">
                                 @foreach(['Unisex', 'Hombre', 'Mujer'] as $g)
                                 <div class="gender-pill">
                                     <input type="radio" name="genero" id="genero{{ $g }}" value="{{ $g }}"
@@ -352,41 +320,71 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    {{-- Multi talla --}}
-                    <div id="multiTallaSection" style="display:none;">
-                        <label class="form-label fw-semibold">Selecciona las tallas a crear:</label>
-                        <div class="d-flex gap-2 flex-wrap p-3 border rounded mb-2" style="background:var(--hover-bg,#f9fafb);">
-                            @foreach ($presentaciones as $item)
-                            <div class="form-check form-check-inline m-0">
-                                <input class="form-check-input" type="checkbox" name="tallas_ids[]"
-                                       id="talla_{{ $item->id }}" value="{{ $item->id }}">
-                                <label class="form-check-label badge fs-6 fw-bold"
-                                       for="talla_{{ $item->id }}"
-                                       style="background:#f59e0b;color:#fff;cursor:pointer;padding:6px 14px;border-radius:8px;">
-                                    {{ $item->nombre }}
-                                </label>
-                            </div>
-                            @endforeach
+                {{-- ── Variantes (talla + color + stock) ────────────────── --}}
+                <div class="create-section">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="section-title mb-0">
+                            <i class="fas fa-layer-group"></i> Variantes
+                            <span class="ms-2 badge bg-secondary" id="variantesCount">1</span>
                         </div>
-                        <small class="text-muted d-block mb-3">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Se creará un producto por talla. Ej: "Chaqueta Negra - S", "Chaqueta Negra - M"
-                        </small>
-                        <div class="row g-3">
-                            <div class="col-sm-6">
-                                <label class="form-label">Color</label>
-                                <input type="text" name="color" class="form-control"
-                                       value="{{ old('color') }}" placeholder="Negro, Blanco...">
-                            </div>
-                            <div class="col-sm-6">
-                                <label class="form-label">Material</label>
-                                <input type="text" name="material" class="form-control"
-                                       value="{{ old('material') }}" placeholder="Cuero, Tela...">
-                            </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addVariantRow()">
+                            <i class="fas fa-plus me-1"></i> Agregar variante
+                        </button>
+                    </div>
+
+                    <div class="mb-2" style="font-size:0.75rem;color:var(--text-muted);">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Cada variante tiene su propia talla, color y stock. Si el producto es único, deja una sola fila.
+                    </div>
+
+                    {{-- Cabecera de la tabla --}}
+                    <div class="row g-1 mb-1" style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);padding:0 4px;">
+                        <div class="col-3">Talla</div>
+                        <div class="col-3">Color</div>
+                        <div class="col-2">Código SKU</div>
+                        <div class="col-2">Stock</div>
+                        <div class="col-2"></div>
+                    </div>
+
+                    {{-- Contenedor de filas --}}
+                    <div id="variantesContainer"></div>
+
+                    @error('variantes')<small class="text-danger d-block mt-1">{{ $message }}</small>@enderror
+                </div>
+
+                {{-- Template de fila (oculto, clonado por JS) --}}
+                <template id="variantRowTemplate">
+                    <div class="variant-row row g-1 align-items-center mb-2">
+                        <div class="col-3">
+                            <select name="variantes[__IDX__][presentacione_id]" class="form-select form-select-sm">
+                                <option value="">Sin talla</option>
+                                @foreach ($presentaciones as $item)
+                                <option value="{{ $item->id }}">{{ $item->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <input type="text" name="variantes[__IDX__][color]"
+                                   class="form-control form-control-sm" placeholder="Negro...">
+                        </div>
+                        <div class="col-2">
+                            <input type="text" name="variantes[__IDX__][codigo]"
+                                   class="form-control form-control-sm" placeholder="SKU-001">
+                        </div>
+                        <div class="col-2">
+                            <input type="number" name="variantes[__IDX__][stock]"
+                                   class="form-control form-control-sm" value="0" min="0" placeholder="0">
+                        </div>
+                        <div class="col-2 text-end">
+                            <button type="button" class="btn btn-sm btn-outline-danger variant-remove-btn"
+                                    onclick="removeVariantRow(this)" title="Eliminar variante">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
                     </div>
-                </div>
+                </template>
 
             </div>
 
@@ -514,20 +512,69 @@ function setCodeMode(mode) {
 // Init
 setCodeMode('auto');
 
-/* ─── Tallas mode ─────────────────────────────────── */
-function toggleModoTallas(checkbox) {
-    const single = document.getElementById('singleTallaSection');
-    const multi  = document.getElementById('multiTallaSection');
-    if (checkbox.checked) {
-        single.style.display = 'none';
-        document.querySelectorAll('input[name="tallas_ids[]"]').forEach(cb => cb.checked = false);
-        multi.style.display  = '';
-    } else {
-        multi.style.display  = 'none';
-        document.querySelectorAll('input[name="tallas_ids[]"]').forEach(cb => cb.checked = false);
-        single.style.display = '';
+/* ─── Gestor de variantes ─────────────────────────── */
+let variantIdx = 0;
+
+function addVariantRow(data = {}) {
+    const template = document.getElementById('variantRowTemplate');
+    const container = document.getElementById('variantesContainer');
+    const clone = template.content.cloneNode(true);
+
+    // Replace __IDX__ placeholder with current index
+    clone.querySelectorAll('[name]').forEach(el => {
+        el.name = el.name.replace('__IDX__', variantIdx);
+    });
+
+    // Pre-fill values if provided (for edit mode)
+    if (data.presentacione_id) {
+        const sel = clone.querySelector('select');
+        if (sel) sel.value = data.presentacione_id;
     }
+    if (data.color) {
+        const inp = clone.querySelector('input[name$="[color]"]');
+        if (inp) inp.value = data.color;
+    }
+    if (data.codigo) {
+        const inp = clone.querySelector('input[name$="[codigo]"]');
+        if (inp) inp.value = data.codigo;
+    }
+    if (data.stock !== undefined) {
+        const inp = clone.querySelector('input[name$="[stock]"]');
+        if (inp) inp.value = data.stock;
+    }
+
+    container.appendChild(clone);
+    variantIdx++;
+    updateVariantCount();
+    updateRemoveButtons();
 }
+
+function removeVariantRow(btn) {
+    const row = btn.closest('.variant-row');
+    if (document.querySelectorAll('.variant-row').length <= 1) return; // mínimo 1
+    row.remove();
+    updateVariantCount();
+    updateRemoveButtons();
+}
+
+function updateVariantCount() {
+    const count = document.querySelectorAll('.variant-row').length;
+    const badge = document.getElementById('variantesCount');
+    if (badge) badge.textContent = count;
+}
+
+function updateRemoveButtons() {
+    const rows = document.querySelectorAll('.variant-row');
+    rows.forEach(row => {
+        const btn = row.querySelector('.variant-remove-btn');
+        if (btn) btn.disabled = rows.length <= 1;
+    });
+}
+
+// Inicializar con una fila vacía al cargar
+document.addEventListener('DOMContentLoaded', () => {
+    addVariantRow();
+});
 
 /* ─── Multi-image gallery ─────────────────────────── */
 const MAX_IMAGES    = 6;

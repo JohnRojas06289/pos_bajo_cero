@@ -216,53 +216,133 @@
                     @error('descripcion')<small class="text-danger">{{ $message }}</small>@enderror
                 </div>
 
-                {{-- Atributos --}}
+                {{-- Atributos del producto (nivel base) --}}
                 <div class="create-section">
                     <div class="section-title"><i class="fas fa-sliders-h"></i> Atributos</div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-sm-4">
-                            <label class="form-label">Talla <small class="text-muted">(opcional)</small></label>
-                            <select data-size="4" title="Sin talla" data-live-search="true"
-                                    name="presentacione_id" id="presentacione_id"
-                                    class="form-control selectpicker show-tick">
-                                <option value="">Ninguna</option>
-                                @foreach ($presentaciones as $item)
-                                <option value="{{ $item->id }}"
-                                    {{ ($producto->presentacione_id == $item->id || old('presentacione_id') == $item->id) ? 'selected' : '' }}>
-                                    {{ $item->nombre }}
-                                </option>
-                                @endforeach
-                            </select>
-                            @error('presentacione_id')<small class="text-danger">{{ $message }}</small>@enderror
-                        </div>
-                        <div class="col-sm-4">
-                            <label class="form-label">Color</label>
-                            <input type="text" name="color" id="colorInput" class="form-control"
-                                   value="{{ old('color', $producto->color) }}" placeholder="Negro, Blanco...">
-                        </div>
-                        <div class="col-sm-4">
-                            <label class="form-label">Material</label>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="form-label">Material <small class="text-muted">(opcional)</small></label>
                             <input type="text" name="material" id="materialInput" class="form-control"
-                                   value="{{ old('material', $producto->material) }}" placeholder="Cuero, Tela...">
+                                   value="{{ old('material', $producto->material) }}" placeholder="Cuero, Algodón...">
                         </div>
-                    </div>
-
-                    <div>
-                        <label class="form-label">Género</label>
-                        <div class="gender-pills">
-                            @foreach(['Unisex', 'Hombre', 'Mujer'] as $g)
-                            <div class="gender-pill">
-                                <input type="radio" name="genero" id="genero{{ $g }}" value="{{ $g }}"
-                                       {{ (old('genero', $producto->genero ?? 'Unisex') == $g) ? 'checked' : '' }}>
-                                <label for="genero{{ $g }}">
-                                    {{ $g === 'Unisex' ? '⚧ Unisex' : ($g === 'Hombre' ? '♂ Hombre' : '♀ Mujer') }}
-                                </label>
+                        <div class="col-sm-6">
+                            <label class="form-label">Género</label>
+                            <div class="gender-pills mt-1">
+                                @foreach(['Unisex', 'Hombre', 'Mujer'] as $g)
+                                <div class="gender-pill">
+                                    <input type="radio" name="genero" id="genero{{ $g }}" value="{{ $g }}"
+                                           {{ (old('genero', $producto->genero ?? 'Unisex') == $g) ? 'checked' : '' }}>
+                                    <label for="genero{{ $g }}">
+                                        {{ $g === 'Unisex' ? '⚧ Unisex' : ($g === 'Hombre' ? '♂ Hombre' : '♀ Mujer') }}
+                                    </label>
+                                </div>
+                                @endforeach
                             </div>
-                            @endforeach
                         </div>
                     </div>
                 </div>
+
+                {{-- ── Variantes ────────────────────────────────────────── --}}
+                <div class="create-section">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="section-title mb-0">
+                            <i class="fas fa-layer-group"></i> Variantes
+                            <span class="ms-2 badge bg-secondary" id="variantesCount">{{ $producto->variantes->count() }}</span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addVariantRow()">
+                            <i class="fas fa-plus me-1"></i> Agregar variante
+                        </button>
+                    </div>
+
+                    <div class="mb-2" style="font-size:0.75rem;color:var(--text-muted);">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Cada variante tiene su propia talla, color y stock. La imagen por defecto es la del producto.
+                    </div>
+
+                    {{-- Cabecera --}}
+                    <div class="row g-1 mb-1" style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);padding:0 4px;">
+                        <div class="col-3">Talla</div>
+                        <div class="col-3">Color</div>
+                        <div class="col-2">Código SKU</div>
+                        <div class="col-2">Stock</div>
+                        <div class="col-2"></div>
+                    </div>
+
+                    {{-- Filas de variantes existentes --}}
+                    <div id="variantesContainer">
+                        @foreach($producto->variantes as $vi => $variante)
+                        <div class="variant-row row g-1 align-items-center mb-2">
+                            <input type="hidden" name="variantes[{{ $vi }}][id]" value="{{ $variante->id }}">
+                            <div class="col-3">
+                                <select name="variantes[{{ $vi }}][presentacione_id]" class="form-select form-select-sm">
+                                    <option value="">Sin talla</option>
+                                    @foreach ($presentaciones as $item)
+                                    <option value="{{ $item->id }}" {{ $variante->presentacione_id == $item->id ? 'selected' : '' }}>
+                                        {{ $item->nombre }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-3">
+                                <input type="text" name="variantes[{{ $vi }}][color]"
+                                       class="form-control form-control-sm"
+                                       value="{{ $variante->color }}" placeholder="Negro...">
+                            </div>
+                            <div class="col-2">
+                                <input type="text" name="variantes[{{ $vi }}][codigo]"
+                                       class="form-control form-control-sm"
+                                       value="{{ $variante->codigo }}" placeholder="SKU-001">
+                            </div>
+                            <div class="col-2">
+                                <input type="number" name="variantes[{{ $vi }}][stock]"
+                                       class="form-control form-control-sm"
+                                       value="{{ $variante->stock }}" min="0">
+                            </div>
+                            <div class="col-2 text-end">
+                                <button type="button" class="btn btn-sm btn-outline-danger variant-remove-btn"
+                                        onclick="removeVariantRow(this)" title="Eliminar variante"
+                                        {{ $producto->variantes->count() <= 1 ? 'disabled' : '' }}>
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+
+                    @error('variantes')<small class="text-danger d-block mt-1">{{ $message }}</small>@enderror
+                </div>
+
+                {{-- Template para nuevas filas (clonado por JS) --}}
+                <template id="variantRowTemplate">
+                    <div class="variant-row row g-1 align-items-center mb-2">
+                        <div class="col-3">
+                            <select name="variantes[__IDX__][presentacione_id]" class="form-select form-select-sm">
+                                <option value="">Sin talla</option>
+                                @foreach ($presentaciones as $item)
+                                <option value="{{ $item->id }}">{{ $item->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <input type="text" name="variantes[__IDX__][color]"
+                                   class="form-control form-control-sm" placeholder="Negro...">
+                        </div>
+                        <div class="col-2">
+                            <input type="text" name="variantes[__IDX__][codigo]"
+                                   class="form-control form-control-sm" placeholder="SKU-001">
+                        </div>
+                        <div class="col-2">
+                            <input type="number" name="variantes[__IDX__][stock]"
+                                   class="form-control form-control-sm" value="0" min="0">
+                        </div>
+                        <div class="col-2 text-end">
+                            <button type="button" class="btn btn-sm btn-outline-danger variant-remove-btn"
+                                    onclick="removeVariantRow(this)" title="Eliminar variante">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </template>
 
             </div>
 
@@ -356,6 +436,52 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <script>
+/* ─── Gestor de variantes ─────────────────────────── */
+let variantIdx = {{ $producto->variantes->count() }};
+
+function addVariantRow(data = {}) {
+    const template  = document.getElementById('variantRowTemplate');
+    const container = document.getElementById('variantesContainer');
+    const clone = template.content.cloneNode(true);
+
+    clone.querySelectorAll('[name]').forEach(el => {
+        el.name = el.name.replace('__IDX__', variantIdx);
+    });
+    if (data.color) {
+        const inp = clone.querySelector('input[name$="[color]"]');
+        if (inp) inp.value = data.color;
+    }
+    if (data.stock !== undefined) {
+        const inp = clone.querySelector('input[name$="[stock]"]');
+        if (inp) inp.value = data.stock;
+    }
+    container.appendChild(clone);
+    variantIdx++;
+    updateVariantCount();
+    updateRemoveButtons();
+}
+
+function removeVariantRow(btn) {
+    if (document.querySelectorAll('.variant-row').length <= 1) return;
+    btn.closest('.variant-row').remove();
+    updateVariantCount();
+    updateRemoveButtons();
+}
+
+function updateVariantCount() {
+    const count = document.querySelectorAll('.variant-row').length;
+    const badge = document.getElementById('variantesCount');
+    if (badge) badge.textContent = count;
+}
+
+function updateRemoveButtons() {
+    const rows = document.querySelectorAll('.variant-row');
+    rows.forEach(row => {
+        const btn = row.querySelector('.variant-remove-btn');
+        if (btn) btn.disabled = rows.length <= 1;
+    });
+}
+
 /* ─── Existing images from server ─────────────────── */
 // Each item: { path, url, main, isNew: false }
 // New items : { file, previewUrl, isNew: true }

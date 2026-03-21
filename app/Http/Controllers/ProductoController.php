@@ -91,11 +91,6 @@ class ProductoController extends Controller
      */
     public function store(StoreProductoRequest $request): RedirectResponse
     {
-        // BATCH MODE: crear múltiples productos por talla
-        if ($request->has('tallas_ids') && is_array($request->input('tallas_ids')) && count($request->input('tallas_ids')) > 0) {
-            return $this->storeBatch($request);
-        }
-
         try {
             $data = $request->validated();
 
@@ -115,87 +110,24 @@ class ProductoController extends Controller
 
             // Pass extra image files to service (outside validated())
             $data['imagenes_files'] = array_filter($request->file('imagenes_extra', []));
-            $this->productoService->crearProducto($data);
-            ActivityLogService::log('Creación de producto', 'Productos', $data);
+            $producto = $this->productoService->crearProducto($data);
+
+            // Crear variantes
+            $variantesData = $request->input('variantes', []);
+            if (!empty($variantesData)) {
+                foreach ($variantesData as $vData) {
+                    $this->productoService->crearVariante($vData, $producto);
+                }
+            } else {
+                // Sin variantes enviadas → crear una variante por defecto vacía
+                $this->productoService->crearVariante(['stock' => 0], $producto);
+            }
+
+            ActivityLogService::log('Creación de producto', 'Productos', ['nombre' => $data['nombre']]);
             return redirect()->route('productos.index')->with('success', 'Producto registrado');
         } catch (Throwable $e) {
             Log::error('Error al crear el producto', ['error' => $e->getMessage()]);
             return redirect()->route('productos.index')->with('error', 'Error: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Crear múltiples productos (uno por talla) en modo batch.
-     */
-    private function storeBatch(Request $request): RedirectResponse
-    {
-        try {
-            $baseNombre = $request->input('nombre');
-            if (empty($baseNombre)) {
-                return redirect()->back()->withErrors(['nombre' => 'El nombre es requerido.'])->withInput();
-            }
-
-            // Upload shared image once for all variants
-            $sharedImgPath = null;
-            if ($request->hasFile('img_path') && $request->file('img_path')->isValid()) {
-                $sharedImgPath = $this->productoService->handleUploadImage($request->file('img_path'));
-            }
-
-            // Shared family ID links all variants as one product family
-            $familiaId = (string) \Illuminate\Support\Str::uuid();
-
-            $tallasIds = $request->input('tallas_ids', []);
-            $created = 0;
-            $skipped = [];
-
-            foreach ($tallasIds as $presentacione_id) {
-                $presentacion = Presentacione::with('caracteristica')->find($presentacione_id);
-                $tallaNombre = $presentacion
-                    ? ($presentacion->caracteristica->nombre ?? $presentacion->sigla)
-                    : null;
-                $nombre = $tallaNombre ? $baseNombre . ' - ' . $tallaNombre : $baseNombre;
-
-                if (Producto::where('nombre', $nombre)->exists()) {
-                    $skipped[] = $nombre;
-                    continue;
-                }
-
-                // Obtener el siguiente código disponible
-                $lastCodigo = Producto::orderByRaw('LENGTH(codigo) DESC, codigo DESC')->first();
-                $codigo = ($lastCodigo && $lastCodigo->codigo) ? (string)((int)$lastCodigo->codigo + 1) : '1';
-
-                Producto::create([
-                    'familia_id'       => $familiaId,
-                    'codigo'           => $codigo,
-                    'nombre'           => $nombre,
-                    'descripcion'      => $request->input('descripcion'),
-                    'img_path'         => $sharedImgPath,
-                    'marca_id'         => $request->input('marca_id') ?: null,
-                    'categoria_id'     => $request->input('categoria_id') ?: null,
-                    'presentacione_id' => $presentacione_id,
-                    'color'            => $request->input('color'),
-                    'material'         => $request->input('material'),
-                    'genero'           => $request->input('genero'),
-                    'precio'           => $request->input('precio') ?: null,
-                    'estado'           => 0,
-                ]);
-                $created++;
-            }
-
-            ActivityLogService::log('Creación batch de productos', 'Productos', [
-                'base_nombre' => $baseNombre,
-                'creados'     => $created,
-                'saltados'    => count($skipped),
-            ]);
-
-            $msg = $created . ' producto(s) creado(s) con tallas.';
-            if (!empty($skipped)) {
-                $msg .= ' Saltados (ya existen): ' . implode(', ', $skipped);
-            }
-            return redirect()->route('productos.index')->with('success', $msg);
-        } catch (Throwable $e) {
-            Log::error('Error en creación batch de productos', ['error' => $e->getMessage()]);
-            return redirect()->back()->withErrors(['nombre' => 'Error: ' . $e->getMessage()])->withInput();
         }
     }
 
@@ -228,6 +160,7 @@ class ProductoController extends Controller
                 ->where('c.estado', 1)->orderBy('c.nombre')->get()
         );
 
+        $producto->load('variantes.presentacione');
         return view('producto.edit', compact('producto', 'marcas', 'presentaciones', 'categorias'));
     }
 
@@ -269,7 +202,13 @@ class ProductoController extends Controller
             $editData = $request->validated();
             $editData['imagenes_nuevas_files'] = array_filter($request->file('imagenes_nuevas', []));
             $this->productoService->editarProducto($editData, $producto);
-            ActivityLogService::log('Edición de producto', 'Productos', $request->validated());
+
+            // Sincronizar variantes
+            $variantesData = $request->input('variantes', []);
+            $variantFiles  = $request->file('variante_imgs', []);
+            $this->productoService->actualizarVariantes($variantesData, $producto, $variantFiles);
+
+            ActivityLogService::log('Edición de producto', 'Productos', ['nombre' => $producto->nombre]);
             return redirect()->route('productos.index')->with('success', 'Producto editado');
         } catch (Throwable $e) {
             Log::error('Error al editar el producto', ['error' => $e->getMessage()]);
