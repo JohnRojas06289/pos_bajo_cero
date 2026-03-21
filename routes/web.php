@@ -71,6 +71,8 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
     Route::post('productos/crear-desde-imagenes', [ProductoController::class, 'crearDesdeImagenes'])->name('productos.crear-desde-imagenes');
     Route::post('productos/{producto}/remove-imagen', [ProductoController::class, 'removeImagen'])->name('productos.remove-imagen');
     Route::resource('productos', ProductoController::class)->except('show', 'destroy');
+    Route::delete('productos/{producto}', [ProductoController::class, 'destroy'])->name('productos.destroy');
+    Route::patch('productos/{producto}/toggle-estado', [ProductoController::class, 'toggleEstado'])->name('productos.toggle-estado');
     Route::resource('clientes', clienteController::class)->except('show');
     Route::resource('proveedores', proveedorController::class)->except('show');
     Route::resource('compras', compraController::class)->except('edit', 'update', 'destroy');

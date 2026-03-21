@@ -31,7 +31,7 @@ class ProductoController extends Controller
         $this->middleware('permission:ver-producto|crear-producto|editar-producto|eliminar-producto', ['only' => ['index']]);
         $this->middleware('permission:crear-producto', ['only' => ['create', 'store', 'import']]);
         $this->middleware('permission:editar-producto', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:eliminar-producto', ['only' => ['destroy']]);
+        $this->middleware('permission:eliminar-producto', ['only' => ['destroy', 'toggleEstado']]);
         $this->middleware('permission:ver-producto', ['only' => ['export']]);
     }
     /**
@@ -1067,25 +1067,17 @@ class ProductoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function toggleEstado(Producto $producto): RedirectResponse
     {
-        /*
-        $message = '';
-        $producto = Producto::find($id);
-        if ($producto->estado == 1) {
-            Producto::where('id', $producto->id)
-                ->update([
-                    'estado' => 0
-                ]);
-            $message = 'Producto eliminado';
-        } else {
-            Producto::where('id', $producto->id)
-                ->update([
-                    'estado' => 1
-                ]);
-            $message = 'Producto restaurado';
-        }
+        $producto->update(['estado' => !$producto->estado]);
+        $msg = $producto->estado ? 'Producto activado' : 'Producto inactivado';
+        return redirect()->route('productos.index')->with('success', $msg);
+    }
 
-        return redirect()->route('productos.index')->with('success', $message);*/
+    public function destroy(Producto $producto): RedirectResponse
+    {
+        $producto->variantes()->delete();
+        $producto->delete();
+        return redirect()->route('productos.index')->with('success', 'Producto eliminado permanentemente');
     }
 }

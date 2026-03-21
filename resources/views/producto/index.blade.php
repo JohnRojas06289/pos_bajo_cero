@@ -229,6 +229,27 @@
                 </form>
                 @endif
                 @endcan
+
+                @can('eliminar-producto')
+                {{-- Inactivar / Activar --}}
+                <form action="{{ route('productos.toggle-estado', $item) }}" method="POST" class="d-inline">
+                    @csrf @method('PATCH')
+                    <button type="submit"
+                            class="btn btn-sm {{ $item->estado ? 'btn-outline-secondary' : 'btn-outline-success' }}"
+                            title="{{ $item->estado ? 'Inactivar producto' : 'Activar producto' }}">
+                        <i class="fas {{ $item->estado ? 'fa-toggle-off' : 'fa-toggle-on' }}"></i>
+                    </button>
+                </form>
+
+                {{-- Eliminar permanentemente --}}
+                <button type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        title="Eliminar permanentemente"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteModal-{{ $item->id }}">
+                    <i class="fas fa-trash"></i>
+                </button>
+                @endcan
             </div>
         </div>
 
@@ -306,6 +327,33 @@
                 </div>
             </div>
         </div>
+
+        {{-- Modal confirmar eliminación --}}
+        @can('eliminar-producto')
+        <div class="modal fade" id="deleteModal-{{ $item->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Eliminar producto</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-1">¿Eliminar permanentemente <strong>{{ $item->nombre }}</strong>?</p>
+                        <p class="text-danger small mb-0"><i class="fas fa-info-circle me-1"></i>Esta acción no se puede deshacer. Se eliminarán también todas sus variantes.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <form action="{{ route('productos.destroy', $item) }}" method="POST" class="d-inline">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-1"></i>Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endcan
 
         @empty
         <div class="empty-state">
