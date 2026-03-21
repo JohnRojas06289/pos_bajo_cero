@@ -80,6 +80,7 @@ class PermissionSeeder extends Seeder
             'ver-producto',
             'crear-producto',
             'editar-producto',
+            'eliminar-producto',
 
             //Perfil 
             'ver-perfil',
@@ -107,6 +108,18 @@ class PermissionSeeder extends Seeder
             'crear-user',
             'editar-user',
             'eliminar-user',
+
+            //Importación
+            'ver-importacion',
+            'crear-importacion',
+
+            //Devolución
+            'ver-devolucion',
+            'crear-devolucion',
+            'editar-devolucion',
+
+            //Reporte
+            'ver-reporte',
         ];
 
         foreach ($permisos as $permiso) {
