@@ -85,15 +85,23 @@ class compraController extends Controller
         try {
 
             //Llenar tabla compras
-            $compra = new Compra();
-            $request->merge([
-                'user_id' => Auth::id(),
-                'impuesto' => 0,
-                'comprobante_path' => isset($request->file_comprobante)
-                    ? $compra->handleUploadFile($request->file_comprobante)
-                    : null
+            $tmpCompra = new Compra();
+            $comprobantePath = $request->hasFile('file_comprobante')
+                ? $tmpCompra->handleUploadFile($request->file_comprobante)
+                : null;
+
+            $compra = Compra::create([
+                'user_id'             => Auth::id(),
+                'proveedore_id'       => $request->proveedore_id ?: null,
+                'comprobante_id'      => $request->comprobante_id ?: null,
+                'numero_comprobante'  => $request->numero_comprobante ?: null,
+                'comprobante_path'    => $comprobantePath,
+                'metodo_pago'         => $request->metodo_pago ?: null,
+                'fecha_hora'          => $request->fecha_hora ?: null,
+                'impuesto'            => 0,
+                'subtotal'            => $request->subtotal,
+                'total'               => $request->total,
             ]);
-            $compra = Compra::create($request->all());
 
             //Llenar tabla compra_producto
             //1.Recuperar los arrays
@@ -106,12 +114,14 @@ class compraController extends Controller
             $siseArray = count($arrayProducto_id);
             $cont = 0;
             while ($cont < $siseArray) {
+                $fechaVenc = !empty($arrayFechaVencimiento[$cont]) ? $arrayFechaVencimiento[$cont] : null;
+
                 $compra->productos()->syncWithoutDetaching([
                     $arrayProducto_id[$cont] => [
                         'id' => Str::uuid()->toString(),
                         'cantidad' => $arrayCantidad[$cont],
                         'precio_compra' => $arrayPrecioCompra[$cont],
-                        'fecha_vencimiento' => $arrayFechaVencimiento[$cont]
+                        'fecha_vencimiento' => $fechaVenc,
                     ]
                 ]);
 
@@ -121,14 +131,14 @@ class compraController extends Controller
                     $arrayProducto_id[$cont],
                     $arrayCantidad[$cont],
                     $arrayPrecioCompra[$cont],
-                    $arrayFechaVencimiento[$cont]
+                    $fechaVenc
                 );
 
                 $cont++;
             }
 
             DB::commit();
-            ActivityLogService::log('Creación de compra', 'Compras', $request->all());
+            ActivityLogService::log('Creación de compra', 'Compras', ['compra_id' => $compra->id, 'total' => $compra->total]);
             return redirect()->route('compras.index')->with('success', 'compra exitosa');
         } catch (Throwable $e) {
             DB::rollBack();
