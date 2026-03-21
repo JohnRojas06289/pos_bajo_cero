@@ -19,7 +19,7 @@
     ],
     "env": {
         "APP_ENV": "production",
-        "APP_DEBUG": "false",
+        "APP_DEBUG": "true",
         "APP_NAME": "Bajo Cero",
         "APP_URL": "https://pos-bajo-cero.vercel.app",
         "APP_CONFIG_CACHE": "/tmp/config.php",
