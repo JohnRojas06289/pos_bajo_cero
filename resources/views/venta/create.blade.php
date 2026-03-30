@@ -1670,9 +1670,18 @@ function updateCashSection() {
 
     // Cash suggestions — billetes colombianos + montos redondos inteligentes
     const sugg = document.getElementById('cashSuggestions');
-    const bills = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000];
-    const roundUps = [5000, 10000, 20000, 50000, 100000].map(r => Math.ceil(total / r) * r);
-    const all = [...new Set([...bills, ...roundUps])].filter(v => v > total).sort((a,b) => a - b);
+    const steps = [5000, 10000, 20000, 50000, 100000];
+    const roundUps = steps.map(r => {
+        let n = Math.ceil(total / r) * r;
+        return n === total && total > 0 ? n + r : n;
+    });
+    
+    // Si el total es muy alto sumamos también algunos billetes fijos mayores
+    const baseBills = [50000, 100000, 150000, 200000];
+    
+    let all = [...new Set([...baseBills, ...roundUps])];
+    all = all.filter(v => v > total).sort((a, b) => a - b).slice(0, 4); // máximo 4 sugerencias
+    
     const exactSugg = `<button class="cash-sugg cash-sugg-exact" onclick="setCash(${total})">Exacto<br><small>${fmt(total)}</small></button>`;
     sugg.innerHTML = exactSugg + all.map(v =>
         `<button class="cash-sugg" onclick="setCash(${v})">${fmt(v)}</button>`
