@@ -10,6 +10,7 @@ use App\Models\Cliente;
 use App\Models\Categoria;
 use App\Models\Marca;
 use App\Models\Producto;
+use App\Models\User;
 use App\Models\Venta;
 use App\Services\ActivityLogService;
 use App\Services\ComprobanteService;
