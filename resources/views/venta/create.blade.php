@@ -18,17 +18,29 @@ main { padding: 0 !important; }
                 opacity 0.35s ease !important;
 }
 #layoutSidenav_content {
-    transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 body.pos-sidebar-hidden #layoutSidenav_nav {
     width: 0 !important;
-    transform: translateX(-100%) !important;
+    transform: translateX(-225px) !important;
     opacity: 0 !important;
     pointer-events: none !important;
     overflow: hidden !important;
 }
-body.pos-sidebar-hidden #layoutSidenav_content {
-    margin-left: 0 !important;
+/* Desktop (≥992px): el contenido usa padding-left */
+@media (min-width: 992px) {
+    body.pos-sidebar-hidden.sb-nav-fixed #layoutSidenav #layoutSidenav_content {
+        padding-left: 0 !important;
+        margin-left: 0 !important;
+    }
+}
+/* Mobile (<992px): el contenido ya no usa padding-left */
+@media (max-width: 991.98px) {
+    body.pos-sidebar-hidden #layoutSidenav #layoutSidenav_content {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+    }
 }
 
 /* ── POS wrapper: 65 / 35 ── */
