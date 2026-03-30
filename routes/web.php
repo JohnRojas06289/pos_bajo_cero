@@ -131,6 +131,16 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
             ], 500);
         }
     });
+
+    // Nueva ruta para renombrar al cliente John a General
+    Route::get('/rename-client', function () {
+        $persona = \App\Models\Persona::where('razon_social', 'John')->first();
+        if ($persona) {
+            $persona->update(['razon_social' => 'General']);
+            return response()->json(['status' => 'success', 'message' => 'Cliente John renombrado a General con éxito.']);
+        }
+        return response()->json(['status' => 'error', 'message' => 'No se encontró ningún cliente llamado John.'], 404);
+    });
 });
 
 
