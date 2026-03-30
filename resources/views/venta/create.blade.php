@@ -104,33 +104,6 @@ body.pos-sidebar-hidden #layoutSidenav_nav {
 #searchInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(29,150,200,0.15); }
 #searchInput::placeholder { color: var(--text-muted); }
 
-/* Category chips */
-.pos-cats {
-    display: flex;
-    gap: 0.4rem;
-    overflow-x: auto;
-    padding-bottom: 0.5rem;
-    scrollbar-width: none;
-}
-.pos-cats::-webkit-scrollbar { display: none; }
-
-.cat-chip {
-    flex-shrink: 0;
-    padding: 0.3rem 0.875rem;
-    border-radius: 20px;
-    border: 1.5px solid var(--border-color);
-    background: var(--input-bg);
-    color: var(--text-secondary);
-    font-size: 0.78rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.18s ease;
-    white-space: nowrap;
-    font-family: 'Inter', sans-serif;
-}
-.cat-chip:hover  { border-color: var(--accent); color: var(--accent); }
-.cat-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
 /* Body: grid + alpha bar */
 .pos-body {
     flex: 1;
@@ -1010,20 +983,16 @@ body.pos-sidebar-hidden #layoutSidenav_nav {
                 </button>
             </div>
             <div class="scan-feedback" id="scanFeedback"></div>
-            {{-- Category chips --}}
-            <div class="pos-cats" id="catChips">
-                <button class="cat-chip active" data-cat="">
-                    <i class="fas fa-th-large me-1"></i>Todo
-                </button>
-                @foreach($categorias as $cat)
-                <button class="cat-chip" data-cat="{{ $cat->id }}">
-                    {{ $cat->caracteristica?->nombre ?? 'Sin nombre' }}
-                </button>
-                @endforeach
-            </div>
-
-            {{-- Filter bar: talla, género, marca, origen --}}
+            {{-- Filter bar: categoría, talla, género, marca, origen --}}
             <div class="pos-filters" id="posFilters">
+                {{-- Categoría --}}
+                <select class="pos-filter-select" id="filterCategoria" title="Categoría">
+                    <option value="">📁 Todas las categorías</option>
+                    @foreach($categorias as $cat)
+                    <option value="{{ $cat->id }}">{{ $cat->caracteristica?->nombre ?? 'Sin nombre' }}</option>
+                    @endforeach
+                </select>
+
                 {{-- Talla --}}
                 <select class="pos-filter-select" id="filterTalla" title="Talla">
                     <option value="">📏 Todas las tallas</option>
@@ -1264,11 +1233,11 @@ let cart           = [];  // [{id, nombre, precio, cantidad, stock}]
         })();
     @endforeach
 @endif
-let activeCat      = '';
 let searchQuery    = '';
 let paymentMethod  = 'EFECTIVO';
 let debounceTimer  = null;
 // Filtros adicionales
+let filterCategoria = '';
 let filterTalla    = '';
 let filterGenero   = '';
 let filterMarca    = '';
@@ -1286,7 +1255,7 @@ function fmt(n) {
 ══════════════════════════════════════ */
 function filteredProducts() {
     let list = allProducts;
-    if (activeCat)    list = list.filter(p => p.categoria_id == activeCat);
+    if (filterCategoria) list = list.filter(p => p.categoria_id == filterCategoria);
     if (filterTalla)  list = list.filter(p => p.talla === filterTalla);
     if (filterGenero) list = list.filter(p => p.genero === filterGenero);
     if (filterMarca)  list = list.filter(p => p.marca_id === filterMarca);
@@ -1305,11 +1274,11 @@ function filteredProducts() {
 }
 
 function updateClearFiltersBtn() {
-    const hasFilter = filterTalla || filterGenero || filterMarca || filterOrigen;
+    const hasFilter = filterCategoria || filterTalla || filterGenero || filterMarca || filterOrigen;
     const btn = document.getElementById('btnClearFilters');
     if (btn) btn.style.display = hasFilter ? 'inline-flex' : 'none';
     // Mark active
-    ['filterTalla','filterGenero','filterMarca','filterOrigen'].forEach(id => {
+    ['filterCategoria','filterTalla','filterGenero','filterMarca','filterOrigen'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.toggle('active-filter', !!el.value);
     });
@@ -1804,27 +1773,16 @@ document.getElementById('searchInput').addEventListener('input', function () {
     }, 300);
 });
 
-// Category chips
-document.getElementById('catChips').addEventListener('click', function (e) {
-    const chip = e.target.closest('.cat-chip');
-    if (!chip) return;
-    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-    activeCat = chip.dataset.cat;
-    searchQuery = '';
-    document.getElementById('searchInput').value = '';
-    renderProducts();
-});
-
-// Filtros adicionales
-['filterTalla','filterGenero','filterMarca','filterOrigen'].forEach(id => {
+// Filtros selectores
+['filterCategoria','filterTalla','filterGenero','filterMarca','filterOrigen'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('change', function () {
-        filterTalla  = document.getElementById('filterTalla').value;
-        filterGenero = document.getElementById('filterGenero').value;
-        filterMarca  = document.getElementById('filterMarca').value;
-        filterOrigen = document.getElementById('filterOrigen').value;
+        filterCategoria = document.getElementById('filterCategoria').value;
+        filterTalla     = document.getElementById('filterTalla').value;
+        filterGenero    = document.getElementById('filterGenero').value;
+        filterMarca     = document.getElementById('filterMarca').value;
+        filterOrigen    = document.getElementById('filterOrigen').value;
         updateClearFiltersBtn();
         renderProducts();
     });
@@ -1832,8 +1790,8 @@ document.getElementById('catChips').addEventListener('click', function (e) {
 
 // Limpiar todos los filtros adicionales
 document.getElementById('btnClearFilters').addEventListener('click', function () {
-    filterTalla = filterGenero = filterMarca = filterOrigen = '';
-    ['filterTalla','filterGenero','filterMarca','filterOrigen'].forEach(id => {
+    filterCategoria = filterTalla = filterGenero = filterMarca = filterOrigen = '';
+    ['filterCategoria','filterTalla','filterGenero','filterMarca','filterOrigen'].forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.value = ''; el.classList.remove('active-filter'); }
     });
