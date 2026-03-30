@@ -454,6 +454,21 @@ main { padding: 0 !important; }
     white-space: nowrap;
 }
 
+.cart-item-price-input {
+    width: 90px;
+    height: 24px;
+    padding: 0 0.35rem;
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    background: var(--input-bg);
+    border: 1.5px solid var(--accent);
+    border-radius: 5px;
+    outline: none;
+    text-align: right;
+}
+.cart-item-price-input:focus { box-shadow: 0 0 0 2px rgba(29,150,200,0.18); }
+
 .cart-item-subtotal {
     font-size: 0.78rem;
     font-weight: 700;
@@ -1079,6 +1094,7 @@ $allProductsData = $productos->map(function($p) {
 })->sortBy('nombre')->values();
 @endphp
 const allProducts = @json($allProductsData);
+const isAdmin     = {{ auth()->user()->hasRole('administrador') ? 'true' : 'false' }};
 
 /* ══════════════════════════════════════
    STATE
@@ -1373,6 +1389,30 @@ function clearCart() {
 }
 
 function getSubtotal() { return cart.reduce((s, i) => s + (i.precio * i.cantidad), 0); }
+
+function updateItemPrice(varianteId, rawValue) {
+    const newPrice = parseFloat(rawValue);
+    if (isNaN(newPrice) || newPrice < 0) return;
+    const item = cart.find(c => c.variante_id == varianteId);
+    if (!item) return;
+    item.precio = newPrice;
+    // Recalcular totales y campos del form sin re-renderizar el carrito
+    // (evita perder el foco del input)
+    const subtotal = getSubtotal();
+    const total    = getTotal();
+    document.getElementById('displayTotal').textContent = fmt(total);
+    const mobileTotal = document.getElementById('mobileTotalDisplay');
+    if (mobileTotal) mobileTotal.textContent = fmt(total);
+    // Actualizar el subtotal de esta fila específica
+    const items = document.querySelectorAll('#cartItems .cart-item');
+    const allItems = cart;
+    const idx = allItems.findIndex(c => c.variante_id == varianteId);
+    if (idx >= 0 && items[idx]) {
+        const subtotalEl = items[idx].querySelector('.cart-item-subtotal');
+        if (subtotalEl) subtotalEl.textContent = fmt(newPrice * item.cantidad);
+    }
+    updateFormFields();
+}
 function getTotal()    { return getSubtotal(); }
 
 function renderCart() {
@@ -1407,7 +1447,13 @@ function renderCart() {
         <div class="cart-item">
             <div style="flex:1;min-width:0;">
                 <div class="cart-item-name" title="${item.nombre}">${item.nombre}</div>
-                <div class="cart-item-price">${fmt(item.precio)} / ud</div>
+                ${isAdmin
+                    ? `<input type="number" class="cart-item-price-input" min="0" step="0.01"
+                              value="${item.precio}"
+                              onchange="updateItemPrice('${item.variante_id}', this.value)"
+                              title="Editar precio unitario">`
+                    : `<div class="cart-item-price">${fmt(item.precio)} / ud</div>`
+                }
             </div>
             <div class="qty-controls">
                 <button class="qty-btn" onclick="changeQty('${item.variante_id}', -1)">−</button>

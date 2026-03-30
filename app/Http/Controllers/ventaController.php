@@ -141,13 +141,22 @@ class ventaController extends Controller
             //2. Realizar el llenado
             $siseArray = count($arrayProducto_id);
             $cont = 0;
+            $esAdmin = Auth::user()->hasRole('administrador');
 
             while ($cont < $siseArray) {
+                // Si no es admin, usar siempre el precio real del producto (seguridad)
+                if (!$esAdmin) {
+                    $productoModel = Producto::find($arrayProducto_id[$cont]);
+                    $precioFinal   = $productoModel ? (float)$productoModel->precio : (float)$arrayPrecioVenta[$cont];
+                } else {
+                    $precioFinal = (float)$arrayPrecioVenta[$cont];
+                }
+
                 $venta->productos()->syncWithoutDetaching([
                     $arrayProducto_id[$cont] => [
                         'id' => \Illuminate\Support\Str::uuid()->toString(),
                         'cantidad' => $arrayCantidad[$cont],
-                        'precio_venta' => $arrayPrecioVenta[$cont],
+                        'precio_venta' => $precioFinal,
                     ]
                 ]);
 
@@ -156,7 +165,7 @@ class ventaController extends Controller
                     $venta,
                     $arrayProducto_id[$cont],
                     $arrayCantidad[$cont],
-                    $arrayPrecioVenta[$cont],
+                    $precioFinal,
                     $arrayVarianteId[$cont] ?? null
                 );
 
