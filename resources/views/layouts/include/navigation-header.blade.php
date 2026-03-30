@@ -18,13 +18,16 @@ if (!$empresa) {
         <span class="ms-2">Bajo<span class="brand-accent">Cero</span></span>
     </a>
 
-    <!-- Sidebar Toggle -->
-    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!">
-        <i class="fas fa-bars text-white opacity-75"></i>
-    </button>
+    <!-- Right nav items (Flex container to align right) -->
+    <div class="ms-auto d-flex align-items-center gap-2 me-3 me-lg-4">
+        
+        <!-- Sidebar Toggle -->
+        <button class="btn btn-link btn-sm order-1 order-lg-0" id="sidebarToggle" href="#!">
+            <i class="fas fa-bars text-white opacity-75" style="font-size: 1.1rem;"></i>
+        </button>
 
-    <!-- Right nav -->
-    <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4 align-items-center gap-1">
+        <!-- User Dropdown & Other nav items -->
+        <ul class="navbar-nav align-items-center gap-1">
 
         <!-- User Dropdown -->
         <li class="nav-item dropdown">
@@ -59,4 +62,5 @@ if (!$empresa) {
         </li>
 
     </ul>
+    </div>
 </nav>

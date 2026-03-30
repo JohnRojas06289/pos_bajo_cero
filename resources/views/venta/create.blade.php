@@ -1545,19 +1545,70 @@ function changeQty(varianteId, delta) {
 }
 
 function removeItem(varianteId) {
-    cart = cart.filter(c => c.variante_id != varianteId);
-    renderCart();
-    renderProducts();
-    updateFormFields();
+    const item = cart.find(c => c.variante_id == varianteId);
+    if (!item) return;
+
+    Swal.fire({
+        title: '¿Eliminar producto?',
+        html: `Vas a retirar <b>${item.nombre}</b> del carrito.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#E74C3C',
+        cancelButtonColor: '#94A3B8',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true,
+        backdrop: `rgba(0,0,0,0.4)`
+    }).then((result) => {
+        if (result.isConfirmed) {
+            cart = cart.filter(c => c.variante_id != varianteId);
+            renderCart();
+            renderProducts();
+            updateFormFields();
+
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
+            Toast.fire({
+                icon: 'success',
+                title: 'Producto eliminado'
+            });
+        }
+    });
 }
 
 function clearCart() {
     if (cart.length === 0) return;
-    if (!confirm('¿Limpiar el carrito?')) return;
-    cart = [];
-    renderCart();
-    renderProducts();
-    updateFormFields();
+
+    Swal.fire({
+        title: '¿Vaciar carrito?',
+        text: "Se perderán todos los productos seleccionados.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#E74C3C',
+        cancelButtonColor: '#94A3B8',
+        confirmButtonText: 'Sí, vaciar carito',
+        cancelButtonText: 'Volver',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            cart = [];
+            renderCart();
+            renderProducts();
+            updateFormFields();
+            
+            Swal.fire({
+                title: 'Carrito vacío',
+                icon: 'success',
+                timer: 1000,
+                showConfirmButton: false
+            });
+        }
+    });
 }
 
 function getSubtotal() { return cart.reduce((s, i) => s + (i.precio * i.cantidad), 0); }
@@ -1998,15 +2049,26 @@ renderCart();
 @if(session('success'))
 Swal.fire({
     icon: 'success',
-    title: '¡Venta registrada!',
+    title: '¡Venta registrada con éxito!',
     text: '{{ session('success') }}',
-    confirmButtonText: 'Nueva venta',
-    confirmButtonColor: '#27AE60',
-    timer: 4000,
+    confirmButtonText: 'Siguiente venta',
+    confirmButtonColor: '#1D96C8',
+    timer: 2500,
     timerProgressBar: true,
-}).then(function() {
-    renderProducts();
-    renderCart();
+    showClass: { popup: 'animate__animated animate__fadeInDown' },
+    hideClass: { popup: 'animate__animated animate__fadeOutUp' }
+});
+
+const ToastSuccess = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true
+});
+ToastSuccess.fire({
+    icon: 'success',
+    title: 'Transacción completada'
 });
 @endif
 
