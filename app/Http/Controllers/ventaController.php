@@ -144,12 +144,16 @@ class ventaController extends Controller
             $esAdmin = Auth::user()->hasRole('administrador');
 
             while ($cont < $siseArray) {
-                // Si no es admin, usar siempre el precio real del producto (seguridad)
-                if (!$esAdmin) {
-                    $productoModel = Producto::find($arrayProducto_id[$cont]);
-                    $precioFinal   = $productoModel ? (float)$productoModel->precio : (float)$arrayPrecioVenta[$cont];
+                // Precio del producto real (siempre como fallback)
+                $productoModel = Producto::find($arrayProducto_id[$cont]);
+                $precioDb      = $productoModel ? (float)$productoModel->precio : 0;
+
+                // Si es admin, respetar el precio enviado; si no, usar el precio de DB
+                if ($esAdmin) {
+                    $precioEnviado = isset($arrayPrecioVenta[$cont]) ? (float)$arrayPrecioVenta[$cont] : $precioDb;
+                    $precioFinal   = $precioEnviado > 0 ? $precioEnviado : $precioDb;
                 } else {
-                    $precioFinal = (float)$arrayPrecioVenta[$cont];
+                    $precioFinal = $precioDb > 0 ? $precioDb : ((float)($arrayPrecioVenta[$cont] ?? 0));
                 }
 
                 $venta->productos()->syncWithoutDetaching([

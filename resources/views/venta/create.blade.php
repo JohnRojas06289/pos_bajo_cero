@@ -1616,7 +1616,11 @@ document.getElementById('btnPagar').addEventListener('click', function () {
     }
     document.getElementById('f_cliente_id').value = clienteId;
 
+    // Asegurar que los campos ocultos estén actualizados antes de enviar
+    updateFormFields();
+
     // Loading state
+    this.disabled = true;
     this.classList.add('loading');
     document.getElementById('btnPagarLabel').textContent = 'Procesando...';
 
