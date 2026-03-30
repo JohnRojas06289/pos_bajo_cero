@@ -1149,8 +1149,24 @@ document.addEventListener('DOMContentLoaded', function () {
     requestAnimationFrame(function () {
         requestAnimationFrame(function () {
             body.classList.add('pos-sidebar-hidden');
+            // Alterar la clase nativa para que al interactuar concuerde con el cierre forzado
+            if (window.innerWidth >= 992) {
+                body.classList.add('sb-sidenav-toggled');
+            } else {
+                body.classList.remove('sb-sidenav-toggled');
+            }
         });
     });
+
+    // Restaurar el comportamiento nativo si se hace clic en la hamburguesa
+    const sidebarToggle = document.querySelector('#sidebarToggle');
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function () {
+            if (body.classList.contains('pos-sidebar-hidden')) {
+                body.classList.remove('pos-sidebar-hidden');
+            }
+        });
+    }
 
     // Restaurar sidebar al salir de la página
     window.addEventListener('pagehide', restoreSidebar);
