@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('pos_code', 6)->nullable()->after('password');
-        });
+        if (!Schema::hasColumn('users', 'pos_code')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('pos_code', 6)->nullable()->after('password');
+            });
+        }
     }
 
     /**
@@ -21,8 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('pos_code');
-        });
+        if (Schema::hasColumn('users', 'pos_code')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('pos_code');
+            });
+        }
     }
 };
