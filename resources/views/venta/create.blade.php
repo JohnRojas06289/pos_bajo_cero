@@ -1788,6 +1788,99 @@ function updatePayButton() {
     if (canPay) label.textContent = `PAGAR ${fmt(total)}`;
 }
 
+document.getElementById('btnPagar').addEventListener('click', function () {
+    const btn = this;
+    if (btn.disabled) return;
+    if (cart.length === 0) {
+        Swal.fire({ icon: 'warning', title: 'Atención', text: 'El carrito está vacío.' });
+        return;
+    }
+
+    // Asegurar que los campos ocultos estén actualizados
+    updateFormFields();
+
+    // Loading state
+    btn.disabled = true;
+    btn.classList.add('loading');
+    const label = document.getElementById('btnPagarLabel');
+    const originalLabel = label.textContent;
+    label.textContent = 'Procesando...';
+
+    const form = document.getElementById('ventaForm');
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(async response => {
+        const data = await response.json();
+        if (response.ok) {
+            // Success!
+            // 1. Descontar stock manualmente en JS para actualización instantánea
+            cart.forEach(item => {
+                const p = allProducts.find(x => x.variante_id == item.variante_id);
+                if (p) p.stock -= item.cantidad;
+            });
+
+            // 2. Limpiar carrito y resetear UI
+            cart = [];
+            document.getElementById('montoRecibido').value = '';
+            document.getElementById('searchInput').value = '';
+            searchQuery = '';
+
+            renderCart();
+            renderProducts();
+            updateFormFields();
+
+            // 3. Notificación VIP
+            Swal.fire({
+                icon: 'success',
+                title: '¡Venta registrada con éxito!',
+                text: 'La transacción se procesó correctamente.',
+                confirmButtonText: 'Siguiente venta',
+                confirmButtonColor: '#1D96C8',
+                timer: 2000,
+                timerProgressBar: true,
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' }
+            });
+
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+            Toast.fire({ icon: 'success', title: 'Venta completada' });
+
+        } else {
+            // Error de validación o servidor
+            throw new Error(data.error || data.message || 'Error desconocido al procesar la venta.');
+        }
+    })
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error en la venta',
+            text: error.message,
+            confirmButtonColor: '#E74C3C'
+        });
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        label.textContent = originalLabel;
+        updatePayButton();
+    });
+});
+
 /* ══════════════════════════════════════
    FORM SUBMISSION
 ══════════════════════════════════════ */

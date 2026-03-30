@@ -144,6 +144,9 @@ class ventaController extends Controller
 
             if (empty($arrayProducto_id)) {
                 DB::rollBack();
+                if ($request->wantsJson()) {
+                    return response()->json(['error' => 'Debe agregar al menos un producto a la venta.'], 422);
+                }
                 return redirect()->route('ventas.create')->with('error', 'Debe agregar al menos un producto a la venta.');
             }
 
@@ -192,6 +195,9 @@ class ventaController extends Controller
         } catch (Throwable $e) {
             DB::rollBack();
             Log::error('Error al crear la venta', ['error' => $e->getMessage()]);
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Ups, algo falló: ' . $e->getMessage()], 500);
+            }
             return redirect()->route('ventas.create')->with('error', 'Ups, algo falló: ' . $e->getMessage());
         }
 
@@ -200,6 +206,13 @@ class ventaController extends Controller
             ActivityLogService::log('Creación de una venta', 'Ventas', $request->validated());
         } catch (Throwable $e) {
             Log::warning('No se pudo registrar el activity log de venta', ['error' => $e->getMessage()]);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => 'Venta registrada con éxito',
+                'venta_id' => $venta->id
+            ]);
         }
 
         return redirect()->route('ventas.create')
