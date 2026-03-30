@@ -1095,7 +1095,7 @@ body.pos-sidebar-hidden #layoutSidenav_nav {
             </div>
 
             {{-- Pay button --}}
-            <button class="btn-pay" id="btnPagar" disabled>
+            <button type="button" class="btn-pay" id="btnPagar" disabled>
                 <i class="fas fa-check-circle"></i>
                 <span id="btnPagarLabel">PAGAR</span>
             </button>
@@ -1788,7 +1788,8 @@ function updatePayButton() {
     if (canPay) label.textContent = `PAGAR ${fmt(total)}`;
 }
 
-document.getElementById('btnPagar').addEventListener('click', function () {
+document.getElementById('btnPagar').addEventListener('click', function (e) {
+    e.preventDefault();
     const btn = this;
     if (btn.disabled) return;
     if (cart.length === 0) {
