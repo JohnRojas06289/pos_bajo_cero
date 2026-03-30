@@ -593,6 +593,84 @@ body.pos-sidebar-hidden #layoutSidenav_nav {
 }
 .cart-select:focus { border-color: var(--accent); }
 
+/* POS Controls: Toggle and Unlock */
+.cart-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: auto;
+    margin-right: 0.5rem;
+}
+.price-toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    user-select: none;
+}
+.price-toggle-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 28px;
+    height: 16px;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--border-color);
+    transition: .3s;
+    border-radius: 20px;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 12px; width: 12px;
+    left: 2px; bottom: 2px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+input:checked + .slider { background-color: var(--accent); }
+input:checked + .slider:before { transform: translateX(12px); }
+
+.btn-unlock-prices {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+}
+.btn-unlock-prices.unlocked { color: var(--success); }
+.btn-unlock-prices:hover { color: var(--accent); }
+
+/* Compact price input for admin */
+.cart-item-price-input {
+    width: 80px;
+    height: 24px;
+    padding: 0 0.35rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    outline: none;
+    margin-top: 2px;
+}
+.cart-item-price-input:focus { border-color: var(--accent); }
+
 .cart-field-label {
     font-size: 0.68rem;
     font-weight: 700;
@@ -1048,6 +1126,23 @@ body.pos-sidebar-hidden #layoutSidenav_nav {
                 Carrito
                 <span class="cart-count-badge" id="cartBadge">0</span>
             </div>
+
+            <div class="cart-controls">
+                {{-- Visibility Toggle --}}
+                <label class="price-toggle-wrap" title="Mostrar/Ocultar precios unitarios">
+                    <span class="price-toggle-label">Precios</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggleCartPrices" checked onchange="togglePrices(this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </label>
+
+                {{-- Unlock Button (Supervisor Code) --}}
+                <button type="button" class="btn-unlock-prices" id="btnUnlockPrices" onclick="unlockPrices()" title="Autorización de supervisor para editar precios">
+                    <i class="fas fa-lock" id="lockIcon"></i>
+                </button>
+            </div>
+
             <button class="cart-clear-btn" id="btnClearCart">
                 <i class="fas fa-trash-alt"></i> Limpiar
             </button>
@@ -1224,11 +1319,14 @@ $allProductsData = $productos->map(function($p) {
 @endphp
 const allProducts = @json($allProductsData);
 const isAdmin     = {{ $isAdmin ? 'true' : 'false' }};
+const supervisorCodes = @json($supervisorCodes);
 
 /* ══════════════════════════════════════
    STATE
 ══════════════════════════════════════ */
 let cart           = [];  // [{id, nombre, precio, cantidad, stock}]
+let supervisorUnlocked = isAdmin; // Auto-unlock for admins
+let showCartPrices     = true;
 @if(old('arrayidproducto'))
     @foreach(old('arrayidproducto') as $i => $id_val)
         (function() {
@@ -1698,6 +1796,82 @@ function renderCart() {
     const sheetItems = document.getElementById('sheetCartItems');
     if (sheetItems) sheetItems.innerHTML = itemsEl.innerHTML;
 }
+
+/* ══════════════════════════════════════
+   TOGGLE & UNLOCK LOGIC
+══════════════════════════════════════ */
+window.togglePrices = function(checked) {
+    showCartPrices = checked;
+    renderCart();
+};
+
+window.unlockPrices = function() {
+    if (isAdmin) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Acceso de Administrador',
+            text: 'Como administrador, ya tienes permiso para editar todos los precios de venta.',
+            confirmButtonColor: '#1D96C8'
+        });
+        return;
+    }
+
+    if (supervisorUnlocked) {
+        Swal.fire({
+            title: '¿Bloquear edición?',
+            text: "Se desactivará la edición de precios para este usuario hasta que un supervisor vuelva a autorizar.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#E74C3C',
+            confirmButtonText: 'Sí, bloquear',
+            cancelButtonText: 'Mantener abierto'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                supervisorUnlocked = false;
+                renderCart();
+            }
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: 'Autorización de Supervisor',
+        text: 'Ingresa el código de seguridad para habilitar la edición de precios:',
+        input: 'password',
+        inputAttributes: {
+            autocapitalize: 'off',
+            autocorrect: 'off'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Validar',
+        confirmButtonColor: '#1D96C8',
+        cancelButtonText: 'Cancelar',
+        showLoaderOnConfirm: true,
+        preConfirm: (code) => {
+            const isValid = supervisorCodes.includes(code);
+            if (isValid) {
+                return true;
+            } else {
+                Swal.showValidationMessage('Código incorrecto o no configurado.');
+                return false;
+            }
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+        if (result.isConfirmed) {
+            supervisorUnlocked = true;
+            renderCart();
+            Swal.fire({
+                icon: 'success',
+                title: 'Edición habilitada',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        }
+    });
+};
 
 /* ══════════════════════════════════════
    PAYMENT

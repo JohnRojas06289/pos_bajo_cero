@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title','Perfil')
 
@@ -44,6 +44,18 @@
                             type='password'
                             labelText='Nueva contraseña' />
                     </div>
+
+                    @if(auth()->user()->hasRole('administrador'))
+                    <!----POS Security Code--->
+                    <div class="col-12">
+                        <x-forms.input id='pos_code'
+                            type='text'
+                            labelText='Código de Seguridad POS (Supervisor)'
+                            placeholder='Ej: 1602'
+                            :defaultValue='auth()->user()->pos_code' />
+                        <small class="text-muted">Este código se usará para autorizar cambios de precio en el punto de venta por parte de otros empleados.</small>
+                    </div>
+                    @endif
 
                 </div>
             </div>

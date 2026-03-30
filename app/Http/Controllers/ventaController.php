@@ -107,6 +107,11 @@ class ventaController extends Controller
             $optionsMetodoPago = MetodoPagoEnum::cases();
 
             $isAdmin = auth()->user()->hasRole('administrador');
+            // Obtener todos los códigos de supervisor válidos (de cualquier admin)
+            $supervisorCodes = User::role('administrador')
+                ->whereNotNull('pos_code')
+                ->pluck('pos_code')
+                ->toArray();
 
             return view('venta.create', compact(
                 'productos',
@@ -116,7 +121,8 @@ class ventaController extends Controller
                 'comprobantes',
                 'optionsMetodoPago',
                 'empresa',
-                'isAdmin'
+                'isAdmin',
+                'supervisorCodes'
             ));
         } catch (\Throwable $e) {
             Log::error('Error al cargar la vista de crear venta', ['error' => $e->getMessage()]);

@@ -68,7 +68,8 @@ class profileController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required|unique:users,email,' . $profile->id,
-            'password' => 'nullable'
+            'password' => 'nullable',
+            'pos_code' => 'nullable|numeric|digits_between:4,8'
         ]);
 
         /*Comprobar el password y aplicar el Hash*/

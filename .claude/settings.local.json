@@ -71,7 +71,12 @@
       "Bash(php -l app/Http/Controllers/loginController.php)",
       "Bash(php -l app/Http/Controllers/userController.php)",
       "Bash(php -l app/Http/Controllers/ImportExcelController.php)",
-      "Bash(php -l routes/debug.php)"
+      "Bash(php -l routes/debug.php)",
+      "Bash(php -l /home/john/Documents/GitHub/pos_bajo_cero/app/Http/Controllers/ventaController.php)",
+      "Bash(php -l /home/john/Documents/GitHub/pos_bajo_cero/resources/views/venta/create.blade.php)",
+      "Bash(find /home/john/Documents/GitHub/pos_bajo_cero/storage/logs -name *.log)",
+      "Bash(xargs ls:*)",
+      "Bash(php /home/john/Documents/GitHub/pos_bajo_cero/artisan route:list --name=ventas)"
     ]
   }
 }
