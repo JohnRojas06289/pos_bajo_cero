@@ -11,6 +11,26 @@ main { padding: 0 !important; }
 /* Ocultar botón IA en POS */
 #aiChatBtn, #aiChatPanel { display: none !important; }
 
+/* ── Sidebar slide-out transition para POS ── */
+#layoutSidenav_nav {
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.35s ease !important;
+}
+#layoutSidenav_content {
+    transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+body.pos-sidebar-hidden #layoutSidenav_nav {
+    width: 0 !important;
+    transform: translateX(-100%) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+}
+body.pos-sidebar-hidden #layoutSidenav_content {
+    margin-left: 0 !important;
+}
+
 /* ── POS wrapper: 65 / 35 ── */
 .pos-wrapper {
     display: flex;
@@ -1053,6 +1073,34 @@ main { padding: 0 !important; }
 @push('js')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
+/* ══════════════════════════════════════
+   AUTO-HIDE SIDEBAR EN POS
+══════════════════════════════════════ */
+(function () {
+    const body = document.body;
+    // Guardar el estado previo del sidebar antes de ocultarlo
+    const wasToggled = body.classList.contains('sb-sidenav-toggled');
+    sessionStorage.setItem('pos_sidebar_was_toggled', wasToggled ? '1' : '0');
+
+    // Pequeño delay para que la transición sea visible al entrar
+    requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+            body.classList.add('pos-sidebar-hidden');
+        });
+    });
+
+    // Restaurar sidebar al salir de la página
+    window.addEventListener('pagehide', restoreSidebar);
+    window.addEventListener('beforeunload', restoreSidebar);
+
+    function restoreSidebar() {
+        body.classList.remove('pos-sidebar-hidden');
+        const wasToggled = sessionStorage.getItem('pos_sidebar_was_toggled') === '1';
+        if (wasToggled) body.classList.add('sb-sidenav-toggled');
+        else body.classList.remove('sb-sidenav-toggled');
+    }
+})();
 
 /* ══════════════════════════════════════
    DATA: Products from Blade
