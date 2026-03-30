@@ -982,7 +982,7 @@ main { padding: 0 !important; }
                 <select class="cart-select" id="clienteSelect">
                     <option value="">— Seleccionar cliente —</option>
                     @foreach($clientes as $c)
-                    <option value="{{ $c->id }}">
+                    <option value="{{ $c->id }}" {{ old('cliente_id') == $c->id ? 'selected' : '' }}>
                         {{ $c->persona?->razon_social ?? 'N/A' }}
                     </option>
                     @endforeach
@@ -1100,6 +1100,26 @@ const isAdmin     = {{ $isAdmin ? 'true' : 'false' }};
    STATE
 ══════════════════════════════════════ */
 let cart           = [];  // [{id, nombre, precio, cantidad, stock}]
+@if(old('arrayidproducto'))
+    @foreach(old('arrayidproducto') as $i => $id_val)
+        (function() {
+            const var_id = '{{ old('arrayvariante_id')[$i] ?? '' }}';
+            const prod = allProducts.find(p => p.variante_id == var_id) || allProducts.find(p => p.id == '{{ $id_val }}');
+            if (prod) {
+                cart.push({
+                    id: '{{ $id_val }}',
+                    variante_id: var_id,
+                    cantidad: parseInt('{{ old('arraycantidad')[$i] ?? 1 }}', 10),
+                    precio: parseFloat('{{ old('arrayprecioventa')[$i] ?? 0 }}'),
+                    nombre: prod.nombre,
+                    stock: prod.stock,
+                    img: prod.img,
+                    var_label: prod.var_label
+                });
+            }
+        })();
+    @endforeach
+@endif
 let activeCat      = '';
 let searchQuery    = '';
 let paymentMethod  = 'EFECTIVO';
@@ -1801,7 +1821,7 @@ window.removeItem   = removeItem;
 // f_comprobante_id is pre-set in the hidden input via Blade
 
 // Set initial payment method
-setPaymentMethod('EFECTIVO');
+setPaymentMethod('{{ old('metodo_pago', 'EFECTIVO') }}');
 
 // Initial render
 renderProducts();
@@ -1820,6 +1840,15 @@ Swal.fire({
 }).then(function() {
     renderProducts();
     renderCart();
+});
+@endif
+
+@if($errors->any())
+Swal.fire({
+    icon: 'warning',
+    title: 'Error de validación',
+    html: '{!! implode("<br>", $errors->all()) !!}',
+    confirmButtonColor: '#E74C3C',
 });
 @endif
 
