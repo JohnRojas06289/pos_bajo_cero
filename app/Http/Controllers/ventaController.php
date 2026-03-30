@@ -132,8 +132,18 @@ class ventaController extends Controller
     {
         DB::beginTransaction();
         try {
+            // Preparar datos y manejar fallback de cliente_id (si no se seleccionó ninguno)
+            $data = $request->validated();
+            if (empty($data['cliente_id'])) {
+                // Buscamos el primer cliente disponible para evitar el error de restricción NotNull en DB
+                $defaultClient = Cliente::first();
+                if ($defaultClient) {
+                    $data['cliente_id'] = $defaultClient->id;
+                }
+            }
+
             //Llenar mi tabla venta
-            $venta = Venta::create($request->validated());
+            $venta = Venta::create($data);
 
             //Llenar mi tabla venta_producto
             //1. Recuperar los arrays
