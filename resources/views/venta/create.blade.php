@@ -1094,7 +1094,7 @@ $allProductsData = $productos->map(function($p) {
 })->sortBy('nombre')->values();
 @endphp
 const allProducts = @json($allProductsData);
-const isAdmin     = {{ auth()->user()->hasRole('administrador') ? 'true' : 'false' }};
+const isAdmin     = {{ $isAdmin ? 'true' : 'false' }};
 
 /* ══════════════════════════════════════
    STATE

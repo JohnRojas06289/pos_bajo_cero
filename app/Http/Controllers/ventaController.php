@@ -101,13 +101,16 @@ class ventaController extends Controller
             $comprobantes = $comprobanteService->obtenerComprobantes();
             $optionsMetodoPago = MetodoPagoEnum::cases();
 
+            $isAdmin = auth()->user()->hasRole('administrador');
+
             return view('venta.create', compact(
                 'productos',
                 'categorias',
                 'clientes',
                 'comprobantes',
                 'optionsMetodoPago',
-                'empresa'
+                'empresa',
+                'isAdmin'
             ));
         } catch (\Throwable $e) {
             Log::error('Error al cargar la vista de crear venta', ['error' => $e->getMessage()]);
