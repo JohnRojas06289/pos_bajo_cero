@@ -113,6 +113,24 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
     Route::patch('/reservas/{reserva}/estado', [ReservaController::class, 'updateEstado'])->name('reservas.estado');
 
     Route::get('/logout', [logoutController::class, 'logout'])->name('logout');
+
+    // Emergencia: Ejecutar migraciones desde el navegador si no se tiene acceso por terminal
+    Route::get('/migrate', function () {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            $output = \Illuminate\Support\Facades\Artisan::output();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Migraciones ejecutadas correctamente.',
+                'output' => $output
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error al ejecutar migraciones: ' . $e->getMessage()
+            ], 500);
+        }
+    });
 });
 
 
