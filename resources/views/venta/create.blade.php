@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'POS — Nueva Venta')
+@section('title', 'POS  Nueva Venta')
 
 @push('css')
 <style>
-/* ── POS layout reset ── */
+/* -- POS layout reset -- */
 body { overflow: hidden !important; }
 main { padding: 0 !important; }
 
-/* Ocultar botón IA en POS */
+/* Ocultar botn IA en POS */
 #aiChatBtn, #aiChatPanel { display: none !important; }
 
-/* ── Sidebar slide-out transition para POS ── */
+/* -- Sidebar slide-out transition para POS -- */
 #layoutSidenav_nav {
     transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
                 transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
@@ -28,7 +28,7 @@ body.pos-sidebar-hidden #layoutSidenav_nav {
     pointer-events: none !important;
     overflow: hidden !important;
 }
-/* Desktop (≥992px): el contenido usa padding-left */
+/* Desktop (992px): el contenido usa padding-left */
 @media (min-width: 992px) {
     body.pos-sidebar-hidden.sb-nav-fixed #layoutSidenav #layoutSidenav_content {
         padding-left: 0 !important;
@@ -43,7 +43,7 @@ body.pos-sidebar-hidden #layoutSidenav_nav {
     }
 }
 
-/* ── POS wrapper: 65 / 35 ── */
+/* -- POS wrapper: 65 / 35 -- */
 .pos-wrapper {
     display: flex;
     height: calc(100vh - 56px);
@@ -52,9 +52,9 @@ body.pos-sidebar-hidden #layoutSidenav_nav {
     background: var(--bg-primary);
 }
 
-/* ════════════════════════════
-   LEFT — Products (65%)
-════════════════════════════ */
+/* ----------------------------
+   LEFT  Products (65%)
+---------------------------- */
 .pos-products {
     flex: 1 1 65%;
     display: flex;
@@ -126,7 +126,7 @@ body.pos-sidebar-hidden #layoutSidenav_nav {
     scrollbar-color: var(--border-color) transparent;
 }
 
-/* ── Product card ── */
+/* -- Product card -- */
 .product-card {
     background: var(--card-bg);
     border: 1.5px solid var(--border-color);
@@ -229,7 +229,7 @@ body.pos-sidebar-hidden #layoutSidenav_nav {
     margin-top: auto;
 }
 
-/* ── Family card size picker ── */
+/* -- Family card size picker -- */
 .family-card { cursor: default; }
 .family-card:hover { transform: none; box-shadow: var(--shadow-sm); }
 
@@ -278,7 +278,7 @@ body.pos-sidebar-hidden #layoutSidenav_nav {
 [data-theme="dark"] .size-stock.low { color: #fbbf24; }
 [data-theme="dark"] .size-stock.out { color: #f87171; }
 
-/* ── Alphabetical bar ── */
+/* -- Alphabetical bar -- */
 .alpha-bar {
     width: 20px;
     display: flex;
@@ -343,9 +343,9 @@ body.pos-sidebar-hidden #layoutSidenav_nav {
     margin-top: 0.25rem;
 }
 
-/* ════════════════════════════
-   RIGHT — Cart (35%)
-════════════════════════════ */
+/* ----------------------------
+   RIGHT  Cart (35%)
+---------------------------- */
 .pos-cart {
     flex: 0 0 35%;
     max-width: 380px;
@@ -805,9 +805,9 @@ input:checked + .slider:before { transform: translateX(12px); }
 .btn-pay:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
 .btn-pay.loading { opacity: 0.7; pointer-events: none; }
 
-/* ════════════════════════════
+/* ----------------------------
    MOBILE
-════════════════════════════ */
+---------------------------- */
 .mobile-bottom-bar {
     display: none;
     position: fixed;
@@ -915,7 +915,7 @@ input:checked + .slider:before { transform: translateX(12px); }
     .product-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
 }
 
-/* ── Barcode scanner mode ── */
+/* -- Barcode scanner mode -- */
 .scan-row {
     display: flex;
     gap: 0.5rem;
@@ -962,7 +962,7 @@ input:checked + .slider:before { transform: translateX(12px); }
 .scan-feedback.ok  { color: #27ae60; }
 .scan-feedback.err { color: #e74c3c; }
 
-/* ── Filter bar ── */
+/* -- Filter bar -- */
 .pos-filters {
     display: flex;
     align-items: center;
@@ -1041,7 +1041,7 @@ input:checked + .slider:before { transform: translateX(12px); }
 {{-- POS --}}
 <div class="pos-wrapper" id="posWrapper">
 
-    {{-- ══ LEFT: Products ══ --}}
+    {{-- -- LEFT: Products -- --}}
     <div class="pos-products">
 
         {{-- Top bar --}}
@@ -1051,21 +1051,21 @@ input:checked + .slider:before { transform: translateX(12px); }
                 <div class="pos-search-wrap">
                     <i class="fas fa-search search-icon" id="searchModeIcon"></i>
                     <input type="text" id="searchInput"
-                           placeholder="Buscar por nombre o código... (Atajo: /)"
+                           placeholder="Buscar por nombre o cdigo... (Atajo: /)"
                            autocomplete="off" spellcheck="false">
                 </div>
                 <button type="button" class="scan-mode-btn" id="scanModeBtn"
-                        title="Activar modo escáner de código de barras">
+                        title="Activar modo escner de cdigo de barras">
                     <i class="fas fa-barcode"></i>
                     <span class="d-none d-md-inline">Escanear</span>
                 </button>
             </div>
             <div class="scan-feedback" id="scanFeedback"></div>
-            {{-- Filter bar: categoría, talla, género, marca, origen --}}
+            {{-- Filter bar: categora, talla, gnero, marca, origen --}}
             <div class="pos-filters" id="posFilters">
-                {{-- Categoría --}}
-                <select class="pos-filter-select" id="filterCategoria" title="Categoría">
-                    <option value="">📁 Todas las categorías</option>
+                {{-- Categora --}}
+                <select class="pos-filter-select" id="filterCategoria" title="Categora">
+                    <option value=""> Todas las categoras</option>
                     @foreach($categorias as $cat)
                     <option value="{{ $cat->id }}">{{ $cat->caracteristica?->nombre ?? 'Sin nombre' }}</option>
                     @endforeach
@@ -1073,20 +1073,20 @@ input:checked + .slider:before { transform: translateX(12px); }
 
                 {{-- Talla --}}
                 <select class="pos-filter-select" id="filterTalla" title="Talla">
-                    <option value="">📏 Todas las tallas</option>
+                    <option value=""> Todas las tallas</option>
                 </select>
 
-                {{-- Género --}}
-                <select class="pos-filter-select" id="filterGenero" title="Género">
-                    <option value="">👤 Género</option>
-                    <option value="Hombre">👨 Hombre</option>
-                    <option value="Mujer">👩 Mujer</option>
-                    <option value="Unisex">🤝 Unisex</option>
+                {{-- Gnero --}}
+                <select class="pos-filter-select" id="filterGenero" title="Gnero">
+                    <option value=""> Gnero</option>
+                    <option value="Hombre"> Hombre</option>
+                    <option value="Mujer"> Mujer</option>
+                    <option value="Unisex"> Unisex</option>
                 </select>
 
                 {{-- Marca --}}
                 <select class="pos-filter-select" id="filterMarca" title="Marca">
-                    <option value="">🏷️ Todas las marcas</option>
+                    <option value=""> Todas las marcas</option>
                     @foreach($marcas as $marca)
                     <option value="{{ $marca->id }}">{{ $marca->caracteristica?->nombre ?? 'Sin nombre' }}</option>
                     @endforeach
@@ -1094,9 +1094,9 @@ input:checked + .slider:before { transform: translateX(12px); }
 
                 {{-- Origen --}}
                 <select class="pos-filter-select" id="filterOrigen" title="Origen">
-                    <option value="">🌍 Nacional / Importada</option>
-                    <option value="Nacional">🇨🇴 Nacional</option>
-                    <option value="Importada">✈️ Importada</option>
+                    <option value=""> Nacional / Importada</option>
+                    <option value="Nacional"> Nacional</option>
+                    <option value="Importada"> Importada</option>
                 </select>
 
                 {{-- Limpiar filtros --}}
@@ -1116,7 +1116,7 @@ input:checked + .slider:before { transform: translateX(12px); }
 
     </div>
 
-    {{-- ══ RIGHT: Cart ══ --}}
+    {{-- -- RIGHT: Cart -- --}}
     <div class="pos-cart" id="cartPanel">
 
         {{-- Header --}}
@@ -1138,7 +1138,7 @@ input:checked + .slider:before { transform: translateX(12px); }
                 </label>
 
                 {{-- Unlock Button (Supervisor Code) --}}
-                <button type="button" class="btn-unlock-prices" id="btnUnlockPrices" onclick="unlockPrices()" title="Autorización de supervisor para editar precios">
+                <button type="button" class="btn-unlock-prices" id="btnUnlockPrices" onclick="unlockPrices()" title="Autorizacin de supervisor para editar precios">
                     <i class="fas fa-lock" id="lockIcon"></i>
                 </button>
             </div>
@@ -1152,7 +1152,7 @@ input:checked + .slider:before { transform: translateX(12px); }
         <div class="cart-items-wrap" id="cartItemsWrap">
             <div class="cart-empty" id="cartEmpty">
                 <i class="fas fa-shopping-bag"></i>
-                <p>El carrito está vacío.<br>Selecciona un producto.</p>
+                <p>El carrito est vaco.<br>Selecciona un producto.</p>
             </div>
             <div id="cartItems"></div>
         </div>
@@ -1166,13 +1166,13 @@ input:checked + .slider:before { transform: translateX(12px); }
                 <span class="total-amount" id="displayTotal">$0</span>
             </div>
 
-            {{-- Método de pago --}}
+            {{-- Mtodo de pago --}}
             <div>
-                <span class="cart-field-label">Método de pago</span>
+                <span class="cart-field-label">Mtodo de pago</span>
                 <div class="payment-pills" id="paymentPills">
-                    <button type="button" class="pay-pill active" data-method="EFECTIVO">💵 Efectivo</button>
-                    <button type="button" class="pay-pill" data-method="VENTA_DIGITAL">📲 Venta Digital</button>
-                    <button type="button" class="pay-pill" data-method="FIADO">🤝 Fiado</button>
+                    <button type="button" class="pay-pill active" data-method="EFECTIVO"> Efectivo</button>
+                    <button type="button" class="pay-pill" data-method="VENTA_DIGITAL"> Venta Digital</button>
+                    <button type="button" class="pay-pill" data-method="FIADO"> Fiado</button>
                 </div>
             </div>
 
@@ -1185,7 +1185,7 @@ input:checked + .slider:before { transform: translateX(12px); }
                 </div>
                 <div class="cash-row">
                     <span class="cash-label">Vuelto</span>
-                    <input class="cash-input readonly" id="vueltoDisplay" type="text" readonly placeholder="—">
+                    <input class="cash-input readonly" id="vueltoDisplay" type="text" readonly placeholder="">
                 </div>
             </div>
 
@@ -1200,7 +1200,7 @@ input:checked + .slider:before { transform: translateX(12px); }
 
 </div>
 
-{{-- ══ MOBILE: bottom bar ══ --}}
+{{-- -- MOBILE: bottom bar -- --}}
 <div class="mobile-bottom-bar">
     <div class="mobile-total-info">
         <span class="mobile-total-label">Total</span>
@@ -1213,7 +1213,7 @@ input:checked + .slider:before { transform: translateX(12px); }
     </button>
 </div>
 
-{{-- ══ MOBILE: bottom sheet ══ --}}
+{{-- -- MOBILE: bottom sheet -- --}}
 <div class="cart-sheet-overlay" id="sheetOverlay"></div>
 <div class="cart-sheet" id="cartSheet">
     <div class="cart-sheet-handle"></div>
@@ -1231,16 +1231,16 @@ input:checked + .slider:before { transform: translateX(12px); }
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    AUTO-HIDE SIDEBAR EN POS
-══════════════════════════════════════ */
+-------------------------------------- */
 (function () {
     const body = document.body;
     // Guardar el estado previo del sidebar antes de ocultarlo
     const wasToggled = body.classList.contains('sb-sidenav-toggled');
     sessionStorage.setItem('pos_sidebar_was_toggled', wasToggled ? '1' : '0');
 
-    // Pequeño delay para que la transición sea visible al entrar
+    // Pequeo delay para que la transicin sea visible al entrar
     requestAnimationFrame(function () {
         requestAnimationFrame(function () {
             body.classList.add('pos-sidebar-hidden');
@@ -1263,7 +1263,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Restaurar sidebar al salir de la página
+    // Restaurar sidebar al salir de la pgina
     window.addEventListener('pagehide', restoreSidebar);
     window.addEventListener('beforeunload', restoreSidebar);
 
@@ -1275,9 +1275,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 })();
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    DATA: Products from Blade
-══════════════════════════════════════ */
+-------------------------------------- */
 @php
 // Resolver URL de imagen: preferir la de la variante, si no la del producto
 $allProductsData = $productos->map(function($p) {
@@ -1313,7 +1313,7 @@ $allProductsData = $productos->map(function($p) {
         'origen'      => $p->origen ?? '',
         'marca_id'    => $p->marca_id ?? '',
         'marca_nombre'=> $p->marca_nombre ?? '',
-        'producto_id' => $productoId,      // alias explícito para agrupación
+        'producto_id' => $productoId,      // alias explcito para agrupacin
     ];
 })->sortBy('nombre')->values();
 @endphp
@@ -1321,9 +1321,9 @@ const allProducts = @json($allProductsData);
 const isAdmin     = {{ $isAdmin ? 'true' : 'false' }};
 const supervisorCodes = @json($supervisorCodes);
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    STATE
-══════════════════════════════════════ */
+-------------------------------------- */
 let cart           = [];  // [{id, nombre, precio, cantidad, stock}]
 let supervisorUnlocked = isAdmin; // Auto-unlock for admins
 let showCartPrices     = true;
@@ -1357,16 +1357,16 @@ let filterGenero   = '';
 let filterMarca    = '';
 let filterOrigen   = '';
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    FORMAT helpers
-══════════════════════════════════════ */
+-------------------------------------- */
 function fmt(n) {
     return '$' + Math.round(n).toLocaleString('es-CO');
 }
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    PRODUCT RENDERING
-══════════════════════════════════════ */
+-------------------------------------- */
 function filteredProducts() {
     let list = allProducts;
     if (filterCategoria) list = list.filter(p => p.categoria_id == filterCategoria);
@@ -1464,7 +1464,7 @@ function renderProducts() {
                      data-letter="${l}">${l}</div>`;
     }).join('');
 
-    // Single-product card click → add to cart
+    // Single-product card click  add to cart
     grid.querySelectorAll('.product-card[data-product-id]').forEach(card => {
         card.addEventListener('click', function () {
             if (this.classList.contains('out-of-stock')) return;
@@ -1474,7 +1474,7 @@ function renderProducts() {
         });
     });
 
-    // Family size-button click → add specific variant
+    // Family size-button click  add specific variant
     grid.querySelectorAll('.size-btn[data-variant-id]').forEach(btn => {
         btn.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -1548,9 +1548,9 @@ function renderFamilyCard(variants) {
         const out      = avail <= 0;
         const label    = v.var_label || v.talla || 'T.U.';
         const stockTip = out ? 'Agotado' : `${avail}u`;
-        return `<button class="size-btn ${out ? 'size-out' : ''}" data-variant-id="${v.variante_id}" title="${label} — ${stockTip}">
+        return `<button class="size-btn ${out ? 'size-out' : ''}" data-variant-id="${v.variante_id}" title="${label}  ${stockTip}">
             <span class="size-label">${label}</span>
-            <span class="size-stock ${out ? 'out' : avail <= 3 ? 'low' : 'ok'}">${out ? '✕' : stockTip}</span>
+            <span class="size-stock ${out ? 'out' : avail <= 3 ? 'low' : 'ok'}">${out ? '' : stockTip}</span>
         </button>`;
     }).join('');
 
@@ -1566,9 +1566,9 @@ function renderFamilyCard(variants) {
     </div>`;
 }
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    ALPHA BAR scroll + touch drag
-══════════════════════════════════════ */
+-------------------------------------- */
 function scrollToLetter(letter) {
     const anchor = document.getElementById(`anchor-${letter}`);
     if (!anchor) return;
@@ -1602,9 +1602,9 @@ function setupAlphaDrag(bar) {
     bar.addEventListener('touchend', () => { dragging = false; });
 }
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    CART LOGIC
-══════════════════════════════════════ */
+-------------------------------------- */
 function addToCart(varianteId) {
     const product = allProducts.find(p => p.variante_id == varianteId);
     if (!product) return;
@@ -1647,13 +1647,13 @@ function removeItem(varianteId) {
     if (!item) return;
 
     Swal.fire({
-        title: '¿Eliminar producto?',
+        title: 'Eliminar producto?',
         html: `Vas a retirar <b>${item.nombre}</b> del carrito.`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#E74C3C',
         cancelButtonColor: '#94A3B8',
-        confirmButtonText: 'Sí, eliminar',
+        confirmButtonText: 'S, eliminar',
         cancelButtonText: 'Cancelar',
         reverseButtons: true,
         backdrop: `rgba(0,0,0,0.4)`
@@ -1683,13 +1683,13 @@ function clearCart() {
     if (cart.length === 0) return;
 
     Swal.fire({
-        title: '¿Vaciar carrito?',
-        text: "Se perderán todos los productos seleccionados.",
+        title: 'Vaciar carrito?',
+        text: "Se perdern todos los productos seleccionados.",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#E74C3C',
         cancelButtonColor: '#94A3B8',
-        confirmButtonText: 'Sí, vaciar carito',
+        confirmButtonText: 'S, vaciar carito',
         cancelButtonText: 'Volver',
         reverseButtons: true
     }).then((result) => {
@@ -1700,7 +1700,7 @@ function clearCart() {
             updateFormFields();
             
             Swal.fire({
-                title: 'Carrito vacío',
+                title: 'Carrito vaco',
                 icon: 'success',
                 timer: 1000,
                 showConfirmButton: false
@@ -1724,7 +1724,7 @@ function updateItemPrice(varianteId, rawValue) {
     document.getElementById('displayTotal').textContent = fmt(total);
     const mobileTotal = document.getElementById('mobileTotalDisplay');
     if (mobileTotal) mobileTotal.textContent = fmt(total);
-    // Actualizar el subtotal de esta fila específica
+    // Actualizar el subtotal de esta fila especfica
     const items = document.querySelectorAll('#cartItems .cart-item');
     const allItems = cart;
     const idx = allItems.findIndex(c => c.variante_id == varianteId);
@@ -1777,7 +1777,7 @@ function renderCart() {
                 }
             </div>
             <div class="qty-controls">
-                <button class="qty-btn" onclick="changeQty('${item.variante_id}', -1)">−</button>
+                <button class="qty-btn" onclick="changeQty('${item.variante_id}', -1)"></button>
                 <span class="qty-value">${item.cantidad}</span>
                 <button class="qty-btn" onclick="changeQty('${item.variante_id}', +1)"
                         ${item.cantidad >= item.stock ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>+</button>
@@ -1797,9 +1797,9 @@ function renderCart() {
     if (sheetItems) sheetItems.innerHTML = itemsEl.innerHTML;
 }
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    TOGGLE & UNLOCK LOGIC
-══════════════════════════════════════ */
+-------------------------------------- */
 window.togglePrices = function(checked) {
     showCartPrices = checked;
     renderCart();
@@ -1818,12 +1818,12 @@ window.unlockPrices = function() {
 
     if (supervisorUnlocked) {
         Swal.fire({
-            title: '¿Bloquear edición?',
-            text: "Se desactivará la edición de precios para este usuario hasta que un supervisor vuelva a autorizar.",
+            title: 'Bloquear edicin?',
+            text: "Se desactivar la edicin de precios para este usuario hasta que un supervisor vuelva a autorizar.",
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#E74C3C',
-            confirmButtonText: 'Sí, bloquear',
+            confirmButtonText: 'S, bloquear',
             cancelButtonText: 'Mantener abierto'
         }).then((result) => {
             if (result.isConfirmed) {
@@ -1835,8 +1835,8 @@ window.unlockPrices = function() {
     }
 
     Swal.fire({
-        title: 'Autorización de Supervisor',
-        text: 'Ingresa el código de seguridad para habilitar la edición de precios:',
+        title: 'Autorizacin de Supervisor',
+        text: 'Ingresa el cdigo de seguridad para habilitar la edicin de precios:',
         input: 'password',
         inputAttributes: {
             autocapitalize: 'off',
@@ -1852,7 +1852,7 @@ window.unlockPrices = function() {
             if (isValid) {
                 return true;
             } else {
-                Swal.showValidationMessage('Código incorrecto o no configurado.');
+                Swal.showValidationMessage('Cdigo incorrecto o no configurado.');
                 return false;
             }
         },
@@ -1863,7 +1863,7 @@ window.unlockPrices = function() {
             renderCart();
             Swal.fire({
                 icon: 'success',
-                title: 'Edición habilitada',
+                title: 'Edicin habilitada',
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
@@ -1873,9 +1873,9 @@ window.unlockPrices = function() {
     });
 };
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    PAYMENT
-══════════════════════════════════════ */
+-------------------------------------- */
 function setPaymentMethod(method) {
     paymentMethod = method;
     document.getElementById('f_metodo_pago').value = method;
@@ -1909,7 +1909,7 @@ function updateCashSection() {
     document.getElementById('f_monto_recibido').value     = recibido || total;
     document.getElementById('f_vuelto_entregado').value   = vuelto;
 
-    // Cash suggestions — billetes colombianos + montos redondos inteligentes
+    // Cash suggestions  billetes colombianos + montos redondos inteligentes
     const sugg = document.getElementById('cashSuggestions');
     const steps = [5000, 10000, 20000, 50000, 100000];
     const roundUps = steps.map(r => {
@@ -1917,11 +1917,11 @@ function updateCashSection() {
         return n === total && total > 0 ? n + r : n;
     });
     
-    // Si el total es muy alto sumamos también algunos billetes fijos mayores
+    // Si el total es muy alto sumamos tambin algunos billetes fijos mayores
     const baseBills = [50000, 100000, 150000, 200000];
     
     let all = [...new Set([...baseBills, ...roundUps])];
-    all = all.filter(v => v > total).sort((a, b) => a - b).slice(0, 4); // máximo 4 sugerencias
+    all = all.filter(v => v > total).sort((a, b) => a - b).slice(0, 4); // mximo 4 sugerencias
     
     const exactSugg = `<button class="cash-sugg cash-sugg-exact" onclick="setCash(${total})">Exacto<br><small>${fmt(total)}</small></button>`;
     sugg.innerHTML = exactSugg + all.map(v =>
@@ -1967,11 +1967,11 @@ document.getElementById('btnPagar').addEventListener('click', function (e) {
     const btn = this;
     if (btn.disabled) return;
     if (cart.length === 0) {
-        Swal.fire({ icon: 'warning', title: 'Atención', text: 'El carrito está vacío.' });
+        Swal.fire({ icon: 'warning', title: 'Atencin', text: 'El carrito est vaco.' });
         return;
     }
 
-    // Asegurar que los campos ocultos estén actualizados
+    // Asegurar que los campos ocultos estn actualizados
     updateFormFields();
 
     // Loading state
@@ -1997,7 +1997,7 @@ document.getElementById('btnPagar').addEventListener('click', function (e) {
         const data = await response.json();
         if (response.ok) {
             // Success!
-            // 1. Descontar stock manualmente en JS para actualización instantánea
+            // 1. Descontar stock manualmente en JS para actualizacin instantnea
             cart.forEach(item => {
                 const p = allProducts.find(x => x.variante_id == item.variante_id);
                 if (p) p.stock -= item.cantidad;
@@ -2013,11 +2013,11 @@ document.getElementById('btnPagar').addEventListener('click', function (e) {
             renderProducts();
             updateFormFields();
 
-            // 3. Notificación VIP
+            // 3. Notificacin VIP
             Swal.fire({
                 icon: 'success',
-                title: '¡Venta registrada con éxito!',
-                text: 'La transacción se procesó correctamente.',
+                title: 'Venta registrada con xito!',
+                text: 'La transaccin se proces correctamente.',
                 confirmButtonText: 'Siguiente venta',
                 confirmButtonColor: '#1D96C8',
                 timer: 2000,
@@ -2036,7 +2036,7 @@ document.getElementById('btnPagar').addEventListener('click', function (e) {
             Toast.fire({ icon: 'success', title: 'Venta completada' });
 
         } else {
-            // Error de validación o servidor
+            // Error de validacin o servidor
             throw new Error(data.error || data.message || 'Error desconocido al procesar la venta.');
         }
     })
@@ -2056,9 +2056,9 @@ document.getElementById('btnPagar').addEventListener('click', function (e) {
     });
 });
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    FORM SUBMISSION
-══════════════════════════════════════ */
+-------------------------------------- */
 function updateFormFields() {
     const subtotal = getSubtotal();
     const total    = getTotal();
@@ -2089,11 +2089,11 @@ function updateFormFields() {
 document.getElementById('btnPagar').addEventListener('click', function () {
     if (this.disabled) return;
 
-    if (cart.length === 0) { alert('El carrito está vacío.'); return; }
+    if (cart.length === 0) { alert('El carrito est vaco.'); return; }
 
     document.getElementById('f_cliente_id').value = '';
 
-    // Asegurar que los campos ocultos estén actualizados antes de enviar
+    // Asegurar que los campos ocultos estn actualizados antes de enviar
     updateFormFields();
 
     // Loading state
@@ -2104,9 +2104,9 @@ document.getElementById('btnPagar').addEventListener('click', function () {
     document.getElementById('ventaForm').submit();
 });
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    EVENT LISTENERS
-══════════════════════════════════════ */
+-------------------------------------- */
 // Search with debounce (disabled in scanner mode)
 document.getElementById('searchInput').addEventListener('input', function () {
     if (scannerMode) return;
@@ -2173,9 +2173,9 @@ function closeSheet() {
     document.getElementById('cartSheet').classList.remove('open');
 }
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    KEYBOARD SHORTCUTS
-══════════════════════════════════════ */
+-------------------------------------- */
 document.addEventListener('keydown', function (e) {
     if (e.key === '/' && !e.target.matches('input, textarea, select')) {
         e.preventDefault();
@@ -2201,9 +2201,9 @@ document.addEventListener('keydown', function (e) {
     if (e.key === 'F12') { e.preventDefault(); setCash(50000); }
 });
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    BARCODE SCANNER MODE
-══════════════════════════════════════ */
+-------------------------------------- */
 let scannerMode   = false;
 const scanModeBtn   = document.getElementById('scanModeBtn');
 const scanFeedback  = document.getElementById('scanFeedback');
@@ -2215,15 +2215,15 @@ scanModeBtn.addEventListener('click', function () {
     this.classList.toggle('active', scannerMode);
 
     if (scannerMode) {
-        searchInputEl.placeholder = 'Escanea el código de barras aquí...';
+        searchInputEl.placeholder = 'Escanea el cdigo de barras aqu...';
         searchInputEl.value       = '';
         searchModeIcon.className  = 'fas fa-barcode search-icon';
         searchQuery               = '';
         renderProducts();
         searchInputEl.focus();
-        showScanFeedback('Modo escáner activo — escanea el código', 'ok', 2500);
+        showScanFeedback('Modo escner activo  escanea el cdigo', 'ok', 2500);
     } else {
-        searchInputEl.placeholder = 'Buscar por nombre o código... (Atajo: /)';
+        searchInputEl.placeholder = 'Buscar por nombre o cdigo... (Atajo: /)';
         searchModeIcon.className  = 'fas fa-search search-icon';
         hideScanFeedback();
     }
@@ -2253,17 +2253,17 @@ searchInputEl.addEventListener('keydown', function (e) {
     );
 
     if (!product) {
-        showScanFeedback('Código no encontrado: ' + code, 'err', 2200);
+        showScanFeedback('Cdigo no encontrado: ' + code, 'err', 2200);
         return;
     }
 
     const inCart  = cart.find(c => c.variante_id == product.variante_id)?.cantidad || 0;
     if (product.stock > 0 && inCart >= product.stock) {
-        showScanFeedback(product.nombre + ' — Stock agotado en carrito', 'err', 2200);
+        showScanFeedback(product.nombre + '  Stock agotado en carrito', 'err', 2200);
         return;
     }
     if (product.stock <= 0) {
-        showScanFeedback(product.nombre + ' — Sin stock disponible', 'err', 2200);
+        showScanFeedback(product.nombre + '  Sin stock disponible', 'err', 2200);
         return;
     }
 
@@ -2278,9 +2278,9 @@ searchInputEl.addEventListener('keydown', function (e) {
     }
 });
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    INIT
-══════════════════════════════════════ */
+-------------------------------------- */
 // Expose functions globally for inline onclick
 window.addToCart    = addToCart;
 window.changeQty    = changeQty;
@@ -2288,7 +2288,7 @@ window.removeItem   = removeItem;
 
 // f_comprobante_id is pre-set in the hidden input via Blade
 
-// Llenar select de tallas dinámicamente
+// Llenar select de tallas dinmicamente
 (function initTallas() {
     const filterTalla = document.getElementById('filterTalla');
     if (!filterTalla) return;
@@ -2296,7 +2296,7 @@ window.removeItem   = removeItem;
     allProducts.forEach(p => {
         if (p.talla) tallas.add(p.talla);
     });
-    // Ordenar (básico)
+    // Ordenar (bsico)
     const sortedTallas = Array.from(tallas).sort((a, b) => a.localeCompare(b));
     sortedTallas.forEach(t => {
         const opt = document.createElement('option');
@@ -2313,11 +2313,11 @@ setPaymentMethod('{{ old('metodo_pago', 'EFECTIVO') }}');
 renderProducts();
 renderCart();
 
-// Confirmación de venta realizada
+// Confirmacin de venta realizada
 @if(session('success'))
 Swal.fire({
     icon: 'success',
-    title: '¡Venta registrada con éxito!',
+    title: 'Venta registrada con xito!',
     text: '{{ session('success') }}',
     confirmButtonText: 'Siguiente venta',
     confirmButtonColor: '#1D96C8',
@@ -2336,14 +2336,14 @@ const ToastSuccess = Swal.mixin({
 });
 ToastSuccess.fire({
     icon: 'success',
-    title: 'Transacción completada'
+    title: 'Transaccin completada'
 });
 @endif
 
 @if($errors->any())
 Swal.fire({
     icon: 'warning',
-    title: 'Error de validación',
+    title: 'Error de validacin',
     html: '{!! implode("<br>", $errors->all()) !!}',
     confirmButtonColor: '#E74C3C',
 });
