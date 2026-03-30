@@ -910,6 +910,64 @@ body.pos-sidebar-hidden #layoutSidenav_nav {
 .scan-feedback.show { opacity: 1; }
 .scan-feedback.ok  { color: #27ae60; }
 .scan-feedback.err { color: #e74c3c; }
+
+/* ── Filter bar ── */
+.pos-filters {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem 0.4rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+}
+.pos-filters::-webkit-scrollbar { display: none; }
+.pos-filter-select {
+    height: 30px;
+    padding: 0 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    border: 1.5px solid var(--border-color);
+    border-radius: 20px;
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    outline: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: border-color 0.18s, color 0.18s, background 0.18s;
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 1.4rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+}
+.pos-filter-select:focus,
+.pos-filter-select.active-filter {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+.pos-filter-clear {
+    height: 30px;
+    padding: 0 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    border: 1.5px solid #e74c3c;
+    border-radius: 20px;
+    background: transparent;
+    color: #e74c3c;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.18s;
+}
+.pos-filter-clear:hover { background: #e74c3c; color: #fff; }
+
 </style>
 @endpush
 
@@ -963,6 +1021,42 @@ body.pos-sidebar-hidden #layoutSidenav_nav {
                 </button>
                 @endforeach
             </div>
+
+            {{-- Filter bar: talla, género, marca, origen --}}
+            <div class="pos-filters" id="posFilters">
+                {{-- Talla --}}
+                <select class="pos-filter-select" id="filterTalla" title="Talla">
+                    <option value="">📏 Todas las tallas</option>
+                </select>
+
+                {{-- Género --}}
+                <select class="pos-filter-select" id="filterGenero" title="Género">
+                    <option value="">👤 Género</option>
+                    <option value="Hombre">👨 Hombre</option>
+                    <option value="Mujer">👩 Mujer</option>
+                    <option value="Unisex">🤝 Unisex</option>
+                </select>
+
+                {{-- Marca --}}
+                <select class="pos-filter-select" id="filterMarca" title="Marca">
+                    <option value="">🏷️ Todas las marcas</option>
+                    @foreach($marcas as $marca)
+                    <option value="{{ $marca->id }}">{{ $marca->caracteristica?->nombre ?? 'Sin nombre' }}</option>
+                    @endforeach
+                </select>
+
+                {{-- Origen --}}
+                <select class="pos-filter-select" id="filterOrigen" title="Origen">
+                    <option value="">🌍 Nacional / Importada</option>
+                    <option value="Nacional">🇨🇴 Nacional</option>
+                    <option value="Importada">✈️ Importada</option>
+                </select>
+
+                {{-- Limpiar filtros --}}
+                <button class="pos-filter-clear" id="btnClearFilters" title="Limpiar filtros" style="display:none">
+                    <i class="fas fa-times"></i> Limpiar
+                </button>
+            </div>
         </div>
 
         {{-- Body: grid + alpha bar --}}
@@ -1006,19 +1100,6 @@ body.pos-sidebar-hidden #layoutSidenav_nav {
             <div class="total-row grand" style="padding: 0.2rem 0;">
                 <span>TOTAL</span>
                 <span class="total-amount" id="displayTotal">$0</span>
-            </div>
-
-            {{-- Cliente --}}
-            <div>
-                <span class="cart-field-label" id="clienteLabel">Cliente <small id="clienteOpcional" style="font-weight:400;opacity:0.6;">(opcional)</small></span>
-                <select class="cart-select" id="clienteSelect">
-                    <option value="">— Seleccionar cliente —</option>
-                    @foreach($clientes as $c)
-                    <option value="{{ $c->id }}" {{ old('cliente_id') == $c->id ? 'selected' : '' }}>
-                        {{ $c->persona?->razon_social ?? 'N/A' }}
-                    </option>
-                    @endforeach
-                </select>
             </div>
 
             {{-- Método de pago --}}
@@ -1149,6 +1230,9 @@ $allProductsData = $productos->map(function($p) {
         'color'       => $p->color ?? '',
         'var_label'   => $varLabel,        // "M / Negro", "L", "Rojo", etc.
         'genero'      => $p->genero ?? '',
+        'origen'      => $p->origen ?? '',
+        'marca_id'    => $p->marca_id ?? '',
+        'marca_nombre'=> $p->marca_nombre ?? '',
         'producto_id' => $productoId,      // alias explícito para agrupación
     ];
 })->sortBy('nombre')->values();
@@ -1184,6 +1268,11 @@ let activeCat      = '';
 let searchQuery    = '';
 let paymentMethod  = 'EFECTIVO';
 let debounceTimer  = null;
+// Filtros adicionales
+let filterTalla    = '';
+let filterGenero   = '';
+let filterMarca    = '';
+let filterOrigen   = '';
 
 /* ══════════════════════════════════════
    FORMAT helpers
@@ -1197,7 +1286,14 @@ function fmt(n) {
 ══════════════════════════════════════ */
 function filteredProducts() {
     let list = allProducts;
-    if (activeCat) list = list.filter(p => p.categoria_id == activeCat);
+    if (activeCat)    list = list.filter(p => p.categoria_id == activeCat);
+    if (filterTalla)  list = list.filter(p => p.talla === filterTalla);
+    if (filterGenero) list = list.filter(p => p.genero === filterGenero);
+    if (filterMarca)  list = list.filter(p => p.marca_id === filterMarca);
+    if (filterOrigen) {
+        if (filterOrigen === 'Nacional')  list = list.filter(p => p.origen === 'Nacional');
+        if (filterOrigen === 'Importada') list = list.filter(p => p.origen === 'Importada');
+    }
     if (searchQuery) {
         const q = searchQuery.toLowerCase();
         list = list.filter(p =>
@@ -1206,6 +1302,17 @@ function filteredProducts() {
         );
     }
     return list;
+}
+
+function updateClearFiltersBtn() {
+    const hasFilter = filterTalla || filterGenero || filterMarca || filterOrigen;
+    const btn = document.getElementById('btnClearFilters');
+    if (btn) btn.style.display = hasFilter ? 'inline-flex' : 'none';
+    // Mark active
+    ['filterTalla','filterGenero','filterMarca','filterOrigen'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('active-filter', !!el.value);
+    });
 }
 
 /** Group variantes by producto_id (one card per product, with size/color buttons) */
@@ -1579,21 +1686,6 @@ function setPaymentMethod(method) {
         document.getElementById('f_vuelto_entregado').value = 0;
     }
 
-    // Fiado: cliente obligatorio
-    const opcional = document.getElementById('clienteOpcional');
-    const clienteSelect = document.getElementById('clienteSelect');
-    if (method === 'FIADO') {
-        opcional.textContent = '(obligatorio)';
-        opcional.style.color = 'var(--danger)';
-        opcional.style.opacity = '1';
-        clienteSelect.style.borderColor = 'var(--danger)';
-    } else {
-        opcional.textContent = '(opcional)';
-        opcional.style.color = '';
-        opcional.style.opacity = '0.6';
-        clienteSelect.style.borderColor = '';
-    }
-
     updatePayButton();
 }
 
@@ -1646,12 +1738,9 @@ function updatePayButton() {
         }
     }
 
-    const clienteId = document.getElementById('clienteSelect').value;
-    const clienteOk = paymentMethod !== 'FIADO' || !!clienteId;
-    const canPay = hasItems && clienteOk && (paymentMethod !== 'EFECTIVO' || cashOk) && total > 0;
+    const canPay = hasItems && (paymentMethod !== 'EFECTIVO' || cashOk) && total > 0;
     btn.disabled = !canPay;
     if (canPay) label.textContent = `PAGAR ${fmt(total)}`;
-    else if (!clienteOk) label.textContent = 'Selecciona un cliente';
 }
 
 /* ══════════════════════════════════════
@@ -1689,12 +1778,7 @@ document.getElementById('btnPagar').addEventListener('click', function () {
 
     if (cart.length === 0) { alert('El carrito está vacío.'); return; }
 
-    const clienteId = document.getElementById('clienteSelect').value;
-    if (paymentMethod === 'FIADO' && !clienteId) {
-        alert('Para ventas fiadas debes seleccionar un cliente.');
-        return;
-    }
-    document.getElementById('f_cliente_id').value = clienteId;
+    document.getElementById('f_cliente_id').value = '';
 
     // Asegurar que los campos ocultos estén actualizados antes de enviar
     updateFormFields();
@@ -1732,15 +1816,37 @@ document.getElementById('catChips').addEventListener('click', function (e) {
     renderProducts();
 });
 
+// Filtros adicionales
+['filterTalla','filterGenero','filterMarca','filterOrigen'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', function () {
+        filterTalla  = document.getElementById('filterTalla').value;
+        filterGenero = document.getElementById('filterGenero').value;
+        filterMarca  = document.getElementById('filterMarca').value;
+        filterOrigen = document.getElementById('filterOrigen').value;
+        updateClearFiltersBtn();
+        renderProducts();
+    });
+});
+
+// Limpiar todos los filtros adicionales
+document.getElementById('btnClearFilters').addEventListener('click', function () {
+    filterTalla = filterGenero = filterMarca = filterOrigen = '';
+    ['filterTalla','filterGenero','filterMarca','filterOrigen'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.value = ''; el.classList.remove('active-filter'); }
+    });
+    this.style.display = 'none';
+    renderProducts();
+});
+
 // Payment pills
 document.getElementById('paymentPills').addEventListener('click', function (e) {
     const pill = e.target.closest('.pay-pill');
     if (!pill) return;
     setPaymentMethod(pill.dataset.method);
 });
-
-// Client change
-document.getElementById('clienteSelect').addEventListener('change', updatePayButton);
 
 // Clear cart
 document.getElementById('btnClearCart').addEventListener('click', clearCart);
@@ -1879,6 +1985,24 @@ window.changeQty    = changeQty;
 window.removeItem   = removeItem;
 
 // f_comprobante_id is pre-set in the hidden input via Blade
+
+// Llenar select de tallas dinámicamente
+(function initTallas() {
+    const filterTalla = document.getElementById('filterTalla');
+    if (!filterTalla) return;
+    const tallas = new Set();
+    allProducts.forEach(p => {
+        if (p.talla) tallas.add(p.talla);
+    });
+    // Ordenar (básico)
+    const sortedTallas = Array.from(tallas).sort((a, b) => a.localeCompare(b));
+    sortedTallas.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        filterTalla.appendChild(opt);
+    });
+})();
 
 // Set initial payment method
 setPaymentMethod('{{ old('metodo_pago', 'EFECTIVO') }}');

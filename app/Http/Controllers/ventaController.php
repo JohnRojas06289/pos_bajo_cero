@@ -8,6 +8,7 @@ use App\Events\CreateVentaEvent;
 use App\Http\Requests\StoreVentaRequest;
 use App\Models\Cliente;
 use App\Models\Categoria;
+use App\Models\Marca;
 use App\Models\Producto;
 use App\Models\Venta;
 use App\Services\ActivityLogService;
@@ -57,21 +58,18 @@ class ventaController extends Controller
             // Verificar que existe una empresa
             $empresa = $this->empresaService->obtenerEmpresa();
 
-            // Verificar que existen clientes
+            // Clientes (para ventas fiadas si se necesitan)
             $clientes = Cliente::whereHas('persona', function ($query) {
                 $query->where('estado', 1);
             })->get();
-
-            if ($clientes->isEmpty()) {
-                return redirect()->route('panel')
-                    ->with('error', 'Debe crear al menos un cliente antes de realizar ventas. Vaya a Clientes > Nuevo Cliente.');
-            }
 
             // Cargar variantes de productos activos (una fila por variante)
             $productos = DB::table('variantes as v')
                 ->join('productos as p', 'v.producto_id', '=', 'p.id')
                 ->leftJoin('presentaciones as pr', 'v.presentacione_id', '=', 'pr.id')
                 ->leftJoin('caracteristicas as cp', 'cp.id', '=', 'pr.caracteristica_id')
+                ->leftJoin('marcas as m', 'm.id', '=', 'p.marca_id')
+                ->leftJoin('caracteristicas as cm', 'cm.id', '=', 'm.caracteristica_id')
                 ->select(
                     'v.id as variante_id',
                     'v.producto_id',
@@ -86,7 +84,10 @@ class ventaController extends Controller
                     'p.precio',
                     'p.img_path',
                     'p.categoria_id',
-                    'p.genero'
+                    'p.genero',
+                    DB::raw("COALESCE(p.origen, '') as origen"),
+                    'p.marca_id',
+                    DB::raw("COALESCE(cm.nombre, '') as marca_nombre")
                 )
                 ->where('p.estado', 1)
                 ->get();
@@ -98,6 +99,10 @@ class ventaController extends Controller
                     })->get();
             });
 
+            $marcas = Marca::with('caracteristica')
+                ->whereHas('caracteristica', fn($q) => $q->where('estado', 1))
+                ->get();
+
             $comprobantes = $comprobanteService->obtenerComprobantes();
             $optionsMetodoPago = MetodoPagoEnum::cases();
 
@@ -107,6 +112,7 @@ class ventaController extends Controller
                 'productos',
                 'categorias',
                 'clientes',
+                'marcas',
                 'comprobantes',
                 'optionsMetodoPago',
                 'empresa',
