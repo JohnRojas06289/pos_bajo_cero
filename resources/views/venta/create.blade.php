@@ -1279,20 +1279,23 @@ document.addEventListener('DOMContentLoaded', function () {
    DATA: Products from Blade
 -------------------------------------- */
 @php
+// Resolver cloudName UNA sola vez para evitar N API calls a Cloudinary por cada producto
+$_cloudName = config('filesystems.disks.cloudinary.cloud_name')
+           ?: parse_url($_ENV['CLOUDINARY_URL'] ?? '', PHP_URL_HOST)
+           ?: parse_url(getenv('CLOUDINARY_URL') ?: '', PHP_URL_HOST);
+
 // Resolver URL de imagen: preferir la de la variante, si no la del producto
-$allProductsData = $productos->map(function($p) {
+$allProductsData = $productos->map(function($p) use ($_cloudName) {
     $imgPath = $p->variante_img ?: $p->img_path;
     $imgUrl  = '';
     if ($imgPath) {
         if (str_starts_with($imgPath, 'http')) {
             $imgUrl = $imgPath;
-        } else {
-            $cloudName = config('filesystems.disks.cloudinary.cloud_name')
-                      ?: parse_url(env('CLOUDINARY_URL', ''), PHP_URL_HOST);
-            $imgUrl = $cloudName
-                ? "https://res.cloudinary.com/{$cloudName}/image/upload/{$imgPath}"
-                : \Illuminate\Support\Facades\Storage::url($imgPath);
+        } elseif ($_cloudName) {
+            $imgUrl = "https://res.cloudinary.com/{$_cloudName}/image/upload/{$imgPath}";
         }
+        // Si cloudName no está disponible dejamos imgUrl vacío — nunca llamamos Storage::url()
+        // porque con el driver Cloudinary haría una API call HTTP por cada imagen → timeout
     }
     // Etiqueta de variante para mostrar (talla / color)
     $varLabel = implode(' / ', array_filter([$p->sigla ?: null, $p->color ?: null])) ?: null;

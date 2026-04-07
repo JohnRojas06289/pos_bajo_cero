@@ -154,13 +154,15 @@ class Producto extends Model
     {
         if (str_starts_with($path, 'http')) return $path;
 
-        $cloudName = config('filesystems.disks.cloudinary.cloud_name');
-        if (!$cloudName) {
-            $cloudName = parse_url(env('CLOUDINARY_URL'), PHP_URL_HOST);
-        }
+        $cloudName = config('filesystems.disks.cloudinary.cloud_name')
+                  ?: parse_url($_ENV['CLOUDINARY_URL'] ?? '', PHP_URL_HOST)
+                  ?: parse_url(getenv('CLOUDINARY_URL') ?: '', PHP_URL_HOST);
+
         if ($cloudName) {
             return "https://res.cloudinary.com/{$cloudName}/image/upload/{$path}";
         }
-        return \Illuminate\Support\Facades\Storage::url($path);
+
+        // Nunca llamamos Storage::url() — con driver Cloudinary hace API call HTTP → timeout
+        return '';
     }
 }
