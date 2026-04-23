@@ -48,25 +48,44 @@ class AgenteIAController extends Controller
             "CONTEXTO ACTUAL DEL NEGOCIO:\n{$context}";
 
         try {
-            $response = Http::timeout(20)
-                ->withHeaders(['Content-Type' => 'application/json'])
-                ->post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
-                    [
-                        'system_instruction' => [
-                            'parts' => [['text' => $systemPrompt]]
-                        ],
-                        'contents' => [
-                            ['role' => 'user', 'parts' => [['text' => $request->input('message')]]]
-                        ],
-                        'generationConfig' => [
-                            'temperature'     => 0.7,
-                            'maxOutputTokens' => 400,
-                        ]
-                    ]
-                );
+            $attempt = 0;
+            $maxAttempts = 3;
+            $lastError = '';
 
-            if ($response->failed()) {
+            do {
+                $response = Http::timeout(20)
+                    ->withHeaders(['Content-Type' => 'application/json'])
+                    ->post(
+                        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
+                        [
+                            'system_instruction' => [
+                                'parts' => [['text' => $systemPrompt]]
+                            ],
+                            'contents' => [
+                                ['role' => 'user', 'parts' => [['text' => $request->input('message')]]]
+                            ],
+                            'generationConfig' => [
+                                'temperature'     => 0.7,
+                                'maxOutputTokens' => 400,
+                            ]
+                        ]
+                    );
+
+                if ($response->status() === 429) {
+                    $attempt++;
+                    $body = $response->json();
+                    $msg = $body['error']['message'] ?? '';
+                    if (str_contains($msg, 'quota') || str_contains($msg, 'rate')) {
+                        $lastError = 'La IA está ocupada. Esperando reintento...';
+                        usleep(500000); // 500ms
+                        continue;
+                    }
+                }
+
+                break;
+            } while ($attempt < $maxAttempts);
+
+            if ($response->failed() && $response->status() !== 429) {
                 $errorBody = $response->json();
                 $errorMsg  = $errorBody['error']['message'] ?? ('HTTP ' . $response->status());
                 \Illuminate\Support\Facades\Log::error('Gemini API error', [
