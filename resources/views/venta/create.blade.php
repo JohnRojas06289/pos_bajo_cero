@@ -1538,9 +1538,7 @@ function renderCard(p) {
     const outOfStock = available <= 0;
 
     let stockBadge = '';
-    if (outOfStock)        stockBadge = `<span class="stock-badge out">Agotado</span>`;
-    else if (p.stock <= 3) stockBadge = `<span class="stock-badge low">${p.stock} ud${p.stock!==1?'s':''}</span>`;
-    else                   stockBadge = `<span class="stock-badge ok">${p.stock} uds</span>`;
+    if (outOfStock) stockBadge = `<span class="stock-badge out">Agotado</span>`;
 
     const imgHtml = p.img
         ? `<img src="${p.img}" alt="${p.nombre}" loading="lazy">`
@@ -1578,10 +1576,8 @@ function renderFamilyCard(variants) {
         const avail    = v.stock - inCart;
         const out      = avail <= 0;
         const label    = v.var_label || v.talla || 'T.U.';
-        const stockTip = out ? 'Agotado' : `${avail}u`;
-        return `<button class="size-btn ${out ? 'size-out' : ''}" data-variant-id="${v.variante_id}" title="${label}  ${stockTip}">
+        return `<button class="size-btn ${out ? 'size-out' : ''}" data-variant-id="${v.variante_id}" title="${label}${out ? ' — Agotado' : ''}">
             <span class="size-label">${label}</span>
-            <span class="size-stock ${out ? 'out' : avail <= 3 ? 'low' : 'ok'}">${out ? '' : stockTip}</span>
         </button>`;
     }).join('');
 
