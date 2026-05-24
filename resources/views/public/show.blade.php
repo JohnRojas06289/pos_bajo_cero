@@ -246,11 +246,7 @@
         <div class="price-display">${{ number_format($product->precio, 0) }}</div>
 
         {{-- Stock --}}
-        @if($stock > 0)
-            <div class="stock-pill-pub stock-pill-in">
-                <i class="fas fa-check-circle"></i> En stock &mdash; {{ $stock }} disponibles
-            </div>
-        @else
+        @if($stock <= 0)
             <div class="stock-pill-pub stock-pill-out">
                 <i class="fas fa-times-circle"></i> Agotado
             </div>
