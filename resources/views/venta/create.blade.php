@@ -1844,73 +1844,9 @@ window.togglePrices = function(checked) {
 };
 
 window.unlockPrices = function() {
-    if (isAdmin) {
-        Swal.fire({
-            icon: 'info',
-            title: 'Acceso de Administrador',
-            text: 'Como administrador, ya tienes permiso para editar todos los precios de venta.',
-            confirmButtonColor: '#1D96C8'
-        });
-        return;
-    }
-
-    if (supervisorUnlocked) {
-        Swal.fire({
-            title: 'Bloquear edicin?',
-            text: "Se desactivar la edicin de precios para este usuario hasta que un supervisor vuelva a autorizar.",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#E74C3C',
-            confirmButtonText: 'S, bloquear',
-            cancelButtonText: 'Mantener abierto'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                supervisorUnlocked = false;
-                updateEditPricesBtn();
-                renderCart();
-            }
-        });
-        return;
-    }
-
-    Swal.fire({
-        title: 'Autorizacin de Supervisor',
-        text: 'Ingresa el cdigo de seguridad para habilitar la edicin de precios:',
-        input: 'password',
-        inputAttributes: {
-            autocapitalize: 'off',
-            autocorrect: 'off'
-        },
-        showCancelButton: true,
-        confirmButtonText: 'Validar',
-        confirmButtonColor: '#1D96C8',
-        cancelButtonText: 'Cancelar',
-        showLoaderOnConfirm: true,
-        preConfirm: (code) => {
-            const isValid = supervisorCodes.includes(code);
-            if (isValid) {
-                return true;
-            } else {
-                Swal.showValidationMessage('Cdigo incorrecto o no configurado.');
-                return false;
-            }
-        },
-        allowOutsideClick: () => !Swal.isLoading()
-    }).then((result) => {
-        if (result.isConfirmed) {
-            supervisorUnlocked = true;
-            updateEditPricesBtn();
-            renderCart();
-            Swal.fire({
-                icon: 'success',
-                title: 'Edicin habilitada',
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 2000
-            });
-        }
-    });
+    supervisorUnlocked = !supervisorUnlocked;
+    updateEditPricesBtn();
+    renderCart();
 };
 
 /* --------------------------------------
