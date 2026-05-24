@@ -1751,12 +1751,10 @@ function updateItemPrice(varianteId, rawValue) {
     document.getElementById('displayTotal').textContent = fmt(total);
     const mobileTotal = document.getElementById('mobileTotalDisplay');
     if (mobileTotal) mobileTotal.textContent = fmt(total);
-    // Actualizar el subtotal de esta fila especfica
-    const items = document.querySelectorAll('#cartItems .cart-item');
-    const allItems = cart;
-    const idx = allItems.findIndex(c => c.variante_id == varianteId);
-    if (idx >= 0 && items[idx]) {
-        const subtotalEl = items[idx].querySelector('.cart-item-subtotal');
+    // Actualizar el subtotal de esta fila usando data attribute
+    const rowEl = document.querySelector(`#cartItems .cart-item[data-variante-id="${varianteId}"]`);
+    if (rowEl) {
+        const subtotalEl = rowEl.querySelector('.cart-item-subtotal');
         if (subtotalEl) subtotalEl.textContent = fmt(newPrice * item.cantidad);
     }
     updateFormFields();
@@ -1792,13 +1790,13 @@ function renderCart() {
     itemsEl.style.display = 'block';
 
     itemsEl.innerHTML = cart.map(item => `
-        <div class="cart-item">
+        <div class="cart-item" data-variante-id="${item.variante_id}">
             <div style="flex:1;min-width:0;">
                 <div class="cart-item-name" title="${item.nombre}">${item.nombre}</div>
                 ${(isAdmin || supervisorUnlocked)
-                    ? `<input type="number" class="cart-item-price-input" min="0" step="0.01"
+                    ? `<input type="number" class="cart-item-price-input" min="0" step="1"
                               value="${item.precio}"
-                              onchange="updateItemPrice('${item.variante_id}', this.value)"
+                              oninput="updateItemPrice('${item.variante_id}', this.value)"
                               title="Editar precio unitario">`
                     : `<div class="cart-item-price">${fmt(item.precio)} / ud</div>`
                 }
