@@ -9,8 +9,10 @@ use App\Http\Requests\StoreVentaRequest;
 use App\Models\Cliente;
 use App\Models\Categoria;
 use App\Models\Marca;
+use App\Models\Inventario;
 use App\Models\Producto;
 use App\Models\User;
+use App\Models\Variante;
 use App\Models\Venta;
 use App\Services\ActivityLogService;
 use App\Services\ComprobanteService;
@@ -193,13 +195,30 @@ class ventaController extends Controller
                     ]
                 ]);
 
+                // Descontar stock directamente dentro de la transacción
+                $varianteId = $arrayVarianteId[$cont] ?? null;
+                $cantidad   = (int) $arrayCantidad[$cont];
+                if ($varianteId) {
+                    Variante::where('id', $varianteId)
+                        ->where('stock', '>', 0)
+                        ->decrement('stock', $cantidad);
+                } else {
+                    Variante::where('producto_id', $arrayProducto_id[$cont])
+                        ->where('stock', '>', 0)
+                        ->orderBy('stock', 'desc')
+                        ->first()?->decrement('stock', $cantidad);
+                }
+                // Sincronizar inventario.cantidad
+                Inventario::where('producto_id', $arrayProducto_id[$cont])
+                    ->decrement('cantidad', $cantidad);
+
                 // Despachar evento — incluye variante_id para descontar stock correcto
                 CreateVentaDetalleEvent::dispatch(
                     $venta,
                     $arrayProducto_id[$cont],
                     $arrayCantidad[$cont],
                     $precioFinal,
-                    $arrayVarianteId[$cont] ?? null
+                    $varianteId
                 );
 
                 $cont++;
