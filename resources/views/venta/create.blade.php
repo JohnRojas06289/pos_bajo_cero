@@ -654,6 +654,32 @@ input:checked + .slider:before { transform: translateX(12px); }
 .btn-unlock-prices.unlocked { color: var(--success); }
 .btn-unlock-prices:hover { color: var(--accent); }
 
+/* Botón editar precios — arriba-izquierda del header del carrito */
+.btn-edit-prices {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: none;
+    border: 1.5px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.18rem 0.55rem;
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: border-color 0.18s, color 0.18s, background 0.18s;
+    white-space: nowrap;
+    margin-left: 0.4rem;
+    flex-shrink: 0;
+}
+.btn-edit-prices:hover { border-color: var(--accent); color: var(--accent); }
+.btn-edit-prices.active {
+    border-color: var(--success);
+    color: var(--success);
+    background: rgba(39,174,96,0.08);
+}
+
 /* Compact price input for admin */
 .cart-item-price-input {
     width: 80px;
@@ -1125,22 +1151,24 @@ input:checked + .slider:before { transform: translateX(12px); }
                 <i class="fas fa-shopping-bag" style="color:var(--accent);"></i>
                 Carrito
                 <span class="cart-count-badge" id="cartBadge">0</span>
+                {{-- Botón editar precios (arriba-izquierda) --}}
+                <button type="button" class="btn-edit-prices" id="btnUnlockPrices"
+                        onclick="unlockPrices()"
+                        title="Activar edición de precios por producto">
+                    <i class="fas fa-lock" id="lockIcon"></i>
+                    <span id="editPricesLabel">Precios</span>
+                </button>
             </div>
 
             <div class="cart-controls">
                 {{-- Visibility Toggle --}}
                 <label class="price-toggle-wrap" title="Mostrar/Ocultar precios unitarios">
-                    <span class="price-toggle-label">Precios</span>
+                    <span class="price-toggle-label">Ver</span>
                     <label class="switch">
                         <input type="checkbox" id="toggleCartPrices" checked onchange="togglePrices(this.checked)">
                         <span class="slider"></span>
                     </label>
                 </label>
-
-                {{-- Unlock Button (Supervisor Code) --}}
-                <button type="button" class="btn-unlock-prices" id="btnUnlockPrices" onclick="unlockPrices()" title="Autorizacin de supervisor para editar precios">
-                    <i class="fas fa-lock" id="lockIcon"></i>
-                </button>
             </div>
 
             <button class="cart-clear-btn" id="btnClearCart">
@@ -1771,7 +1799,7 @@ function renderCart() {
         <div class="cart-item">
             <div style="flex:1;min-width:0;">
                 <div class="cart-item-name" title="${item.nombre}">${item.nombre}</div>
-                ${isAdmin
+                ${(isAdmin || supervisorUnlocked)
                     ? `<input type="number" class="cart-item-price-input" min="0" step="0.01"
                               value="${item.precio}"
                               onchange="updateItemPrice('${item.variante_id}', this.value)"
@@ -1803,6 +1831,17 @@ function renderCart() {
 /* --------------------------------------
    TOGGLE & UNLOCK LOGIC
 -------------------------------------- */
+function updateEditPricesBtn() {
+    const btn  = document.getElementById('btnUnlockPrices');
+    const icon = document.getElementById('lockIcon');
+    const lbl  = document.getElementById('editPricesLabel');
+    if (!btn) return;
+    const active = isAdmin || supervisorUnlocked;
+    btn.classList.toggle('active', active);
+    if (icon) icon.className = active ? 'fas fa-pencil-alt' : 'fas fa-lock';
+    if (lbl)  lbl.textContent = active ? 'Editar' : 'Precios';
+}
+
 window.togglePrices = function(checked) {
     showCartPrices = checked;
     renderCart();
@@ -1831,6 +1870,7 @@ window.unlockPrices = function() {
         }).then((result) => {
             if (result.isConfirmed) {
                 supervisorUnlocked = false;
+                updateEditPricesBtn();
                 renderCart();
             }
         });
@@ -1863,6 +1903,7 @@ window.unlockPrices = function() {
     }).then((result) => {
         if (result.isConfirmed) {
             supervisorUnlocked = true;
+            updateEditPricesBtn();
             renderCart();
             Swal.fire({
                 icon: 'success',
@@ -2315,6 +2356,7 @@ setPaymentMethod('{{ old('metodo_pago', 'EFECTIVO') }}');
 // Initial render
 renderProducts();
 renderCart();
+updateEditPricesBtn();
 
 // Confirmacin de venta realizada
 @if(session('success'))
