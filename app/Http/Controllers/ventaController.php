@@ -198,15 +198,23 @@ class ventaController extends Controller
                 // Descontar stock directamente dentro de la transacción
                 $varianteId = $arrayVarianteId[$cont] ?? null;
                 $cantidad   = (int) $arrayCantidad[$cont];
+                Log::info('[stock] intentando descontar', [
+                    'variante_id' => $varianteId,
+                    'producto_id' => $arrayProducto_id[$cont],
+                    'cantidad'    => $cantidad,
+                ]);
                 if ($varianteId) {
-                    Variante::where('id', $varianteId)
+                    $rows = Variante::where('id', $varianteId)
                         ->where('stock', '>', 0)
                         ->decrement('stock', $cantidad);
+                    Log::info('[stock] decrement variante', ['rows_afectadas' => $rows]);
                 } else {
-                    Variante::where('producto_id', $arrayProducto_id[$cont])
+                    $variante = Variante::where('producto_id', $arrayProducto_id[$cont])
                         ->where('stock', '>', 0)
                         ->orderBy('stock', 'desc')
-                        ->first()?->decrement('stock', $cantidad);
+                        ->first();
+                    Log::info('[stock] fallback variante', ['variante_encontrada' => $variante?->id]);
+                    $variante?->decrement('stock', $cantidad);
                 }
                 // Sincronizar inventario.cantidad
                 Inventario::where('producto_id', $arrayProducto_id[$cont])
