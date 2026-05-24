@@ -141,7 +141,7 @@
                                         @foreach($variantes as $v)
                                             <span class="badge {{ $v->stock > 0 ? 'bg-secondary' : 'bg-dark opacity-50' }}"
                                                   style="font-size:.72rem;padding:4px 8px;"
-                                                  title="{{ $v->stock > 0 ? $v->stock . ' disponibles' : 'Agotado' }}">
+                                                  title="{{ $v->stock <= 0 ? 'Agotado' : '' }}">
                                                 {{ $v->label }}
                                             </span>
                                         @endforeach

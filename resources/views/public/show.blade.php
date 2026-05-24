@@ -347,7 +347,7 @@
                         <div class="pub-product-card-body">
                             <div class="pub-product-card-name">{{ $rel->nombre }}</div>
                             <div class="pub-product-card-price">${{ number_format($rel->precio, 0) }}</div>
-                            <div class="pub-product-card-stock">{{ $rs > 0 ? 'En stock' : 'Agotado' }}</div>
+                            @if($rs <= 0)<div class="pub-product-card-stock">Agotado</div>@endif
                         </div>
                     </a>
                 </div>
@@ -375,7 +375,7 @@
                         <div class="pub-product-card-body">
                             <div class="pub-product-card-name">{{ $feat->nombre }}</div>
                             <div class="pub-product-card-price">${{ number_format($feat->precio, 0) }}</div>
-                            <div class="pub-product-card-stock">{{ $fs > 0 ? 'En stock' : 'Agotado' }}</div>
+                            @if($fs <= 0)<div class="pub-product-card-stock">Agotado</div>@endif
                         </div>
                     </a>
                 </div>
