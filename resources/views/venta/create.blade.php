@@ -1151,13 +1151,15 @@ input:checked + .slider:before { transform: translateX(12px); }
                 <i class="fas fa-shopping-bag" style="color:var(--accent);"></i>
                 Carrito
                 <span class="cart-count-badge" id="cartBadge">0</span>
-                {{-- Botón editar precios (arriba-izquierda) --}}
+                {{-- Botón editar precios — solo administrador --}}
+                @if($isAdmin)
                 <button type="button" class="btn-edit-prices" id="btnUnlockPrices"
                         onclick="unlockPrices()"
                         title="Activar edición de precios por producto">
                     <i class="fas fa-lock" id="lockIcon"></i>
                     <span id="editPricesLabel">Precios</span>
                 </button>
+                @endif
             </div>
 
             <div class="cart-controls">
@@ -1356,7 +1358,7 @@ const supervisorCodes = @json($supervisorCodes);
    STATE
 -------------------------------------- */
 let cart           = [];  // [{id, nombre, precio, cantidad, stock}]
-let supervisorUnlocked = isAdmin; // Auto-unlock for admins
+let supervisorUnlocked = false; // Admin activa manualmente con el botón
 let showCartPrices     = true;
 @if(old('arrayidproducto'))
     @foreach(old('arrayidproducto') as $i => $id_val)
@@ -1793,7 +1795,7 @@ function renderCart() {
         <div class="cart-item" data-variante-id="${item.variante_id}">
             <div style="flex:1;min-width:0;">
                 <div class="cart-item-name" title="${item.nombre}">${item.nombre}</div>
-                ${(isAdmin || supervisorUnlocked)
+                ${supervisorUnlocked
                     ? `<input type="number" class="cart-item-price-input" min="0" step="1"
                               value="${item.precio}"
                               oninput="updateItemPrice('${item.variante_id}', this.value)"
@@ -1830,7 +1832,7 @@ function updateEditPricesBtn() {
     const icon = document.getElementById('lockIcon');
     const lbl  = document.getElementById('editPricesLabel');
     if (!btn) return;
-    const active = isAdmin || supervisorUnlocked;
+    const active = supervisorUnlocked;
     btn.classList.toggle('active', active);
     if (icon) icon.className = active ? 'fas fa-pencil-alt' : 'fas fa-lock';
     if (lbl)  lbl.textContent = active ? 'Editar' : 'Precios';
