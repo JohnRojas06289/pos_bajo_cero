@@ -21,10 +21,11 @@ class EstadisticasController extends Controller
 
         try {
             // ── Filtros de fecha ──────────────────────────────────────────────
-            $fechaInicio = $request->input('fecha_inicio', Carbon::now()->format('Y-m-d'));
-            $fechaFin    = $request->input('fecha_fin',    Carbon::now()->format('Y-m-d'));
-            $rangeStart  = $fechaInicio . ' 00:00:00';
-            $rangeEnd    = $fechaFin    . ' 23:59:59';
+            $tz          = 'America/Bogota';
+            $fechaInicio = $request->input('fecha_inicio', Carbon::now($tz)->format('Y-m-d'));
+            $fechaFin    = $request->input('fecha_fin',    Carbon::now($tz)->format('Y-m-d'));
+            $rangeStart  = Carbon::createFromFormat('Y-m-d', $fechaInicio, $tz)->startOfDay()->setTimezone('UTC')->format('Y-m-d H:i:s');
+            $rangeEnd    = Carbon::createFromFormat('Y-m-d', $fechaFin,    $tz)->endOfDay()->setTimezone('UTC')->format('Y-m-d H:i:s');
 
             // ── KPIs del periodo filtrado ─────────────────────────────────────
             $ventasPeriodo = DB::table('ventas')
@@ -37,12 +38,19 @@ class EstadisticasController extends Controller
                 ? round($ventasPeriodo / $transaccionesPeriodo) : 0;
 
             // ── KPIs acumulados ───────────────────────────────────────────────
+            $nowBogota    = Carbon::now($tz);
             $ventasSemana = Venta::whereBetween('created_at', [
-                Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()
+                $nowBogota->copy()->startOfWeek()->setTimezone('UTC'),
+                $nowBogota->copy()->endOfWeek()->setTimezone('UTC'),
             ])->sum('total');
-            $ventasMes  = Venta::whereMonth('created_at', Carbon::now()->month)
-                               ->whereYear('created_at', Carbon::now()->year)->sum('total');
-            $ventasYear = Venta::whereYear('created_at', Carbon::now()->year)->sum('total');
+            $ventasMes  = Venta::whereBetween('created_at', [
+                $nowBogota->copy()->startOfMonth()->setTimezone('UTC'),
+                $nowBogota->copy()->endOfMonth()->setTimezone('UTC'),
+            ])->sum('total');
+            $ventasYear = Venta::whereBetween('created_at', [
+                $nowBogota->copy()->startOfYear()->setTimezone('UTC'),
+                $nowBogota->copy()->endOfYear()->setTimezone('UTC'),
+            ])->sum('total');
 
             $unidadesVendidas    = DB::table('producto_venta')->sum('cantidad');
             $ventasEfectivo      = Venta::where('metodo_pago', 'EFECTIVO')->sum('total');
@@ -50,8 +58,14 @@ class EstadisticasController extends Controller
 
             // ── Gastos (compras) del período ─────────────────────────────────
             $gastosPeriodo  = DB::table('compras')->whereBetween('created_at', [$rangeStart, $rangeEnd])->sum('total');
-            $gastosMes      = Compra::whereMonth('created_at', Carbon::now()->month)->whereYear('created_at', Carbon::now()->year)->sum('total');
-            $gastosYear     = Compra::whereYear('created_at', Carbon::now()->year)->sum('total');
+            $gastosMes      = Compra::whereBetween('created_at', [
+                $nowBogota->copy()->startOfMonth()->setTimezone('UTC'),
+                $nowBogota->copy()->endOfMonth()->setTimezone('UTC'),
+            ])->sum('total');
+            $gastosYear     = Compra::whereBetween('created_at', [
+                $nowBogota->copy()->startOfYear()->setTimezone('UTC'),
+                $nowBogota->copy()->endOfYear()->setTimezone('UTC'),
+            ])->sum('total');
             $utilidadBruta  = $ventasPeriodo - $gastosPeriodo;
             $margenPct      = $ventasPeriodo > 0 ? round(($utilidadBruta / $ventasPeriodo) * 100, 1) : 0;
 

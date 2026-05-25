@@ -29,17 +29,20 @@ class homeController extends Controller
 
         try {
             // ── KPIs del día ──────────────────────────────────────────────────
-            $ventasHoy         = Venta::whereDate('created_at', Carbon::today())->sum('total');
-            $transaccionesHoy  = Venta::whereDate('created_at', Carbon::today())->count();
+            $tz         = 'America/Bogota';
+            $hoyStart   = Carbon::now($tz)->startOfDay()->setTimezone('UTC');
+            $hoyEnd     = Carbon::now($tz)->endOfDay()->setTimezone('UTC');
+            $ventasHoy         = Venta::whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
+            $transaccionesHoy  = Venta::whereBetween('created_at', [$hoyStart, $hoyEnd])->count();
             $ticketPromedioHoy = $transaccionesHoy > 0 ? round($ventasHoy / $transaccionesHoy) : 0;
             $efectivoHoy       = Venta::where('metodo_pago', 'EFECTIVO')
-                                      ->whereDate('created_at', Carbon::today())->sum('total');
+                                      ->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
             $nequiHoy          = Venta::where('metodo_pago', 'NEQUI')
-                                      ->whereDate('created_at', Carbon::today())->sum('total');
+                                      ->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
             $daviplataHoy      = Venta::where('metodo_pago', 'DAVIPLATA')
-                                      ->whereDate('created_at', Carbon::today())->sum('total');
+                                      ->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
             $transferenciaHoy  = Venta::where('metodo_pago', 'TRANSFERENCIA')
-                                      ->whereDate('created_at', Carbon::today())->sum('total');
+                                      ->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
 
             // ── Ventas por cliente del día (con productos) ────────────────────
             $ventasPorClienteHoy = Venta::with(['cliente.persona', 'productos', 'user'])
@@ -64,25 +67,28 @@ class homeController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $ventasHoy        = Venta::whereDate('created_at', Carbon::today())->sum('total');
-        $transaccionesHoy = Venta::whereDate('created_at', Carbon::today())->count();
-        $efectivoHoy      = Venta::where('metodo_pago', 'EFECTIVO')->whereDate('created_at', Carbon::today())->sum('total');
-        $nequiHoy         = Venta::where('metodo_pago', 'NEQUI')->whereDate('created_at', Carbon::today())->sum('total');
-        $daviplataHoy     = Venta::where('metodo_pago', 'DAVIPLATA')->whereDate('created_at', Carbon::today())->sum('total');
-        $transferenciaHoy = Venta::where('metodo_pago', 'TRANSFERENCIA')->whereDate('created_at', Carbon::today())->sum('total');
+        $tz               = 'America/Bogota';
+        $hoyStart         = Carbon::now($tz)->startOfDay()->setTimezone('UTC');
+        $hoyEnd           = Carbon::now($tz)->endOfDay()->setTimezone('UTC');
+        $ventasHoy        = Venta::whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
+        $transaccionesHoy = Venta::whereBetween('created_at', [$hoyStart, $hoyEnd])->count();
+        $efectivoHoy      = Venta::where('metodo_pago', 'EFECTIVO')->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
+        $nequiHoy         = Venta::where('metodo_pago', 'NEQUI')->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
+        $daviplataHoy     = Venta::where('metodo_pago', 'DAVIPLATA')->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
+        $transferenciaHoy = Venta::where('metodo_pago', 'TRANSFERENCIA')->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
 
         $ventas = Venta::with(['cliente.persona', 'productos', 'user'])
-            ->whereDate('created_at', Carbon::today())
+            ->whereBetween('created_at', [$hoyStart, $hoyEnd])
             ->latest()
             ->get()
             ->map(fn($v) => [
-                'hora'      => Carbon::parse($v->created_at)->format('H:i'),
+                'hora'      => Carbon::parse($v->created_at)->setTimezone($tz)->format('H:i'),
                 'cliente'   => $v->cliente?->persona?->razon_social ?? 'Cliente General',
                 'metodo'    => $v->metodo_pago,
                 'total'     => (float) $v->total,
                 'vendedor'  => $v->user?->name ?? 'N/A',
                 'numero'    => $v->numero_venta ?? null,
-                'fecha'     => Carbon::parse($v->created_at)->format('d/m/Y H:i'),
+                'fecha'     => Carbon::parse($v->created_at)->setTimezone($tz)->format('d/m/Y H:i'),
                 'productos' => $v->productos->map(fn($p) => [
                     'nombre'   => $p->nombre,
                     'cantidad' => $p->pivot->cantidad,

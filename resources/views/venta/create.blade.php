@@ -2079,23 +2079,6 @@ function updateFormFields() {
     updatePayButton();
 }
 
-document.getElementById('btnPagar').addEventListener('click', function () {
-    if (this.disabled) return;
-
-    if (cart.length === 0) { alert('El carrito est vaco.'); return; }
-
-    document.getElementById('f_cliente_id').value = '';
-
-    // Asegurar que los campos ocultos estn actualizados antes de enviar
-    updateFormFields();
-
-    // Loading state
-    this.disabled = true;
-    this.classList.add('loading');
-    document.getElementById('btnPagarLabel').textContent = 'Procesando...';
-
-    document.getElementById('ventaForm').submit();
-});
 
 /* --------------------------------------
    EVENT LISTENERS
