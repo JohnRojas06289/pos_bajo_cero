@@ -62,13 +62,6 @@
             @forelse($featuredProducts as $product)
                 <div class="col-lg-3 col-md-6 mb-5">
                     <div class="pub-product-card h-100">
-                        {{-- Badge de stock real --}}
-                        @php $stock = $product->total_stock; @endphp
-                        @if($stock > 0)
-                            <span class="badge-stock-in">DISPONIBLE</span>
-                        @else
-                            <span class="badge-stock-out">AGOTADO</span>
-                        @endif
 
                         {{-- Imagen del producto --}}
                         <a href="{{ route('product.show', $product->id) }}" class="d-block overflow-hidden" style="height:280px;">
