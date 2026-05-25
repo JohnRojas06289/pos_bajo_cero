@@ -100,7 +100,7 @@
                     <div class="footer-heading">Bajo Cero</div>
                     <p class="text-muted mb-4">Ropa urbana inspirada en la montaña. Chaquetas, gorras y prendas para quienes desafían el frío. Estilo, calidad y actitud colombiana.</p>
                     <div class="d-flex gap-3">
-                        <a href="#" style="color:rgba(255,255,255,0.75);font-size:1.2rem;transition:color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='rgba(255,255,255,0.75)'"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.instagram.com/importacionesbajocero" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.75);font-size:1.2rem;transition:color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='rgba(255,255,255,0.75)'"><i class="fab fa-instagram"></i></a>
                         <a href="#" style="color:rgba(255,255,255,0.75);font-size:1.2rem;transition:color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='rgba(255,255,255,0.75)'"><i class="fab fa-facebook"></i></a>
                         <a href="https://www.tiktok.com/@chaquetas.bajo.ce0" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.75);font-size:1.2rem;transition:color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='rgba(255,255,255,0.75)'"><i class="fab fa-tiktok"></i></a>
                     </div>
@@ -122,12 +122,11 @@
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-4">
-                    <div class="footer-heading">Pagos Seguros</div>
-                    <p class="text-muted mb-3">Procesamos tus pagos con la máxima seguridad.</p>
+                    <div class="footer-heading">Métodos de pago</div>
+                    <p class="text-muted mb-3">Aceptamos efectivo y transferencias digitales.</p>
                     <div class="d-flex gap-3 align-items-center" style="color:rgba(255,255,255,0.8);font-size:1.6rem;">
-                        <i class="fab fa-cc-visa"></i>
-                        <i class="fab fa-cc-mastercard"></i>
-                        <i class="fas fa-money-bill-wave" style="font-size:1.3rem;"></i>
+                        <i class="fas fa-money-bill-wave" title="Efectivo"></i>
+                        <i class="fab fa-whatsapp" style="color:#25d366;font-size:1.5rem;" title="Nequi / Daviplata"></i>
                     </div>
                 </div>
             </div>
