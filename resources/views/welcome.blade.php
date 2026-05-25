@@ -15,7 +15,7 @@
                     <p class="lead fw-normal mb-4" style="color:rgba(255,255,255,0.6);">Descubre la nueva colección de chaquetas, gorras y prendas para desafiar el frío. Calidad premium, diseño exclusivo y la actitud que necesitas.</p>
                     <div class="d-grid gap-3 d-sm-flex justify-content-sm-center justify-content-xl-start">
                         <a class="btn-neon px-4 me-sm-3" href="{{ route('collection') }}">Ver Colección</a>
-                        <a class="btn btn-outline-light btn-lg px-4" href="{{ route('reservar.index') }}"><i class="fas fa-calendar-check me-2"></i>Reservar</a>
+                        <a class="btn btn-outline-light btn-lg px-4" href="{{ route('reservar.index') }}"><i class="fas fa-shopping-bag me-2"></i>Comprar</a>
                     </div>
                 </div>
             </div>
