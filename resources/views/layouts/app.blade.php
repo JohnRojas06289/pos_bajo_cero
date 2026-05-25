@@ -445,6 +445,7 @@
         //  AI CHAT WIDGET
         // ══════════════════════════════════════
         const chatBtn    = document.getElementById('aiChatBtn');
+        const chatIcon   = document.getElementById('aiChatIcon');
         const chatPanel  = document.getElementById('aiChatPanel');
         const chatClose  = document.getElementById('aiChatClose');
         const chatInput  = document.getElementById('aiInput');
@@ -533,7 +534,7 @@
         // Toggle panel
         chatBtn.addEventListener('click', () => {
             const isOpen = chatPanel.classList.toggle('open');
-            chatBtn.querySelector('i').className = isOpen ? 'fas fa-times' : 'fas fa-comments';
+            if (chatIcon) chatIcon.className = isOpen ? 'fas fa-times' : 'fas fa-comments';
             if (isOpen) {
                 loadHistory();
                 chatInput.focus();
@@ -542,7 +543,7 @@
 
         chatClose.addEventListener('click', () => {
             chatPanel.classList.remove('open');
-            chatBtn.querySelector('i').className = 'fas fa-comments';
+            if (chatIcon) chatIcon.className = 'fas fa-comments';
         });
 
         // Send on button click
