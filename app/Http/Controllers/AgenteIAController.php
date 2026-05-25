@@ -113,11 +113,12 @@ class AgenteIAController extends Controller
 
             // Stock bajo (< 10 unidades)
             $stockBajo = DB::table('productos')
-                ->join('inventario', 'productos.id', '=', 'inventario.producto_id')
-                ->where('inventario.cantidad', '<', 10)
-                ->where('inventario.cantidad', '>=', 0)
-                ->orderBy('inventario.cantidad')
-                ->select('productos.nombre', 'inventario.cantidad')
+                ->join('variantes', 'variantes.producto_id', '=', 'productos.id')
+                ->where('productos.estado', 1)
+                ->groupBy('productos.id', 'productos.nombre')
+                ->havingRaw('SUM(variantes.stock) < 10')
+                ->orderByRaw('SUM(variantes.stock)')
+                ->selectRaw('productos.nombre, SUM(variantes.stock) as cantidad')
                 ->limit(8)
                 ->get();
 

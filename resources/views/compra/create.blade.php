@@ -64,7 +64,7 @@
                                     <option value="{{ $item->id }}"
                                             data-talla="{{ $item->presentacione->caracteristica->nombre ?? '' }}"
                                             data-sigla="{{ $item->presentacione->sigla ?? '' }}"
-                                            data-stock="{{ $item->inventario->cantidad ?? 0 }}">
+                                            data-stock="{{ $item->variantes->sum('stock') }}">
                                         {{ $item->nombre_completo }}
                                     </option>
                                     @endforeach

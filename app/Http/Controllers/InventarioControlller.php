@@ -29,7 +29,7 @@ class InventarioControlller extends Controller
     {
         $categorias = \App\Models\Categoria::with('caracteristica')->get();
         
-        $productos = Producto::with(['inventario', 'presentacione', 'categoria.caracteristica'])
+        $productos = Producto::with(['inventario', 'variantes', 'presentacione', 'categoria.caracteristica'])
             ->when($request->categoria_id, function($query, $categoria_id) {
                 return $query->where('categoria_id', $categoria_id);
             })
@@ -86,7 +86,7 @@ class InventarioControlller extends Controller
      */
     public function edit(string $id)
     {
-        $inventario = Inventario::with('producto')->findOrFail($id);
+        $inventario = Inventario::with('producto.variantes')->findOrFail($id);
         $producto = $inventario->producto;
         
         // Fetch last cost from Kardex
@@ -115,6 +115,25 @@ class InventarioControlller extends Controller
             // We use except() because validated() returns fields like costo_unitario/precio_venta that don't exist in 'inventario' table
             $data = $request->safe()->except(['costo_unitario', 'precio_venta']);
             $inventario->update($data);
+
+            // Sincronizar variante.stock con la nueva cantidad (fuente de verdad del POS)
+            $nuevaCantidad = (int) $request->cantidad;
+            $variantes = \App\Models\Variante::where('producto_id', $producto->id)
+                ->orderBy('stock', 'desc')
+                ->get();
+
+            if ($variantes->count() === 1) {
+                $variantes->first()->update(['stock' => $nuevaCantidad]);
+            } elseif ($variantes->count() > 1) {
+                $stockActual = $variantes->sum('stock');
+                $diff = $nuevaCantidad - $stockActual;
+                if ($diff !== 0) {
+                    // Aplicar la diferencia a la variante con más stock (la primera, ya ordenada desc)
+                    $objetivo = $variantes->first();
+                    $nuevoStock = max(0, $objetivo->stock + $diff);
+                    $objetivo->update(['stock' => $nuevoStock]);
+                }
+            }
             
             // Actualizar costo en Kardex (último registro)
             if ($request->has('costo_unitario')) {

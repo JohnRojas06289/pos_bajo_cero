@@ -88,7 +88,7 @@
                                 </div>
                             </td>
                             <td>
-                                @php $qty = $item->inventario->cantidad ?? 0; @endphp
+                                @php $qty = $item->variantes->sum('stock'); @endphp
                                 @if($qty <= 0)
                                     <span class="badge bg-danger">
                                         <i class="fas fa-exclamation-triangle me-1"></i>Agotado

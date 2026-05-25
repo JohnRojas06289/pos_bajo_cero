@@ -42,7 +42,8 @@ class ProductoController extends Controller
         $productos = Producto::with([
             'categoria.caracteristica',
             'marca.caracteristica',
-            'presentacione.caracteristica'
+            'presentacione.caracteristica',
+            'variantes'
         ])
             ->orderBy('nombre')
             ->get();

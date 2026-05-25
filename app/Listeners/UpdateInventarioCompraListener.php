@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\CreateCompraDetalleEvent;
 use App\Models\Inventario;
+use App\Models\Variante;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
@@ -20,29 +21,36 @@ class UpdateInventarioCompraListener
     public function handle(CreateCompraDetalleEvent $event): void
     {
         try {
-            \Log::info('UpdateInventarioCompraListener: Updating stock', [
-                'producto_id' => $event->producto_id,
-                'cantidad_comprada' => $event->cantidad
-            ]);
-
+            // 1. Actualizar inventario.cantidad (registro histórico)
             $registro = Inventario::where('producto_id', $event->producto_id)->first();
+            if ($registro) {
+                $registro->update([
+                    'cantidad' => $registro->cantidad + $event->cantidad,
+                    'fecha_vencimiento' => $event->fecha_vencimiento
+                ]);
+            }
 
-            if (!$registro) {
-                \Log::error('UpdateInventarioCompraListener: Inventario not found', ['producto_id' => $event->producto_id]);
+            // 2. Actualizar variante.stock (fuente de verdad del POS)
+            $variantes = Variante::where('producto_id', $event->producto_id)
+                ->orderBy('stock', 'asc')
+                ->get();
+
+            if ($variantes->isEmpty()) {
+                \Log::warning('UpdateInventarioCompraListener: No variantes found', ['producto_id' => $event->producto_id]);
                 return;
             }
 
-            $nuevaCantidad = $registro->cantidad + $event->cantidad;
-            
-            $registro->update([
-                'cantidad' => $nuevaCantidad,
-                'fecha_vencimiento' => $event->fecha_vencimiento
-            ]);
-            
-            \Log::info('UpdateInventarioCompraListener: Stock updated', [
+            if ($variantes->count() === 1) {
+                // Producto de una sola variante: agregar todo el stock
+                $variantes->first()->increment('stock', $event->cantidad);
+            } else {
+                // Múltiples variantes: agregar a la de menor stock
+                $variantes->first()->increment('stock', $event->cantidad);
+            }
+
+            \Log::info('UpdateInventarioCompraListener: variante stock updated', [
                 'producto_id' => $event->producto_id,
-                'cantidad_anterior' => $registro->cantidad,
-                'cantidad_nueva' => $nuevaCantidad
+                'cantidad_agregada' => $event->cantidad,
             ]);
         } catch (\Exception $e) {
             \Log::error('UpdateInventarioCompraListener: Error', ['error' => $e->getMessage()]);

@@ -28,7 +28,7 @@
 
             <!---Cantidad--->
             <div class="col-md-6">
-                <x-forms.input id="cantidad" required='true' type='number' :defaultValue="$inventario->cantidad" />
+                <x-forms.input id="cantidad" required='true' type='number' :defaultValue="$producto->variantes->sum('stock')" />
             </div>
 
               <!-----Costo Unitario----->

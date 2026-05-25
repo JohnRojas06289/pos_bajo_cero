@@ -1640,7 +1640,7 @@ function addToCart(varianteId) {
 
     const item = cart.find(c => c.variante_id == varianteId);
     const currentInCart = item ? item.cantidad : 0;
-    if (currentInCart >= product.stock && product.stock > 0) return;
+    if (product.stock <= 0 || currentInCart >= product.stock) return;
 
     const label = product.var_label ? `${product.nombre} (${product.var_label})` : product.nombre;
 

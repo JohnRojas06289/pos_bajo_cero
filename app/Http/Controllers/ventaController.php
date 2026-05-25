@@ -8,8 +8,8 @@ use App\Events\CreateVentaEvent;
 use App\Http\Requests\StoreVentaRequest;
 use App\Models\Cliente;
 use App\Models\Categoria;
-use App\Models\Marca;
 use App\Models\Inventario;
+use App\Models\Marca;
 use App\Models\Producto;
 use App\Models\User;
 use App\Models\Variante;
@@ -169,6 +169,25 @@ class ventaController extends Controller
                 return redirect()->route('ventas.create')->with('error', 'Debe agregar al menos un producto a la venta.');
             }
 
+            // Validación server-side de stock antes de procesar
+            foreach ($arrayProducto_id as $i => $pid) {
+                $vid = $arrayVarianteId[$i] ?? null;
+                $qty = (int) ($arrayCantidad[$i] ?? 0);
+                if ($vid && $qty > 0) {
+                    $variante = Variante::find($vid);
+                    if (!$variante || $variante->stock < $qty) {
+                        DB::rollBack();
+                        $nombre = Producto::find($pid)->nombre ?? 'Producto';
+                        $disponible = $variante->stock ?? 0;
+                        $msg = "Stock insuficiente para \"{$nombre}\". Disponible: {$disponible}, solicitado: {$qty}.";
+                        if ($request->wantsJson()) {
+                            return response()->json(['error' => $msg], 422);
+                        }
+                        return redirect()->route('ventas.create')->with('error', $msg);
+                    }
+                }
+            }
+
             //2. Realizar el llenado
             $siseArray = count($arrayProducto_id);
             $cont = 0;
@@ -205,8 +224,12 @@ class ventaController extends Controller
                 ]);
                 if ($varianteId) {
                     $rows = Variante::where('id', $varianteId)
-                        ->where('stock', '>', 0)
+                        ->where('stock', '>=', $cantidad)
                         ->decrement('stock', $cantidad);
+                    if (!$rows) {
+                        // Llegó hasta aquí pero el stock ya no alcanza (race condition)
+                        throw new \RuntimeException("Stock insuficiente para variante {$varianteId} al momento de procesar.");
+                    }
                     Log::info('[stock] decrement variante', ['rows_afectadas' => $rows]);
                 } else {
                     $variante = Variante::where('producto_id', $arrayProducto_id[$cont])
@@ -214,10 +237,15 @@ class ventaController extends Controller
                         ->orderBy('stock', 'desc')
                         ->first();
                     Log::info('[stock] fallback variante', ['variante_encontrada' => $variante?->id]);
-                    $variante?->decrement('stock', $cantidad);
+                    if ($variante) {
+                        $nuevoStock = max(0, $variante->stock - $cantidad);
+                        $variante->update(['stock' => $nuevoStock]);
+                    }
                 }
-                // Sincronizar inventario.cantidad
+
+                // Sincronizar inventario.cantidad (con guard para no crashear si está desincronizado)
                 Inventario::where('producto_id', $arrayProducto_id[$cont])
+                    ->where('cantidad', '>=', $cantidad)
                     ->decrement('cantidad', $cantidad);
 
                 // Despachar evento — incluye variante_id para descontar stock correcto

@@ -139,7 +139,7 @@
              data-status="{{ $item->estado }}"
              data-talla="{{ $item->presentacione->sigla ?? '' }}"
              data-talla-nombre="{{ $item->presentacione->caracteristica->nombre ?? '' }}"
-             data-stock="{{ $item->inventario->cantidad ?? 0 }}"
+             data-stock="{{ $item->variantes->sum('stock') }}"
              data-edit-href="{{ route('productos.edit', ['producto' => $item]) }}">
             
             <!-- Product Image -->
