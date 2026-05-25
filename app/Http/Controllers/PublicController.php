@@ -13,6 +13,9 @@ class PublicController extends Controller
     {
         $featuredProducts = Producto::with(['categoria.caracteristica', 'marca.caracteristica', 'variantes'])
             ->where('estado', 1)
+            ->whereHas('variantes', function ($q) {
+                $q->where('stock', '>', 0);
+            })
             ->latest()
             ->take(4)
             ->get();
@@ -23,7 +26,10 @@ class PublicController extends Controller
     public function collection(Request $request)
     {
         $query = Producto::with(['categoria.caracteristica', 'marca.caracteristica', 'variantes.presentacione'])
-            ->where('estado', 1);
+            ->where('estado', 1)
+            ->whereHas('variantes', function ($q) {
+                $q->where('stock', '>', 0);
+            });
 
         if ($request->filled('categoria') && $request->categoria !== 'all') {
             $query->whereHas('categoria.caracteristica', function ($q) use ($request) {
@@ -74,12 +80,18 @@ class PublicController extends Controller
     {
         $product = Producto::with(['categoria.caracteristica', 'marca.caracteristica', 'variantes.presentacione'])
             ->where('estado', 1)
+            ->whereHas('variantes', function ($q) {
+                $q->where('stock', '>', 0);
+            })
             ->findOrFail($id);
 
         $relatedProducts = Producto::with(['variantes', 'marca.caracteristica'])
             ->where('categoria_id', $product->categoria_id)
             ->where('id', '!=', $id)
             ->where('estado', 1)
+            ->whereHas('variantes', function ($q) {
+                $q->where('stock', '>', 0);
+            })
             ->latest()
             ->take(4)
             ->get();
@@ -87,6 +99,9 @@ class PublicController extends Controller
         $featuredProducts = Producto::with(['variantes', 'marca.caracteristica'])
             ->where('estado', 1)
             ->where('id', '!=', $id)
+            ->whereHas('variantes', function ($q) {
+                $q->where('stock', '>', 0);
+            })
             ->latest()
             ->take(4)
             ->get();

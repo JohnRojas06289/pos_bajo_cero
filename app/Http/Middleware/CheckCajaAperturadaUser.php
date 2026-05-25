@@ -20,6 +20,12 @@ class CheckCajaAperturadaUser
         $existe = Caja::where('user_id', Auth::id())->where('estado', 1)->exists(); 
 
         if (!$existe) {
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json([
+                    'error' => 'No hay una caja abierta para tu usuario actual. Debes aperturar una caja antes de registrar ventas.'
+                ], 409);
+            }
+
             return redirect()->route('cajas.index') // Redirige a otra ruta si no existe
                 ->with('error', 'Debe aperturar una caja');
         }
