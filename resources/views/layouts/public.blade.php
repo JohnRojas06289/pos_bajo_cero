@@ -102,7 +102,7 @@
                     <div class="d-flex gap-3">
                         <a href="#" style="color:rgba(255,255,255,0.75);font-size:1.2rem;transition:color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='rgba(255,255,255,0.75)'"><i class="fab fa-instagram"></i></a>
                         <a href="#" style="color:rgba(255,255,255,0.75);font-size:1.2rem;transition:color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='rgba(255,255,255,0.75)'"><i class="fab fa-facebook"></i></a>
-                        <a href="#" style="color:rgba(255,255,255,0.75);font-size:1.2rem;transition:color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='rgba(255,255,255,0.75)'"><i class="fab fa-tiktok"></i></a>
+                        <a href="https://www.tiktok.com/@chaquetas.bajo.ce0" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.75);font-size:1.2rem;transition:color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='rgba(255,255,255,0.75)'"><i class="fab fa-tiktok"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-4 mb-5 mb-lg-0">
