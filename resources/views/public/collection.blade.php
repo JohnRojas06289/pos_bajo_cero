@@ -99,9 +99,9 @@
                         <div class="card product-card h-100 border-0">
                             {{-- Stock badge --}}
                             @if($totalStock > 0)
-                                <div class="badge bg-success text-white position-absolute" style="top:.5rem;right:.5rem">DISPONIBLE</div>
+                                <div class="badge bg-success text-white position-absolute" style="top:.5rem;right:.5rem;z-index:10">DISPONIBLE</div>
                             @else
-                                <div class="badge bg-danger text-white position-absolute" style="top:.5rem;right:.5rem">AGOTADO</div>
+                                <div class="badge bg-danger text-white position-absolute" style="top:.5rem;right:.5rem;z-index:10">AGOTADO</div>
                             @endif
 
                             {{-- Imagen --}}

@@ -64,7 +64,10 @@ class PublicController extends Controller
             ->whereHas('caracteristica', fn ($q) => $q->where('estado', 1))
             ->get();
 
-        return view('public.collection', compact('products', 'categorias', 'marcas'));
+        return response()
+            ->view('public.collection', compact('products', 'categorias', 'marcas'))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate')
+            ->header('Pragma', 'no-cache');
     }
 
     public function show($id)
