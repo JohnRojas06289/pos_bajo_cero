@@ -1165,7 +1165,7 @@ input:checked + .slider:before { transform: translateX(12px); }
             <div class="cart-controls">
                 {{-- Visibility Toggle --}}
                 <label class="price-toggle-wrap" title="Mostrar/Ocultar precios unitarios">
-                    <span class="price-toggle-label">Ver</span>
+                    <span class="price-toggle-label">Por Mayor</span>
                     <label class="switch">
                         <input type="checkbox" id="toggleCartPrices" checked onchange="togglePrices(this.checked)">
                         <span class="slider"></span>
@@ -1347,6 +1347,7 @@ $allProductsData = $productos->map(function($p) use ($_cloudName) {
         'marca_id'    => $p->marca_id ?? '',
         'marca_nombre'=> $p->marca_nombre ?? '',
         'producto_id' => $productoId,      // alias explcito para agrupacin
+        'precio_mayor' => (float)($p->precio_al_por_mayor ?? 0),
     ];
 })->sortBy('nombre')->values();
 @endphp
@@ -1360,6 +1361,7 @@ const supervisorCodes = @json($supervisorCodes);
 let cart           = [];  // [{id, nombre, precio, cantidad, stock}]
 let supervisorUnlocked = false; // Admin activa manualmente con el botón
 let showCartPrices     = true;
+let mayoreo = false;
 @if(old('arrayidproducto'))
     @foreach(old('arrayidproducto') as $i => $id_val)
         (function() {
@@ -1856,8 +1858,25 @@ function updateEditPricesBtn() {
 }
 
 window.togglePrices = function(checked) {
-    showCartPrices = checked;
+    mayoreo = checked;
+    if (checked) {
+        // Aplicar precio al por mayor a todos los ítems del carrito
+        cart.forEach(item => {
+            const p = allProducts.find(x => x.variante_id == item.variante_id);
+            if (!item._precio_original) item._precio_original = item.precio;
+            if (p && p.precio_mayor > 0) item.precio = p.precio_mayor;
+        });
+    } else {
+        // Restaurar precios originales
+        cart.forEach(item => {
+            if (item._precio_original !== undefined) {
+                item.precio = item._precio_original;
+                delete item._precio_original;
+            }
+        });
+    }
     renderCart();
+    updateFormFields();
 };
 
 window.unlockPrices = function() {

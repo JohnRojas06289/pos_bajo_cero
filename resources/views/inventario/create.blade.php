@@ -44,6 +44,11 @@
              <div class="col-md-6">
                 <x-forms.input id="precio_venta" type='number' labelText='Precio de venta' required='true'/>
             </div>
+
+            {{-- Precio al por mayor --}}
+            <div class="col-md-6">
+                <x-forms.input id="precio_al_por_mayor" type='number' step="0.01" labelText='Precio al por mayor' />
+            </div>
         </div>
 
         <x-slot name='footer'>

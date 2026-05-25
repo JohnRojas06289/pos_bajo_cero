@@ -62,6 +62,9 @@ class InventarioControlller extends Controller
             // Update product sale price
             $producto = Producto::findOrFail($request->producto_id);
             $producto->update(['precio' => $request->precio_venta]);
+            if ($request->filled('precio_al_por_mayor')) {
+                $producto->update(['precio_al_por_mayor' => $request->precio_al_por_mayor]);
+            }
 
             DB::commit();
             ActivityLogService::log('Inicialiación de producto', 'Productos', $request->validated());
@@ -109,6 +112,9 @@ class InventarioControlller extends Controller
             $producto = $inventario->producto;
             if ($request->has('precio_venta')) {
                 $producto->update(['precio' => $request->precio_venta]);
+            }
+            if ($request->filled('precio_al_por_mayor')) {
+                $producto->update(['precio_al_por_mayor' => $request->precio_al_por_mayor]);
             }
 
             // Update Inventory (excluding fields not in table)

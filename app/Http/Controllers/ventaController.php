@@ -85,6 +85,7 @@ class ventaController extends Controller
                     'p.codigo',
                     'p.id as producto_uuid',
                     'p.precio',
+                    'p.precio_al_por_mayor',
                     'p.img_path',
                     'p.categoria_id',
                     'p.genero',

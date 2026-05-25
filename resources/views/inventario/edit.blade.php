@@ -40,6 +40,11 @@
             <div class="col-md-6">
                 <x-forms.input id="precio_venta" type='number' step="0.01" labelText='Precio de Venta' required='true' :defaultValue="$producto->precio" />
             </div>
+
+            {{-- Precio al por mayor --}}
+            <div class="col-md-6">
+                <x-forms.input id="precio_al_por_mayor" type='number' step="0.01" labelText='Precio al por mayor' :defaultValue="$producto->precio_al_por_mayor" />
+            </div>
         </div>
 
         <x-slot name='footer'>

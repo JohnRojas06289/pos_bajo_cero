@@ -26,7 +26,8 @@ class StoreInventarioRequest extends FormRequest
             'ubicacione_id' => 'nullable|exists:ubicaciones,id',
             'cantidad' => 'required|numeric|min:0',
             'costo_unitario' => 'required|numeric|min:0.1',
-            'precio_venta' => 'required|numeric|min:0'
+            'precio_venta' => 'required|numeric|min:0',
+            'precio_al_por_mayor' => 'nullable|numeric|min:0',
         ];
     }
 }

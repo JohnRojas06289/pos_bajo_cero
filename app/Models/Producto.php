@@ -23,6 +23,7 @@ class Producto extends Model
         'imagenes',
         'estado',
         'precio',
+        'precio_al_por_mayor',
         'marca_id',
         'presentacione_id',
         'categoria_id',
