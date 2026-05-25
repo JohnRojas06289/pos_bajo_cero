@@ -280,7 +280,7 @@
         {{-- Variantes disponibles --}}
         @if($variantes->isNotEmpty())
             <div class="mb-4">
-                <div class="attr-label mb-2">VARIANTES DISPONIBLES</div>
+                <div class="attr-label mb-2">TALLAS DISPONIBLES</div>
                 <div class="d-flex flex-wrap gap-2">
                     @foreach($variantes as $v)
                         <span class="badge fs-6 px-3 py-2 {{ $v->stock > 0 ? 'bg-secondary' : 'bg-dark opacity-50' }}"
