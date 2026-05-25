@@ -1740,7 +1740,7 @@ function clearCart() {
 
 function getSubtotal() { return cart.reduce((s, i) => s + (i.precio * i.cantidad), 0); }
 
-function onPriceInput(event, varianteId) {
+window.onPriceInput = function onPriceInput(event, varianteId) {
     const input = event.target;
     // Quitar todo excepto dígitos
     const digits = input.value.replace(/\D/g, '');
