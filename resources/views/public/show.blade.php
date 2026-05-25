@@ -172,6 +172,28 @@
 .product-sections { margin-top: 72px; }
 .prod-section { padding-top: 48px; border-top: 1px solid var(--card-border); margin-top: 48px; }
 .prod-section:first-child { margin-top: 0; }
+
+/* Talla selector */
+.talla-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.25);
+    color: rgba(255,255,255,0.75);
+    border-radius: 6px;
+    padding: 6px 18px;
+    font-size: .95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+}
+.talla-btn:hover {
+    border-color: var(--primary-color);
+    color: #fff;
+}
+.talla-btn.selected {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+}
 </style>
 @endpush
 
@@ -281,12 +303,13 @@
         @if($variantes->isNotEmpty())
             <div class="mb-4">
                 <div class="attr-label mb-2">TALLAS DISPONIBLES</div>
-                <div class="d-flex flex-wrap gap-2">
+                <div class="d-flex flex-wrap gap-2" id="tallasPicker">
                     @foreach($variantes as $v)
-                        <span class="badge fs-6 px-3 py-2 bg-secondary"
-                              style="border:1px solid rgba(255,255,255,0.15);">
+                        <button type="button"
+                                class="talla-btn"
+                                data-label="{{ $v->label }}">
                             {{ $v->label }}
-                        </span>
+                        </button>
                     @endforeach
                 </div>
             </div>
@@ -294,7 +317,7 @@
 
         {{-- CTA --}}
         <a href="https://wa.me/573053530749?text={{ urlencode('Hola! Me interesa: ' . $product->nombre . ' — $' . number_format($product->precio, 0)) }}"
-           target="_blank" rel="noopener" class="btn-wsp">
+           target="_blank" rel="noopener" class="btn-wsp" id="btnWsp">
             <i class="fab fa-whatsapp" style="font-size:1.15rem;"></i>
             CONSULTAR POR WHATSAPP
         </a>
@@ -486,5 +509,23 @@ document.addEventListener('keydown', e => {
         sx = null;
     });
 })();
+
+// Talla selector
+const baseWspHref = "https://wa.me/573053530749?text={{ urlencode('Hola! Me interesa: ' . $product->nombre . ' — $' . number_format($product->precio, 0)) }}";
+const btnWsp      = document.getElementById('btnWsp');
+let tallaSeleccionada = '';
+
+document.querySelectorAll('.talla-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.talla-btn').forEach(b => b.classList.remove('selected'));
+        this.classList.add('selected');
+        tallaSeleccionada = this.dataset.label;
+        if (btnWsp) {
+            const msg = '{{ addslashes('Hola! Me interesa: ' . $product->nombre . ' — $' . number_format($product->precio, 0)) }}' +
+                        ' — Talla: ' + tallaSeleccionada;
+            btnWsp.href = 'https://wa.me/573053530749?text=' + encodeURIComponent(msg);
+        }
+    });
+});
 </script>
 @endpush
