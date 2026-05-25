@@ -181,17 +181,22 @@
     {{-- ── KPIs del período ─────────────────────────────────────────────── --}}
     <div class="periodo-banner">
         <div class="row g-3 text-center">
-            <div class="col-4">
+            <div class="col-6 col-md-3">
                 <div class="label">Ventas del período</div>
                 <div class="value">${{ number_format($ventasPeriodo, 0, ',', '.') }}</div>
                 <div class="sub">COP</div>
             </div>
-            <div class="col-4">
+            <div class="col-6 col-md-3">
+                <div class="label">Ganancia</div>
+                <div class="value {{ $utilidadBruta >= 0 ? '' : 'margen-neg' }}">${{ number_format(abs($utilidadBruta), 0, ',', '.') }}</div>
+                <div class="sub">{{ $utilidadBruta >= 0 ? 'ventas − gastos' : 'pérdida' }}</div>
+            </div>
+            <div class="col-6 col-md-3">
                 <div class="label">Transacciones</div>
                 <div class="value">{{ number_format($transaccionesPeriodo) }}</div>
                 <div class="sub">ventas</div>
             </div>
-            <div class="col-4">
+            <div class="col-6 col-md-3">
                 <div class="label">Ticket Promedio</div>
                 <div class="value">${{ number_format($ticketPromedioPeriodo, 0, ',', '.') }}</div>
                 <div class="sub">por venta</div>
