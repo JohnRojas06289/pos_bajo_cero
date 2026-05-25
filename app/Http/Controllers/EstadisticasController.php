@@ -54,7 +54,7 @@ class EstadisticasController extends Controller
 
             $unidadesVendidas    = DB::table('producto_venta')->sum('cantidad');
             $ventasEfectivo      = Venta::where('metodo_pago', 'EFECTIVO')->sum('total');
-            $ventasTransferencia = Venta::whereIn('metodo_pago', ['NEQUI', 'DAVIPLATA', 'TRANSFERENCIA'])->sum('total');
+            $ventasTransferencia = Venta::whereIn('metodo_pago', ['NEQUI', 'DAVIPLATA', 'TRANSFERENCIA', 'VENTA_DIGITAL'])->sum('total');
 
             // ── Gastos (compras) del período ─────────────────────────────────
             $gastosPeriodo  = DB::table('compras')->whereBetween('created_at', [$rangeStart, $rangeEnd])->sum('total');

@@ -41,7 +41,7 @@ class homeController extends Controller
                                       ->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
             $daviplataHoy      = Venta::where('metodo_pago', 'DAVIPLATA')
                                       ->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
-            $transferenciaHoy  = Venta::where('metodo_pago', 'TRANSFERENCIA')
+            $transferenciaHoy  = Venta::whereIn('metodo_pago', ['TRANSFERENCIA', 'VENTA_DIGITAL'])
                                       ->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
 
             // ── Ventas por cliente del día (con productos) ────────────────────
@@ -75,7 +75,7 @@ class homeController extends Controller
         $efectivoHoy      = Venta::where('metodo_pago', 'EFECTIVO')->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
         $nequiHoy         = Venta::where('metodo_pago', 'NEQUI')->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
         $daviplataHoy     = Venta::where('metodo_pago', 'DAVIPLATA')->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
-        $transferenciaHoy = Venta::where('metodo_pago', 'TRANSFERENCIA')->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
+        $transferenciaHoy = Venta::whereIn('metodo_pago', ['TRANSFERENCIA', 'VENTA_DIGITAL'])->whereBetween('created_at', [$hoyStart, $hoyEnd])->sum('total');
 
         $ventas = Venta::with(['cliente.persona', 'productos', 'user'])
             ->whereBetween('created_at', [$hoyStart, $hoyEnd])
