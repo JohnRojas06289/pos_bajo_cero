@@ -1740,14 +1740,22 @@ function clearCart() {
 
 function getSubtotal() { return cart.reduce((s, i) => s + (i.precio * i.cantidad), 0); }
 
+// Formateador determinístico sin depender de toLocaleString
+function fmtMiles(n) {
+    return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
 window.posEditPrice = function(event, varianteId) {
-    const input = event.target;
-    // Quitar todo excepto dígitos
+    const input  = event.target;
     const digits = input.value.replace(/\D/g, '');
-    const num = parseInt(digits, 10) || 0;
-    // Formatear con puntos de miles y reposicionar cursor
-    const formatted = num.toLocaleString('es-CO').replace(/,/g, '.');
-    input.value = formatted;
+    const num    = parseInt(digits, 10) || 0;
+    // Guardar posición relativa del cursor desde el final
+    const lenBefore = input.value.length;
+    input.value = fmtMiles(num);
+    // Restaurar cursor desde el final para que no salte al inicio
+    const diff = input.value.length - lenBefore;
+    const pos  = (input.selectionStart || 0) + diff;
+    input.setSelectionRange(pos, pos);
     updateItemPrice(varianteId, num);
 }
 
@@ -1805,7 +1813,7 @@ function renderCart() {
                 <div class="cart-item-name" title="${item.nombre}">${item.nombre}</div>
                 ${supervisorUnlocked
                     ? `<input type="text" inputmode="numeric" class="cart-item-price-input"
-                              value="${fmt(item.precio)}"
+                              value="${fmtMiles(item.precio)}"
                               oninput="posEditPrice(event, '${item.variante_id}')"
                               onkeydown="if(event.key==='Enter'){event.preventDefault();posEditPrice(event,'${item.variante_id}');this.blur();}"
                               title="Editar precio unitario">`
