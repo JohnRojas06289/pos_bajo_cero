@@ -55,6 +55,7 @@ Route::post('/reservar', [ReservaController::class, 'store'])->name('reservar.st
 
 
 Route::middleware('auth')->get('/panel', [homeController::class, 'index'])->name('panel');
+Route::middleware('auth')->get('/panel/kpis', [homeController::class, 'kpis'])->name('panel.kpis');
 Route::middleware('auth')->get('/admin/estadisticas', [EstadisticasController::class, 'index'])->name('estadisticas.index');
 
 

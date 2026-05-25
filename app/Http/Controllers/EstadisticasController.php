@@ -48,6 +48,28 @@ class EstadisticasController extends Controller
             $ventasEfectivo      = Venta::where('metodo_pago', 'EFECTIVO')->sum('total');
             $ventasTransferencia = Venta::whereIn('metodo_pago', ['NEQUI', 'DAVIPLATA', 'TRANSFERENCIA'])->sum('total');
 
+            // ── Gastos (compras) del período ─────────────────────────────────
+            $gastosPeriodo  = DB::table('compras')->whereBetween('created_at', [$rangeStart, $rangeEnd])->sum('total');
+            $gastosMes      = Compra::whereMonth('created_at', Carbon::now()->month)->whereYear('created_at', Carbon::now()->year)->sum('total');
+            $gastosYear     = Compra::whereYear('created_at', Carbon::now()->year)->sum('total');
+            $utilidadBruta  = $ventasPeriodo - $gastosPeriodo;
+            $margenPct      = $ventasPeriodo > 0 ? round(($utilidadBruta / $ventasPeriodo) * 100, 1) : 0;
+
+            // Gastos por día en el período (para gráfica)
+            $gastosPorDia   = DB::table('compras')
+                ->selectRaw("DATE(created_at) as fecha, SUM(total) as total, COUNT(*) as cantidad")
+                ->whereBetween('created_at', [$rangeStart, $rangeEnd])
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->orderBy('fecha', 'asc')
+                ->get()->toArray();
+
+            // Últimas compras del período
+            $ultimasCompras = Compra::with(['proveedore', 'user'])
+                ->whereBetween('created_at', [$rangeStart, $rangeEnd])
+                ->latest()
+                ->limit(10)
+                ->get();
+
             [$totalClientes, $totalProductos, $totalCompras, $totalUsuarios] = Cache::remember(
                 'dashboard_counts', 300, fn () => [
                     Cliente::count(),
@@ -108,6 +130,8 @@ class EstadisticasController extends Controller
                 'totalVentasPorDia', 'pagosPorMetodo',
                 'top5MasVendidos', 'top5MenosVendidos',
                 'ultimasVentas', 'productosStockBajo',
+                'gastosPeriodo', 'gastosMes', 'gastosYear',
+                'utilidadBruta', 'margenPct', 'gastosPorDia', 'ultimasCompras',
             ));
 
         } catch (\Exception $e) {

@@ -122,6 +122,10 @@
     transition: all 0.15s ease;
 }
 .btn-detail:hover { border-color: #E67E22; color: #E67E22; }
+.icon-red    { background: linear-gradient(135deg,#C0392B,#E74C3C); }
+.icon-teal   { background: linear-gradient(135deg,#148F77,#1ABC9C); }
+.margen-pos  { color: #27AE60; }
+.margen-neg  { color: #E74C3C; }
 </style>
 @endpush
 
@@ -192,6 +196,63 @@
         </div>
     </div>
 
+    {{-- ── Gastos & Utilidad del período ──────────────────────────── --}}
+    <div class="db-section-title">Gastos & Utilidad del período</div>
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-md-3">
+            <div class="db-kpi-card" style="border-left-color:#E74C3C;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="db-kpi-label">Gastos (Compras)</div>
+                        <div class="db-kpi-value">${{ number_format($gastosPeriodo, 0, ',', '.') }}</div>
+                        <div class="db-kpi-sub">en el período</div>
+                    </div>
+                    <div class="db-kpi-icon icon-red"><i class="fas fa-shopping-cart"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="db-kpi-card" style="border-left-color:{{ $utilidadBruta >= 0 ? '#27AE60' : '#E74C3C' }};">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="db-kpi-label">Utilidad Bruta</div>
+                        <div class="db-kpi-value {{ $utilidadBruta >= 0 ? 'margen-pos' : 'margen-neg' }}">
+                            ${{ number_format(abs($utilidadBruta), 0, ',', '.') }}
+                        </div>
+                        <div class="db-kpi-sub">{{ $utilidadBruta >= 0 ? 'Ganancia' : 'Pérdida' }}</div>
+                    </div>
+                    <div class="db-kpi-icon" style="background:{{ $utilidadBruta >= 0 ? 'linear-gradient(135deg,#1E8449,#27AE60)' : 'linear-gradient(135deg,#C0392B,#E74C3C)' }};">
+                        <i class="fas fa-{{ $utilidadBruta >= 0 ? 'arrow-up' : 'arrow-down' }}"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="db-kpi-card" style="border-left-color:#1ABC9C;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="db-kpi-label">Margen Bruto</div>
+                        <div class="db-kpi-value {{ $margenPct >= 0 ? 'margen-pos' : 'margen-neg' }}">{{ $margenPct }}%</div>
+                        <div class="db-kpi-sub">Sobre ventas</div>
+                    </div>
+                    <div class="db-kpi-icon icon-teal"><i class="fas fa-percentage"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="db-kpi-card" style="border-left-color:#8E44AD;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="db-kpi-label">Gastos Mes / Año</div>
+                        <div class="db-kpi-value" style="font-size:1.1rem;">${{ number_format($gastosMes, 0, ',', '.') }}</div>
+                        <div class="db-kpi-sub">Año: ${{ number_format($gastosYear, 0, ',', '.') }}</div>
+                    </div>
+                    <div class="db-kpi-icon icon-purple"><i class="fas fa-boxes"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- ── Gráficas ─────────────────────────────────────────────────────── --}}
     <div class="db-section-title">Análisis del período</div>
     <div class="row g-3 mb-3">
@@ -236,6 +297,20 @@
                 </div>
                 <div class="chart-card-body">
                     <div style="height:200px;"><canvas id="top5MenosChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── Gráfica: Ventas vs Gastos por día ─────────────────────── --}}
+    <div class="row g-3 mb-3">
+        <div class="col-12">
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <h6><i class="fas fa-balance-scale me-2" style="color:#E67E22;"></i>Ventas vs Gastos por Día</h6>
+                </div>
+                <div class="chart-card-body">
+                    <div style="height:240px;"><canvas id="ventasVsGastosChart"></canvas></div>
                 </div>
             </div>
         </div>
@@ -422,6 +497,50 @@
         </div>
     </div>
 
+    {{-- ── Últimas compras del período ────────────────────────────── --}}
+    @if($ultimasCompras->isNotEmpty())
+    <div class="db-section-title">Últimas compras del período</div>
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <h6><i class="fas fa-shopping-cart me-2" style="color:#E74C3C;"></i>Compras / Gastos registrados</h6>
+                </div>
+                <div class="p-0">
+                    <div class="table-responsive">
+                        <table class="db-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Proveedor</th>
+                                    <th>Comprobante</th>
+                                    <th>Método</th>
+                                    <th>Total</th>
+                                    <th>Registrado por</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($ultimasCompras as $c)
+                                <tr>
+                                    <td>{{ \Carbon\Carbon::parse($c->created_at)->format('d/m H:i') }}</td>
+                                    <td>{{ $c->proveedore?->persona?->razon_social ?? '—' }}</td>
+                                    <td style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;">{{ $c->numero_comprobante ?? '—' }}</td>
+                                    <td><span class="stock-badge badge-efectivo">{{ $c->metodo_pago }}</span></td>
+                                    <td style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#E74C3C;">
+                                        ${{ number_format($c->total, 0, ',', '.') }}
+                                    </td>
+                                    <td>{{ $c->user?->name ?? 'N/A' }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
 </div>
 
 {{-- ── Modal detalle ───────────────────────────────────────────────────── --}}
@@ -558,6 +677,42 @@ function cop(v) { return '$' + Number(v).toLocaleString('es-CO', {maximumFractio
         }
         makeHBar('top5MasChart',   datosTop5Mas.map(p=>p.nombre),   datosTop5Mas.map(p=>parseInt(p.total_vendido)||0),   JS_GREEN);
         makeHBar('top5MenosChart', datosTop5Menos.map(p=>p.nombre), datosTop5Menos.map(p=>parseInt(p.total_vendido)||0), JS_RED);
+
+        // Ventas vs Gastos por día
+        const _vgCanvas = document.getElementById('ventasVsGastosChart');
+        if (_vgCanvas) {
+            const gastosData    = @json($gastosPorDia);
+            // Merge ventas y gastos por fecha
+            const ventasByDate  = {};
+            datosVentasDia.forEach(d => { ventasByDate[String(d.fecha).split(' ')[0]] = parseFloat(d.total) || 0; });
+            const gastosByDate  = {};
+            gastosData.forEach(d => { gastosByDate[String(d.fecha).split(' ')[0]] = parseFloat(d.total) || 0; });
+            // Union de todas las fechas
+            const allDates = [...new Set([...Object.keys(ventasByDate), ...Object.keys(gastosByDate)])].sort();
+            const vgLabels = allDates.map(f => { const p = f.split('-'); return p.length===3 ? `${p[2]}/${p[1]}` : f; });
+            const vgVentas = allDates.map(f => ventasByDate[f] || 0);
+            const vgGastos = allDates.map(f => gastosByDate[f] || 0);
+
+            new Chart(_vgCanvas, {
+                type: 'bar',
+                data: {
+                    labels: vgLabels,
+                    datasets: [
+                        { label: 'Ventas', data: vgVentas, backgroundColor: 'rgba(230,126,34,0.75)', borderColor: JS_ACCENT, borderWidth: 1.5 },
+                        { label: 'Gastos', data: vgGastos, backgroundColor: 'rgba(231,76,60,0.65)',  borderColor: JS_RED,    borderWidth: 1.5 }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        xAxes: [{ gridLines:{display:false}, ticks:{fontColor:tickColor(),maxTicksLimit:12} }],
+                        yAxes: [{ ticks:{fontColor:tickColor(),maxTicksLimit:5,callback:v=>cop(v)}, gridLines:{color:gridColor(),drawBorder:false,borderDash:[3]} }]
+                    },
+                    legend: { display:true, labels:{fontColor:tickColor(),boxWidth:12,padding:14,usePointStyle:true} },
+                    tooltips: { mode:'index', intersect:false, backgroundColor:themeColor('#fff','#1A1A2C'), titleFontColor:themeColor('#1e293b','#ecedf0'), bodyFontColor:themeColor('#64748b','#B0B3C1'), borderColor:themeColor('#e2e8f0','#2A2A3E'), borderWidth:1, callbacks:{label:(item)=>` ${item.datasetIndex===0?'Ventas':'Gastos'}: ${cop(item.yLabel)}`} }
+                }
+            });
+        }
 
     } catch(e) { console.warn('[Estadísticas] Chart error:', e.message); }
 })();

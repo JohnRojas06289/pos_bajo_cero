@@ -57,4 +57,49 @@ class homeController extends Controller
             return response("Error en Dashboard: " . $e->getMessage() . " | File: " . $e->getFile() . " | Line: " . $e->getLine());
         }
     }
+
+    public function kpis(): \Illuminate\Http\JsonResponse
+    {
+        if (!Auth::check() || !Auth::user()->can('ver-panel')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $ventasHoy        = Venta::whereDate('created_at', Carbon::today())->sum('total');
+        $transaccionesHoy = Venta::whereDate('created_at', Carbon::today())->count();
+        $efectivoHoy      = Venta::where('metodo_pago', 'EFECTIVO')->whereDate('created_at', Carbon::today())->sum('total');
+        $nequiHoy         = Venta::where('metodo_pago', 'NEQUI')->whereDate('created_at', Carbon::today())->sum('total');
+        $daviplataHoy     = Venta::where('metodo_pago', 'DAVIPLATA')->whereDate('created_at', Carbon::today())->sum('total');
+        $transferenciaHoy = Venta::where('metodo_pago', 'TRANSFERENCIA')->whereDate('created_at', Carbon::today())->sum('total');
+
+        $ventas = Venta::with(['cliente.persona', 'productos', 'user'])
+            ->whereDate('created_at', Carbon::today())
+            ->latest()
+            ->get()
+            ->map(fn($v) => [
+                'hora'      => Carbon::parse($v->created_at)->format('H:i'),
+                'cliente'   => $v->cliente?->persona?->razon_social ?? 'Cliente General',
+                'metodo'    => $v->metodo_pago,
+                'total'     => (float) $v->total,
+                'vendedor'  => $v->user?->name ?? 'N/A',
+                'numero'    => $v->numero_venta ?? null,
+                'fecha'     => Carbon::parse($v->created_at)->format('d/m/Y H:i'),
+                'productos' => $v->productos->map(fn($p) => [
+                    'nombre'   => $p->nombre,
+                    'cantidad' => $p->pivot->cantidad,
+                    'precio'   => (float) $p->pivot->precio_venta,
+                    'subtotal' => (float) ($p->pivot->cantidad * $p->pivot->precio_venta),
+                ]),
+            ]);
+
+        return response()->json([
+            'ventasHoy'         => (float) $ventasHoy,
+            'transaccionesHoy'  => (int)   $transaccionesHoy,
+            'ticketPromedioHoy' => $transaccionesHoy > 0 ? round($ventasHoy / $transaccionesHoy) : 0,
+            'efectivoHoy'       => (float) $efectivoHoy,
+            'nequiHoy'          => (float) $nequiHoy,
+            'daviplataHoy'      => (float) $daviplataHoy,
+            'transferenciaHoy'  => (float) $transferenciaHoy,
+            'ventas'            => $ventas,
+        ]);
+    }
 }

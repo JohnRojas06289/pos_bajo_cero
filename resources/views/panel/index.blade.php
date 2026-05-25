@@ -118,6 +118,7 @@
         <div>
             <div class="db-section-title mb-0">Resumen del día</div>
             <div style="font-size:0.78rem;color:var(--text-secondary);">{{ \Carbon\Carbon::today()->isoFormat('dddd, D [de] MMMM [de] Y') }}</div>
+            <div id="lastUpdated" style="font-size:0.68rem;color:var(--text-secondary);opacity:0.6;margin-top:2px;"></div>
         </div>
         @can('ver-estadisticas')
         <a href="{{ route('estadisticas.index') }}" class="btn btn-sm btn-warning">
@@ -133,7 +134,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <div class="db-kpi-label">Ventas hoy</div>
-                        <div class="db-kpi-value">${{ number_format($ventasHoy, 0, ',', '.') }}</div>
+                        <div class="db-kpi-value" id="kpi-ventas">${{ number_format($ventasHoy, 0, ',', '.') }}</div>
                         <div class="db-kpi-sub">COP</div>
                     </div>
                     <div class="db-kpi-icon icon-accent"><i class="fas fa-calendar-day"></i></div>
@@ -145,7 +146,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <div class="db-kpi-label">Transacciones</div>
-                        <div class="db-kpi-value">{{ number_format($transaccionesHoy) }}</div>
+                        <div class="db-kpi-value" id="kpi-trans">{{ number_format($transaccionesHoy) }}</div>
                         <div class="db-kpi-sub">Ventas registradas</div>
                     </div>
                     <div class="db-kpi-icon icon-petrol"><i class="fas fa-receipt"></i></div>
@@ -157,7 +158,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <div class="db-kpi-label">Ticket Promedio</div>
-                        <div class="db-kpi-value">${{ number_format($ticketPromedioHoy, 0, ',', '.') }}</div>
+                        <div class="db-kpi-value" id="kpi-ticket">${{ number_format($ticketPromedioHoy, 0, ',', '.') }}</div>
                         <div class="db-kpi-sub">Por venta</div>
                     </div>
                     <div class="db-kpi-icon icon-blue"><i class="fas fa-tags"></i></div>
@@ -169,7 +170,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <div class="db-kpi-label">Efectivo</div>
-                        <div class="db-kpi-value">${{ number_format($efectivoHoy, 0, ',', '.') }}</div>
+                        <div class="db-kpi-value" id="kpi-efectivo">${{ number_format($efectivoHoy, 0, ',', '.') }}</div>
                         <div class="db-kpi-sub">En caja</div>
                     </div>
                     <div class="db-kpi-icon icon-cash"><i class="fas fa-money-bill-wave"></i></div>
@@ -181,7 +182,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <div class="db-kpi-label">Nequi</div>
-                        <div class="db-kpi-value">${{ number_format($nequiHoy, 0, ',', '.') }}</div>
+                        <div class="db-kpi-value" id="kpi-nequi">${{ number_format($nequiHoy, 0, ',', '.') }}</div>
                         <div class="db-kpi-sub">Digital</div>
                     </div>
                     <div class="db-kpi-icon icon-nequi"><i class="fas fa-mobile-alt"></i></div>
@@ -193,7 +194,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <div class="db-kpi-label">Daviplata</div>
-                        <div class="db-kpi-value">${{ number_format($daviplataHoy, 0, ',', '.') }}</div>
+                        <div class="db-kpi-value" id="kpi-daviplata">${{ number_format($daviplataHoy, 0, ',', '.') }}</div>
                         <div class="db-kpi-sub">Digital</div>
                     </div>
                     <div class="db-kpi-icon icon-davi"><i class="fas fa-university"></i></div>
@@ -205,7 +206,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <div class="db-kpi-label">Transferencia</div>
-                        <div class="db-kpi-value">${{ number_format($transferenciaHoy, 0, ',', '.') }}</div>
+                        <div class="db-kpi-value" id="kpi-transfer">${{ number_format($transferenciaHoy, 0, ',', '.') }}</div>
                         <div class="db-kpi-sub">Digital</div>
                     </div>
                     <div class="db-kpi-icon icon-digital"><i class="fas fa-exchange-alt"></i></div>
@@ -366,5 +367,67 @@ function abrirDetalle(data) {
 
     new bootstrap.Modal(document.getElementById('ventaDetalleModal')).show();
 }
+
+// ── Polling en tiempo real cada 60 segundos ─────────────────────
+(function initPolling() {
+    const kpisUrl = "{{ route('panel.kpis') }}";
+
+    function cop(n) {
+        return '$' + Math.round(n).toLocaleString('es-CO', { maximumFractionDigits: 0 });
+    }
+
+    function updateSalesTable(ventas) {
+        const tbody = document.querySelector('.chart-card .db-table tbody');
+        if (!tbody) return;
+        if (!ventas || !ventas.length) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-secondary"><i class="fas fa-store-slash fa-2x mb-2 d-block" style="opacity:0.3;"></i>Sin ventas registradas hoy</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = ventas.map((v, i) => `
+            <tr>
+                <td class="text-secondary" style="font-size:0.7rem;">${i + 1}</td>
+                <td>${v.hora}</td>
+                <td class="fw-600">${v.cliente}</td>
+                <td><span class="stock-badge badge-${v.metodo.toLowerCase()}">${v.metodo}</span></td>
+                <td class="fw-700" style="font-family:'JetBrains Mono',monospace;">${cop(v.total)}</td>
+                <td>${v.vendedor}</td>
+                <td><button class="btn-detail" onclick="abrirDetalle(${JSON.stringify(v).replace(/'/g, '&#39;')})"><i class="fas fa-eye"></i></button></td>
+            </tr>
+        `).join('');
+    }
+
+    async function fetchKpis() {
+        try {
+            const res = await fetch(kpisUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!res.ok) return;
+            const d = await res.json();
+
+            const map = {
+                'kpi-ventas':    cop(d.ventasHoy),
+                'kpi-trans':     d.transaccionesHoy,
+                'kpi-ticket':    cop(d.ticketPromedioHoy),
+                'kpi-efectivo':  cop(d.efectivoHoy),
+                'kpi-nequi':     cop(d.nequiHoy),
+                'kpi-daviplata': cop(d.daviplataHoy),
+                'kpi-transfer':  cop(d.transferenciaHoy),
+            };
+            Object.entries(map).forEach(([id, val]) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val;
+            });
+
+            updateSalesTable(d.ventas);
+
+            const tsEl = document.getElementById('lastUpdated');
+            if (tsEl) tsEl.textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        } catch (e) {
+            console.warn('[Panel] polling error:', e.message);
+        }
+    }
+
+    setInterval(fetchKpis, 60000);
+    // Run once on load to show initial timestamp
+    fetchKpis();
+})();
 </script>
 @endpush
