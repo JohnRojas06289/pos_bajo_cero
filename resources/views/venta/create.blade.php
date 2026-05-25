@@ -1764,12 +1764,9 @@ function updateItemPrice(varianteId, rawValue) {
     document.getElementById('displayTotal').textContent = fmt(total);
     const mobileTotal = document.getElementById('mobileTotalDisplay');
     if (mobileTotal) mobileTotal.textContent = fmt(total);
-    // Actualizar el subtotal de esta fila usando data attribute
-    const rowEl = document.querySelector(`#cartItems .cart-item[data-variante-id="${varianteId}"]`);
-    if (rowEl) {
-        const subtotalEl = rowEl.querySelector('.cart-item-subtotal');
-        if (subtotalEl) subtotalEl.textContent = fmt(newPrice * item.cantidad);
-    }
+    // Actualizar el subtotal de esta fila por ID directo
+    const subtotalEl = document.getElementById(`subtotal-${varianteId}`);
+    if (subtotalEl) subtotalEl.textContent = fmt(newPrice * item.cantidad);
     updateFormFields();
 }
 function getTotal()    { return getSubtotal(); }
@@ -1821,7 +1818,7 @@ function renderCart() {
                 <button class="qty-btn" onclick="changeQty('${item.variante_id}', +1)"
                         ${item.cantidad >= item.stock ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>+</button>
             </div>
-            <div class="cart-item-subtotal">${fmt(item.precio * item.cantidad)}</div>
+            <div class="cart-item-subtotal" id="subtotal-${item.variante_id}">${fmt(item.precio * item.cantidad)}</div>
             <button class="cart-remove-btn" onclick="removeItem('${item.variante_id}')">
                 <i class="fas fa-times"></i>
             </button>
