@@ -283,13 +283,9 @@
                 <div class="attr-label mb-2">TALLAS DISPONIBLES</div>
                 <div class="d-flex flex-wrap gap-2">
                     @foreach($variantes as $v)
-                        <span class="badge fs-6 px-3 py-2 {{ $v->stock > 0 ? 'bg-secondary' : 'bg-dark opacity-50' }}"
-                              style="border:1px solid rgba(255,255,255,0.15);"
-                              title="{{ $v->stock > 0 ? $v->stock . ' en stock' : 'Agotado' }}">
+                        <span class="badge fs-6 px-3 py-2 bg-secondary"
+                              style="border:1px solid rgba(255,255,255,0.15);">
                             {{ $v->label }}
-                            @if($v->stock <= 0)
-                                <span style="font-size:.65rem;opacity:.7;"> — Agotado</span>
-                            @endif
                         </span>
                     @endforeach
                 </div>
