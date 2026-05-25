@@ -131,6 +131,35 @@
                     </div>
                 </div>
             </div>
+            <!-- Ubicación -->
+            <div class="footer-divider">
+                <div class="row gx-5 align-items-center">
+                    <div class="col-lg-5 mb-4 mb-lg-0">
+                        <div class="footer-heading mb-3"><i class="fas fa-map-marker-alt me-2" style="color:var(--primary-color);"></i>Dónde encontrarnos</div>
+                        <p style="color:rgba(255,255,255,0.75);font-size:0.9rem;line-height:1.7;margin-bottom:0.5rem;">
+                            <strong style="color:#fff;">Local Z715</strong><br>
+                            Centro Comercial Carpas y Contenedores Lo Nuestro<br>
+                            Bogotá, Colombia
+                        </p>
+                        <a href="https://maps.google.com/?q=Centro+Comercial+Carpas+y+Contenedores+Lo+Nuestro+Bogota+Colombia"
+                           target="_blank" rel="noopener"
+                           style="color:var(--primary-color);font-size:0.85rem;text-decoration:none;">
+                            <i class="fas fa-directions me-1"></i> Cómo llegar
+                        </a>
+                    </div>
+                    <div class="col-lg-7">
+                        <div style="border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);">
+                            <iframe
+                                src="https://maps.google.com/maps?q=Centro+Comercial+Carpas+y+Contenedores+Lo+Nuestro+Bogota+Colombia&output=embed&z=16"
+                                width="100%" height="220" style="border:0;display:block;"
+                                allowfullscreen="" loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="footer-divider text-center">
                 <small class="footer-copyright">&copy; 2026 Bajo Cero. Todos los derechos reservados.</small>
             </div>
