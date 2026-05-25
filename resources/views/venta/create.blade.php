@@ -1740,8 +1740,19 @@ function clearCart() {
 
 function getSubtotal() { return cart.reduce((s, i) => s + (i.precio * i.cantidad), 0); }
 
+function onPriceInput(event, varianteId) {
+    const input = event.target;
+    // Quitar todo excepto dígitos
+    const digits = input.value.replace(/\D/g, '');
+    const num = parseInt(digits, 10) || 0;
+    // Formatear con puntos de miles y reposicionar cursor
+    const formatted = num.toLocaleString('es-CO').replace(/,/g, '.');
+    input.value = formatted;
+    updateItemPrice(varianteId, num);
+}
+
 function updateItemPrice(varianteId, rawValue) {
-    const newPrice = parseFloat(rawValue);
+    const newPrice = typeof rawValue === 'number' ? rawValue : parseFloat(String(rawValue).replace(/\./g, ''));
     if (isNaN(newPrice) || newPrice < 0) return;
     const item = cart.find(c => c.variante_id == varianteId);
     if (!item) return;
@@ -1796,9 +1807,10 @@ function renderCart() {
             <div style="flex:1;min-width:0;">
                 <div class="cart-item-name" title="${item.nombre}">${item.nombre}</div>
                 ${supervisorUnlocked
-                    ? `<input type="number" class="cart-item-price-input" min="0" step="1"
-                              value="${item.precio}"
-                              oninput="updateItemPrice('${item.variante_id}', this.value)"
+                    ? `<input type="text" inputmode="numeric" class="cart-item-price-input"
+                              value="${fmt(item.precio)}"
+                              oninput="onPriceInput(event, '${item.variante_id}')"
+                              onkeydown="if(event.key==='Enter'){event.preventDefault();onPriceInput(event,'${item.variante_id}');this.blur();}"
                               title="Editar precio unitario">`
                     : `<div class="cart-item-price">${fmt(item.precio)} / ud</div>`
                 }
