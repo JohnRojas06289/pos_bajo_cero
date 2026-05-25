@@ -21,7 +21,7 @@ class EstadisticasController extends Controller
 
         try {
             // ── Filtros de fecha ──────────────────────────────────────────────
-            $fechaInicio = $request->input('fecha_inicio', Carbon::now()->subDays(29)->format('Y-m-d'));
+            $fechaInicio = $request->input('fecha_inicio', Carbon::now()->format('Y-m-d'));
             $fechaFin    = $request->input('fecha_fin',    Carbon::now()->format('Y-m-d'));
             $rangeStart  = $fechaInicio . ' 00:00:00';
             $rangeEnd    = $fechaFin    . ' 23:59:59';
