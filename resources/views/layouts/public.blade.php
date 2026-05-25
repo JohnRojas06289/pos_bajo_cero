@@ -101,7 +101,7 @@
                     <p class="text-muted mb-4">Ropa urbana inspirada en la montaña. Chaquetas, gorras y prendas para quienes desafían el frío. Estilo, calidad y actitud colombiana.</p>
                     <div class="d-flex gap-3">
                         <a href="https://www.instagram.com/importacionesbajocero" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.75);font-size:1.2rem;transition:color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='rgba(255,255,255,0.75)'"><i class="fab fa-instagram"></i></a>
-                        <a href="#" style="color:rgba(255,255,255,0.75);font-size:1.2rem;transition:color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='rgba(255,255,255,0.75)'"><i class="fab fa-facebook"></i></a>
+                        <a href="https://wa.me/573053530749" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.75);font-size:1.2rem;transition:color 0.2s;" onmouseover="this.style.color='#25d366'" onmouseout="this.style.color='rgba(255,255,255,0.75)'"><i class="fab fa-whatsapp"></i></a>
                         <a href="https://www.tiktok.com/@chaquetas.bajo.ce0" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.75);font-size:1.2rem;transition:color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='rgba(255,255,255,0.75)'"><i class="fab fa-tiktok"></i></a>
                     </div>
                 </div>
