@@ -53,16 +53,14 @@ class AgenteIAController extends Controller
             $lastError = '';
 
             do {
+                $userMessage = $systemPrompt . "\n\n---\n\nMensaje del usuario: " . $request->input('message');
                 $response = Http::timeout(20)
                     ->withHeaders(['Content-Type' => 'application/json'])
                     ->post(
                         "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}",
                         [
-                            'system_instruction' => [
-                                'parts' => [['text' => $systemPrompt]]
-                            ],
                             'contents' => [
-                                ['role' => 'user', 'parts' => [['text' => $request->input('message')]]]
+                                ['role' => 'user', 'parts' => [['text' => $userMessage]]]
                             ],
                             'generationConfig' => [
                                 'temperature'     => 0.7,
