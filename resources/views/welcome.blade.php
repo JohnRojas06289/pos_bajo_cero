@@ -128,7 +128,7 @@
         <div class="welcome-tiktok-box d-inline-block">
             <i class="fab fa-tiktok fa-3x mb-3" style="color:var(--text-color);"></i>
             <p style="color:var(--text-color);">Descubre nuestro contenido exclusivo</p>
-            <a href="#" class="btn btn-danger btn-sm">Seguir en TikTok</a>
+            <a href="https://www.tiktok.com/@chaquetas.bajo.ce0" target="_blank" rel="noopener" class="btn btn-danger btn-sm">Seguir en TikTok</a>
         </div>
     </div>
 </section>
