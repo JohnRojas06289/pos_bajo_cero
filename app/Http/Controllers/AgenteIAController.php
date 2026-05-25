@@ -57,7 +57,7 @@ class AgenteIAController extends Controller
                 $response = Http::timeout(20)
                     ->withHeaders(['Content-Type' => 'application/json'])
                     ->post(
-                        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}",
+                        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}",
                         [
                             'contents' => [
                                 ['role' => 'user', 'parts' => [['text' => $userMessage]]]
