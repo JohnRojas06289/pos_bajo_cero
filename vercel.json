@@ -7,6 +7,20 @@
             "runtime": "vercel-php@0.7.4"
         }
     },
+    "headers": [
+        {
+            "source": "/coleccion(.*)",
+            "headers": [
+                { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" }
+            ]
+        },
+        {
+            "source": "/producto/(.*)",
+            "headers": [
+                { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" }
+            ]
+        }
+    ],
     "routes": [
         {
             "src": "/(css|js|images|storage|build|assets)/(.*)",

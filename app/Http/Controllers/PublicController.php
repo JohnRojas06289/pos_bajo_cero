@@ -91,7 +91,10 @@ class PublicController extends Controller
             ->take(4)
             ->get();
 
-        return view('public.show', compact('product', 'relatedProducts', 'featuredProducts'));
+        return response()
+            ->view('public.show', compact('product', 'relatedProducts', 'featuredProducts'))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate')
+            ->header('Pragma', 'no-cache');
     }
 
     public function contact()
