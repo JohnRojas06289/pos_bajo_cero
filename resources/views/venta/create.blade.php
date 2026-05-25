@@ -1740,7 +1740,7 @@ function clearCart() {
 
 function getSubtotal() { return cart.reduce((s, i) => s + (i.precio * i.cantidad), 0); }
 
-window.onPriceInput = function onPriceInput(event, varianteId) {
+window.posEditPrice = function(event, varianteId) {
     const input = event.target;
     // Quitar todo excepto dígitos
     const digits = input.value.replace(/\D/g, '');
@@ -1806,8 +1806,8 @@ function renderCart() {
                 ${supervisorUnlocked
                     ? `<input type="text" inputmode="numeric" class="cart-item-price-input"
                               value="${fmt(item.precio)}"
-                              oninput="onPriceInput(event, '${item.variante_id}')"
-                              onkeydown="if(event.key==='Enter'){event.preventDefault();onPriceInput(event,'${item.variante_id}');this.blur();}"
+                              oninput="posEditPrice(event, '${item.variante_id}')"
+                              onkeydown="if(event.key==='Enter'){event.preventDefault();posEditPrice(event,'${item.variante_id}');this.blur();}"
                               title="Editar precio unitario">`
                     : `<div class="cart-item-price">${fmt(item.precio)} / ud</div>`
                 }
