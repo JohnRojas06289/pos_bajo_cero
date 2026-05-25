@@ -101,11 +101,10 @@ class EstadisticasController extends Controller
             $top5MasVendidos   = (clone $baseTop)->orderByDesc('total_vendido')->limit(5)->get();
             $top5MenosVendidos = (clone $baseTop)->orderBy('total_vendido')->limit(5)->get();
 
-            // ── Últimas transacciones ─────────────────────────────────────────
+            // ── Últimas transacciones (sin filtro de fecha para siempre mostrar las más recientes) ──
             $ultimasVentas = Venta::with(['user', 'cliente.persona', 'productos'])
-                ->whereBetween('created_at', [$rangeStart, $rangeEnd])
                 ->latest()
-                ->limit(15)
+                ->limit(20)
                 ->get();
 
             // ── Stock bajo ────────────────────────────────────────────────────

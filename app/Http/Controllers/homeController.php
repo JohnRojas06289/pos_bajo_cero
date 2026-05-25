@@ -43,8 +43,8 @@ class homeController extends Controller
 
             // ── Ventas por cliente del día (con productos) ────────────────────
             $ventasPorClienteHoy = Venta::with(['cliente.persona', 'productos', 'user'])
-                ->whereDate('created_at', Carbon::today())
                 ->latest()
+                ->limit(50)
                 ->get();
 
             return view('panel.index', compact(
