@@ -117,8 +117,8 @@
                     <div class="footer-heading">Contacto</div>
                     <div class="footer-links">
                         <div class="mb-2" style="color:rgba(255,255,255,0.65);font-size:0.85rem;"><i class="fas fa-map-marker-alt me-2" style="color:var(--primary-color);"></i> Bogotá, Colombia</div>
-                        <div class="mb-2" style="color:rgba(255,255,255,0.65);font-size:0.85rem;"><i class="fab fa-whatsapp me-2" style="color:#25d366;"></i> +57 300 123 4567</div>
-                        <div class="mb-2" style="color:rgba(255,255,255,0.65);font-size:0.85rem;"><i class="fas fa-envelope me-2" style="color:var(--primary-color);"></i> contacto@bajocero.co</div>
+                        <a href="https://wa.me/573053530749" target="_blank" rel="noopener" class="mb-2 d-block" style="color:rgba(255,255,255,0.65);font-size:0.85rem;text-decoration:none;"><i class="fab fa-whatsapp me-2" style="color:#25d366;"></i> +57 305 353 0749</a>
+                        <a href="mailto:Importacionesbajocero@gmail.com" class="mb-2 d-block" style="color:rgba(255,255,255,0.65);font-size:0.85rem;text-decoration:none;"><i class="fas fa-envelope me-2" style="color:var(--primary-color);"></i> Importacionesbajocero@gmail.com</a>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-4">
