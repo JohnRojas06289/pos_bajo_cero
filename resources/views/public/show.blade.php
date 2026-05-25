@@ -267,12 +267,6 @@
         {{-- Precio --}}
         <div class="price-display">${{ number_format($product->precio, 0) }}</div>
 
-        {{-- Stock --}}
-        @if($stock <= 0)
-            <div class="stock-pill-pub stock-pill-out">
-                <i class="fas fa-times-circle"></i> Agotado
-            </div>
-        @endif
 
         <hr class="info-sep">
 
@@ -366,7 +360,6 @@
                         <div class="pub-product-card-body">
                             <div class="pub-product-card-name">{{ $rel->nombre }}</div>
                             <div class="pub-product-card-price">${{ number_format($rel->precio, 0) }}</div>
-                            @if($rs <= 0)<div class="pub-product-card-stock">Agotado</div>@endif
                         </div>
                     </a>
                 </div>
@@ -394,7 +387,6 @@
                         <div class="pub-product-card-body">
                             <div class="pub-product-card-name">{{ $feat->nombre }}</div>
                             <div class="pub-product-card-price">${{ number_format($feat->precio, 0) }}</div>
-                            @if($fs <= 0)<div class="pub-product-card-stock">Agotado</div>@endif
                         </div>
                     </a>
                 </div>

@@ -97,12 +97,6 @@
                     @endphp
                     <div class="col mb-5">
                         <div class="card product-card h-100 border-0">
-                            {{-- Stock badge --}}
-                            @if($totalStock > 0)
-                                <div class="badge bg-success text-white position-absolute" style="top:.5rem;right:.5rem;z-index:10">DISPONIBLE</div>
-                            @else
-                                <div class="badge bg-danger text-white position-absolute" style="top:.5rem;right:.5rem;z-index:10">AGOTADO</div>
-                            @endif
 
                             {{-- Imagen --}}
                             <a href="{{ route('product.show', $product->id) }}" class="d-block overflow-hidden" style="height:250px;">
@@ -139,9 +133,8 @@
                                     @if($hasVariants)
                                     <div class="d-flex flex-wrap gap-1 mt-2">
                                         @foreach($variantes as $v)
-                                            <span class="badge {{ $v->stock > 0 ? 'bg-secondary' : 'bg-dark opacity-50' }}"
-                                                  style="font-size:.72rem;padding:4px 8px;"
-                                                  title="{{ $v->stock <= 0 ? 'Agotado' : '' }}">
+                                            <span class="badge bg-secondary"
+                                                  style="font-size:.72rem;padding:4px 8px;">
                                                 {{ $v->label }}
                                             </span>
                                         @endforeach
