@@ -100,6 +100,7 @@ class homeController extends Controller
             'daviplataHoy'      => (float) $daviplataHoy,
             'transferenciaHoy'  => (float) $transferenciaHoy,
             'ventas'            => $ventas,
-        ]);
+        ])->header('Cache-Control', 'no-store, no-cache, must-revalidate')
+          ->header('Pragma', 'no-cache');
     }
 }

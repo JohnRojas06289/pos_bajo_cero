@@ -70,14 +70,10 @@ class EstadisticasController extends Controller
                 ->limit(10)
                 ->get();
 
-            [$totalClientes, $totalProductos, $totalCompras, $totalUsuarios] = Cache::remember(
-                'dashboard_counts', 300, fn () => [
-                    Cliente::count(),
-                    Producto::count(),
-                    Compra::count(),
-                    User::count(),
-                ]
-            );
+            $totalClientes  = Cliente::count();
+            $totalProductos = Producto::count();
+            $totalCompras   = Compra::count();
+            $totalUsuarios  = User::count();
 
             // ── Gráfica 1: Ventas por día ─────────────────────────────────────
             $totalVentasPorDia = DB::table('ventas')
@@ -121,7 +117,8 @@ class EstadisticasController extends Controller
                 ->select('productos.nombre', 'inventario.cantidad')
                 ->limit(10)->get();
 
-            return view('panel.estadisticas', compact(
+            return response()
+                ->view('panel.estadisticas', compact(
                 'fechaInicio', 'fechaFin',
                 'ventasPeriodo', 'transaccionesPeriodo', 'ticketPromedioPeriodo',
                 'ventasSemana', 'ventasMes', 'ventasYear',
@@ -132,7 +129,9 @@ class EstadisticasController extends Controller
                 'ultimasVentas', 'productosStockBajo',
                 'gastosPeriodo', 'gastosMes', 'gastosYear',
                 'utilidadBruta', 'margenPct', 'gastosPorDia', 'ultimasCompras',
-            ));
+            ))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate')
+            ->header('Pragma', 'no-cache');
 
         } catch (\Exception $e) {
             Log::error('Error en EstadisticasController', ['error' => $e->getMessage(), 'line' => $e->getLine()]);

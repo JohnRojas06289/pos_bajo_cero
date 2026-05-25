@@ -137,10 +137,16 @@
         <div>
             <div class="db-section-title mb-0">Estadísticas</div>
             <div style="font-size:0.75rem;color:var(--text-secondary);">Análisis histórico · filtros · KPIs del período</div>
+            <div id="statsLastUpdated" style="font-size:0.68rem;color:var(--text-secondary);opacity:0.6;margin-top:2px;"></div>
         </div>
-        <a href="{{ route('panel') }}" class="btn btn-sm" style="border:1.5px solid var(--border-color);color:var(--text-secondary);border-radius:8px;font-size:0.75rem;background:var(--card-bg);">
-            <i class="fas fa-arrow-left me-1"></i>Volver al panel
-        </a>
+        <div class="d-flex gap-2 align-items-center">
+            <button type="button" onclick="refreshStats()" class="btn btn-sm" style="border:1.5px solid #E67E22;color:#E67E22;border-radius:8px;font-size:0.75rem;background:transparent;">
+                <i class="fas fa-sync-alt me-1" id="refreshIcon"></i>Actualizar
+            </button>
+            <a href="{{ route('panel') }}" class="btn btn-sm" style="border:1.5px solid var(--border-color);color:var(--text-secondary);border-radius:8px;font-size:0.75rem;background:var(--card-bg);">
+                <i class="fas fa-arrow-left me-1"></i>Volver al panel
+            </a>
+        </div>
     </div>
 
     {{-- ── Filtro de fechas ─────────────────────────────────────────────── --}}
@@ -754,5 +760,17 @@ function abrirDetalle(data) {
     document.getElementById('modalTotal').textContent = '$'+Number(data.total).toLocaleString('es-CO',{maximumFractionDigits:0});
     new bootstrap.Modal(document.getElementById('ventaDetalleModal')).show();
 }
+
+// ── Auto-refresh cada 60 segundos ─────────────────────────────────
+function refreshStats() {
+    const icon = document.getElementById('refreshIcon');
+    if (icon) icon.classList.add('fa-spin');
+    document.getElementById('filterForm').submit();
+}
+(function initAutoRefresh() {
+    const tsEl = document.getElementById('statsLastUpdated');
+    if (tsEl) tsEl.textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    setInterval(refreshStats, 60000);
+})();
 </script>
 @endpush
