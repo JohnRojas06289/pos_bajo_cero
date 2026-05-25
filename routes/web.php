@@ -109,6 +109,16 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
 
     Route::post('/agente-ia/chat', [AgenteIAController::class, 'chat'])->name('agente.ia.chat');
 
+    Route::get('/debug/version', function () {
+        return response()->json([
+            'app' => config('app.name'),
+            'env' => config('app.env'),
+            'version' => config('app.version'),
+            'laravel' => app()->version(),
+            'php' => PHP_VERSION,
+        ]);
+    })->name('debug.version');
+
     // Reservas
     Route::get('/reservas', [ReservaController::class, 'adminIndex'])->name('reservas.index');
     Route::patch('/reservas/{reserva}/estado', [ReservaController::class, 'updateEstado'])->name('reservas.estado');
@@ -148,5 +158,4 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
 
 Route::get('/login', [loginController::class, 'index'])->name('login.index');
 Route::post('/login', [loginController::class, 'login'])->name('login.login');
-
 

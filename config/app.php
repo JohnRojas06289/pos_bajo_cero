@@ -17,6 +17,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'version' => env('APP_VERSION', env('VERCEL_GIT_COMMIT_SHA', 'local')),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
