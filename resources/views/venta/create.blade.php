@@ -1201,7 +1201,7 @@ input:checked + .slider:before { transform: translateX(12px); }
                 <span class="cart-field-label">Mtodo de pago</span>
                 <div class="payment-pills" id="paymentPills">
                     <button type="button" class="pay-pill active" data-method="EFECTIVO"> Efectivo</button>
-                    <button type="button" class="pay-pill" data-method="VENTA_DIGITAL"> Venta Digital</button>
+                    <button type="button" class="pay-pill" data-method="VENTA_DIGITAL"> Transferencia</button>
                     <button type="button" class="pay-pill" data-method="FIADO"> Fiado</button>
                 </div>
             </div>
