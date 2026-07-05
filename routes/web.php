@@ -125,33 +125,6 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
 
     Route::get('/logout', [logoutController::class, 'logout'])->name('logout');
 
-    // Emergencia: Ejecutar migraciones desde el navegador si no se tiene acceso por terminal
-    Route::get('/migrate', function () {
-        try {
-            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-            $output = \Illuminate\Support\Facades\Artisan::output();
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Migraciones ejecutadas correctamente.',
-                'output' => $output
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Error al ejecutar migraciones: ' . $e->getMessage()
-            ], 500);
-        }
-    });
-
-    // Nueva ruta para renombrar al cliente John a General
-    Route::get('/rename-client', function () {
-        $persona = \App\Models\Persona::where('razon_social', 'John')->first();
-        if ($persona) {
-            $persona->update(['razon_social' => 'General']);
-            return response()->json(['status' => 'success', 'message' => 'Cliente John renombrado a General con éxito.']);
-        }
-        return response()->json(['status' => 'error', 'message' => 'No se encontró ningún cliente llamado John.'], 404);
-    });
 });
 
 

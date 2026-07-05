@@ -171,11 +171,13 @@ class ventaController extends Controller
             }
 
             // Validación server-side de stock antes de procesar
+            // lockForUpdate() dentro de la transacción evita que dos ventas concurrentes
+            // lean el mismo stock simultáneamente (race condition → overselling)
             foreach ($arrayProducto_id as $i => $pid) {
                 $vid = $arrayVarianteId[$i] ?? null;
                 $qty = (int) ($arrayCantidad[$i] ?? 0);
                 if ($vid && $qty > 0) {
-                    $variante = Variante::find($vid);
+                    $variante = Variante::where('id', $vid)->lockForUpdate()->first();
                     if (!$variante || $variante->stock < $qty) {
                         DB::rollBack();
                         $nombre = Producto::find($pid)->nombre ?? 'Producto';

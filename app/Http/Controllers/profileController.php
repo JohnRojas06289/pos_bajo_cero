@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -72,15 +71,18 @@ class profileController extends Controller
             'pos_code' => 'nullable|numeric|digits_between:4,8'
         ]);
 
-        /*Comprobar el password y aplicar el Hash*/
-        if (empty($request->password)) {
-            $request = Arr::except($request, array('password'));
-        } else {
-            $request->merge(['password' => Hash::make($request->password)]);
+        $updateData = [
+            'name'     => $request->input('name'),
+            'email'    => $request->input('email'),
+            'pos_code' => $request->input('pos_code'),
+        ];
+
+        if (!empty($request->password)) {
+            $updateData['password'] = Hash::make($request->password);
         }
 
         try {
-            $profile->update($request->all());
+            $profile->update($updateData);
             return redirect()->route('profile.index')->with('success', 'Cambios guardados');
         } catch (Throwable $e) {
             Log::error('Error al actualizar perfil', ['error' => $e->getMessage()]);

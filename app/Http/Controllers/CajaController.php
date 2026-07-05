@@ -43,7 +43,9 @@ class CajaController extends Controller
             'saldo_inicial' => ['required', 'numeric', 'min:1', new CajaCerradaRule]
         ]);
         try {
-            $caja = Caja::create($request->all());
+            $caja = Caja::create([
+                'saldo_inicial' => $request->input('saldo_inicial'),
+            ]);
             ActivityLogService::log('Creación de caja', 'Cajas', ['caja' => $caja]);
             return redirect()->route('movimientos.index', ['caja_id' => $caja->id])->with('success', 'Caja aperturada');
         } catch (Throwable $e) {
