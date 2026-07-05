@@ -15,7 +15,7 @@ class KardexController extends Controller
     public function index(Request $request): View
     {
         $producto_id = $request->get('producto_id');
-        $productos = Producto::orderBy('nombre')->get();
+        $productos = Producto::select('id', 'nombre', 'codigo')->orderBy('nombre')->get();
 
         $kardex = $producto_id
             ? Kardex::where('producto_id', $producto_id)->latest()->paginate(50)

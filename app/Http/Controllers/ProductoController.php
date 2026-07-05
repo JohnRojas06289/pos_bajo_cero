@@ -37,18 +37,50 @@ class ProductoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $productos = Producto::with([
+        $query = Producto::with([
             'categoria.caracteristica',
             'marca.caracteristica',
             'presentacione.caracteristica',
             'variantes'
-        ])
-            ->orderBy('nombre')
-            ->get();
+        ])->orderBy('nombre');
 
-        return view('producto.index', compact('productos'));
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre', 'like', "%{$search}%")
+                  ->orWhere('codigo', 'like', "%{$search}%");
+            });
+        }
+        if ($cat = $request->get('categoria')) {
+            $query->whereHas('categoria.caracteristica', fn($q) => $q->where('nombre', $cat));
+        }
+        if ($marca = $request->get('marca')) {
+            $query->whereHas('marca.caracteristica', fn($q) => $q->where('nombre', $marca));
+        }
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->get('estado'));
+        }
+
+        $productos = $query->paginate(60)->withQueryString();
+
+        $categorias = Cache::remember('categorias_activas_form', 3600, fn () =>
+            Categoria::join('caracteristicas as c', 'categorias.caracteristica_id', '=', 'c.id')
+                ->select('c.nombre as nombre')
+                ->where('c.estado', 1)
+                ->orderBy('c.nombre')
+                ->pluck('nombre')
+        );
+
+        $marcas = Cache::remember('marcas_activas', 3600, fn () =>
+            Marca::join('caracteristicas as c', 'marcas.caracteristica_id', '=', 'c.id')
+                ->select('c.nombre as nombre')
+                ->where('c.estado', 1)
+                ->orderBy('c.nombre')
+                ->pluck('nombre')
+        );
+
+        return view('producto.index', compact('productos', 'categorias', 'marcas'));
     }
 
     /**

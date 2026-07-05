@@ -54,6 +54,7 @@
     </div>
 
     <!-- Filters and Controls -->
+    <form method="GET" action="{{ route('productos.index') }}" id="filtrosForm">
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <div class="row g-3 align-items-center">
@@ -63,53 +64,50 @@
                         <span class="input-group-text bg-white">
                             <i class="fas fa-search text-muted"></i>
                         </span>
-                        <input type="text" id="searchProducts" class="form-control border-start-0" 
-                               placeholder="Buscar producto..." onkeyup="filterProducts()">
+                        <input type="text" name="search" id="searchProducts" class="form-control border-start-0"
+                               placeholder="Buscar producto..." value="{{ request('search') }}"
+                               oninput="clearTimeout(window._st);window._st=setTimeout(()=>this.form.submit(),400)">
                     </div>
                 </div>
 
                 <!-- Category Filter -->
                 <div class="col-md-2">
-                    <select id="filterCategory" class="form-select" onchange="filterProducts()">
+                    <select name="categoria" id="filterCategory" class="form-select" onchange="this.form.submit()">
                         <option value="">Todas las categorías</option>
-                        @foreach($productos->unique('categoria_id')->sortBy('categoria.caracteristica.nombre') as $item)
-                            @if($item->categoria)
-                            <option value="{{ $item->categoria->caracteristica->nombre }}">
-                                {{ $item->categoria->caracteristica->nombre }}
+                        @foreach($categorias as $nombre)
+                            <option value="{{ $nombre }}" {{ request('categoria') === $nombre ? 'selected' : '' }}>
+                                {{ $nombre }}
                             </option>
-                            @endif
                         @endforeach
                     </select>
                 </div>
 
                 <!-- Brand Filter -->
                 <div class="col-md-2">
-                    <select id="filterMarca" class="form-select" onchange="filterProducts()">
+                    <select name="marca" id="filterMarca" class="form-select" onchange="this.form.submit()">
                         <option value="">Todas las marcas</option>
-                        @foreach($productos->unique('marca_id')->sortBy('marca.caracteristica.nombre') as $item)
-                            @if($item->marca)
-                            <option value="{{ $item->marca->caracteristica->nombre }}">
-                                {{ $item->marca->caracteristica->nombre }}
+                        @foreach($marcas as $nombre)
+                            <option value="{{ $nombre }}" {{ request('marca') === $nombre ? 'selected' : '' }}>
+                                {{ $nombre }}
                             </option>
-                            @endif
                         @endforeach
                     </select>
                 </div>
 
                 <!-- Status Filter -->
                 <div class="col-md-2">
-                    <select id="filterStatus" class="form-select" onchange="filterProducts()">
+                    <select name="estado" id="filterStatus" class="form-select" onchange="this.form.submit()">
                         <option value="">Todos los estados</option>
-                        <option value="1">Activos</option>
-                        <option value="0">Inactivos</option>
+                        <option value="1" {{ request('estado') === '1' ? 'selected' : '' }}>Activos</option>
+                        <option value="0" {{ request('estado') === '0' ? 'selected' : '' }}>Inactivos</option>
                     </select>
                 </div>
 
                 <!-- View Toggle + Clear -->
                 <div class="col-md-2 d-flex gap-2 align-items-center justify-content-end">
-                    <button type="button" class="btn-ghost btn-sm" onclick="clearFilters()" title="Limpiar filtros" style="font-size:0.78rem;padding:0.3rem 0.65rem;">
+                    <a href="{{ route('productos.index') }}" class="btn-ghost btn-sm" title="Limpiar filtros" style="font-size:0.78rem;padding:0.3rem 0.65rem;">
                         <i class="fas fa-times me-1"></i>Limpiar
-                    </button>
+                    </a>
                     <div class="btn-group btn-group-sm" role="group">
                         <button type="button" class="btn btn-outline-secondary active" id="gridViewBtn" onclick="setView('grid')" title="Grid">
                             <i class="fas fa-th"></i>
@@ -125,6 +123,7 @@
             </div>
         </div>
     </div>
+    </form>
 
     <!-- Family View Container (hidden by default) -->
     <div id="familyContainer" class="row g-3" style="display:none;"></div>
@@ -344,12 +343,19 @@
         @endforelse
     </div>
 
-    <!-- No Results Message -->
+    <!-- No Results Message (JS, para cuando se ocultan todos en familia view) -->
     <div id="noResults" class="empty-state" style="display: none;">
         <i class="fas fa-search"></i>
         <h3>No se encontraron productos</h3>
         <p>Intenta con otro término de búsqueda</p>
     </div>
+
+    <!-- Paginación -->
+    @if($productos->hasPages())
+    <div class="d-flex justify-content-center mt-4">
+        {{ $productos->links() }}
+    </div>
+    @endif
 </div>
 
 @endsection
@@ -363,46 +369,6 @@ function confirmarEliminar(id, nombre) {
 }
 
     let currentView = 'grid';
-
-    function clearFilters() {
-        document.getElementById('searchProducts').value = '';
-        document.getElementById('filterCategory').value = '';
-        document.getElementById('filterMarca').value = '';
-        document.getElementById('filterStatus').value = '';
-        filterProducts();
-    }
-
-    function filterProducts() {
-        const searchTerm = document.getElementById('searchProducts').value.toLowerCase();
-        const categoryFilter = document.getElementById('filterCategory').value;
-        const marcaFilter = document.getElementById('filterMarca').value;
-        const statusFilter = document.getElementById('filterStatus').value;
-        
-        const products = document.querySelectorAll('.product-card');
-        let visibleCount = 0;
-
-        products.forEach(product => {
-            const searchData = product.getAttribute('data-search');
-            const category = product.getAttribute('data-category');
-            const marca = product.getAttribute('data-marca');
-            const status = product.getAttribute('data-status');
-
-            const matchesSearch = searchData.includes(searchTerm);
-            const matchesCategory = !categoryFilter || category === categoryFilter;
-            const matchesMarca = !marcaFilter || marca === marcaFilter;
-            const matchesStatus = !statusFilter || status === statusFilter;
-
-            if (matchesSearch && matchesCategory && matchesMarca && matchesStatus) {
-                product.style.display = '';
-                visibleCount++;
-            } else {
-                product.style.display = 'none';
-            }
-        });
-
-        // Show/hide no results message
-        document.getElementById('noResults').style.display = visibleCount === 0 ? 'block' : 'none';
-    }
 
     function setView(view) {
         currentView = view;
