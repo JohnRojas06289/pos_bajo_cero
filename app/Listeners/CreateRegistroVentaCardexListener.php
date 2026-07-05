@@ -30,8 +30,14 @@ class CreateRegistroVentaCardexListener
                 ->latest('id')
                 ->first();
 
-            // Si no hay registros previos, usar el precio de venta como costo
-            $costoUnitario = $ultimoRegistro ? $ultimoRegistro->costo_unitario : $event->precio_venta;
+            // Si no hay registros previos en kardex, usar 0 como costo de adquisición.
+            // Usar precio_venta como costo sería incorrecto y distorsionaría el margen.
+            if (!$ultimoRegistro) {
+                \Log::warning('CreateRegistroVentaCardexListener: sin registro previo en kardex, costo_unitario=0', [
+                    'producto_id' => $event->producto_id,
+                ]);
+            }
+            $costoUnitario = $ultimoRegistro ? $ultimoRegistro->costo_unitario : 0;
 
             $kardex->crearRegistro(
                 [

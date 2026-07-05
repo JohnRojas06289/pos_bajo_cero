@@ -223,13 +223,7 @@ class ProductoController extends Controller
     public function export()
     {
         try {
-            // Get all products with relationships
-            $productos = Producto::with([
-                'categoria.caracteristica',
-                'marca.caracteristica',
-                'presentacione.caracteristica',
-                'inventario'
-            ])->get();
+            $totalProductos = Producto::count();
 
             // Create filename with current date
             $filename = 'productos_' . date('Y-m-d') . '.csv';
@@ -243,10 +237,10 @@ class ProductoController extends Controller
                 'Expires' => '0'
             ];
 
-            // Create callback for streaming CSV
-            $callback = function() use ($productos) {
+            // Usar chunkById para evitar cargar todos los productos en memoria a la vez
+            $callback = function() {
                 $file = fopen('php://output', 'w');
-                
+
                 // Add BOM for UTF-8 (helps Excel recognize special characters)
                 fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
@@ -263,25 +257,32 @@ class ProductoController extends Controller
                     'Estado'
                 ]);
 
-                // Add product data
-                foreach ($productos as $producto) {
-                    fputcsv($file, [
-                        $producto->codigo,
-                        $producto->nombre,
-                        $producto->descripcion ?? 'Sin descripción',
-                        number_format($producto->precio ?? 0, 2, '.', ''),
-                        $producto->categoria->caracteristica->nombre ?? 'Sin categoría',
-                        $producto->marca->caracteristica->nombre ?? 'Sin marca',
-                        $producto->presentacione->caracteristica->nombre ?? 'Sin presentación',
-                        $producto->inventario->stock ?? 0,
-                        $producto->estado ? 'Activo' : 'Inactivo'
-                    ]);
-                }
+                // Procesar en lotes de 100 para no agotar memoria con catálogos grandes
+                Producto::with([
+                    'categoria.caracteristica',
+                    'marca.caracteristica',
+                    'presentacione.caracteristica',
+                    'inventario'
+                ])->chunkById(100, function ($chunk) use ($file) {
+                    foreach ($chunk as $producto) {
+                        fputcsv($file, [
+                            $producto->codigo,
+                            $producto->nombre,
+                            $producto->descripcion ?? 'Sin descripción',
+                            number_format($producto->precio ?? 0, 2, '.', ''),
+                            $producto->categoria->caracteristica->nombre ?? 'Sin categoría',
+                            $producto->marca->caracteristica->nombre ?? 'Sin marca',
+                            $producto->presentacione->caracteristica->nombre ?? 'Sin presentación',
+                            $producto->inventario->cantidad ?? 0,
+                            $producto->estado ? 'Activo' : 'Inactivo'
+                        ]);
+                    }
+                });
 
                 fclose($file);
             };
 
-            ActivityLogService::log('Exportación de productos', 'Productos', ['total' => $productos->count()]);
+            ActivityLogService::log('Exportación de productos', 'Productos', ['total' => $totalProductos]);
             
             return response()->stream($callback, 200, $headers);
 

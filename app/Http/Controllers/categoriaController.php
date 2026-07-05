@@ -9,6 +9,7 @@ use App\Models\Categoria;
 use App\Services\ActivityLogService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -56,6 +57,8 @@ class categoriaController extends Controller
             $caracteristica = Caracteristica::create($request->validated());
             $caracteristica->categoria()->create([]);
             DB::commit();
+            Cache::forget('categorias_activas');
+            Cache::forget('categorias_activas_form');
 
             ActivityLogService::log('Creación de categoría', 'Categorías', $request->validated());
             return redirect()->route('categorias.index')->with('success', 'Categoría registrada');
@@ -89,6 +92,8 @@ class categoriaController extends Controller
     {
         try {
             $categoria->caracteristica->update($request->validated());
+            Cache::forget('categorias_activas');
+            Cache::forget('categorias_activas_form');
 
             ActivityLogService::log('Edición de categoría', 'Categorías', $request->validated());
 
@@ -110,6 +115,8 @@ class categoriaController extends Controller
 
             $nuevoEstado = $categoria->caracteristica->estado == 1 ? 0 : 1;
             $categoria->caracteristica->update(['estado' => $nuevoEstado]);
+            Cache::forget('categorias_activas');
+            Cache::forget('categorias_activas_form');
             $message = $nuevoEstado == 1 ? 'Categoría restaurada' : 'Categoría eliminada';
 
             ActivityLogService::log($message, 'Categorías', [

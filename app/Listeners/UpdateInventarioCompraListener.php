@@ -7,6 +7,7 @@ use App\Models\Inventario;
 use App\Models\Variante;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\DB;
 
 class UpdateInventarioCompraListener
 {
@@ -21,32 +22,29 @@ class UpdateInventarioCompraListener
     public function handle(CreateCompraDetalleEvent $event): void
     {
         try {
-            // 1. Actualizar inventario.cantidad (registro histórico)
-            $registro = Inventario::where('producto_id', $event->producto_id)->first();
-            if ($registro) {
-                $registro->update([
-                    'cantidad' => $registro->cantidad + $event->cantidad,
-                    'fecha_vencimiento' => $event->fecha_vencimiento
-                ]);
-            }
+            DB::transaction(function () use ($event) {
+                // 1. Actualizar inventario.cantidad (registro histórico)
+                $registro = Inventario::where('producto_id', $event->producto_id)->first();
+                if ($registro) {
+                    $registro->update([
+                        'cantidad' => $registro->cantidad + $event->cantidad,
+                        'fecha_vencimiento' => $event->fecha_vencimiento
+                    ]);
+                }
 
-            // 2. Actualizar variante.stock (fuente de verdad del POS)
-            $variantes = Variante::where('producto_id', $event->producto_id)
-                ->orderBy('stock', 'asc')
-                ->get();
+                // 2. Actualizar variante.stock (fuente de verdad del POS)
+                $variantes = Variante::where('producto_id', $event->producto_id)
+                    ->orderBy('stock', 'asc')
+                    ->get();
 
-            if ($variantes->isEmpty()) {
-                \Log::warning('UpdateInventarioCompraListener: No variantes found', ['producto_id' => $event->producto_id]);
-                return;
-            }
+                if ($variantes->isEmpty()) {
+                    \Log::warning('UpdateInventarioCompraListener: No variantes found', ['producto_id' => $event->producto_id]);
+                    return;
+                }
 
-            if ($variantes->count() === 1) {
-                // Producto de una sola variante: agregar todo el stock
+                // Agregar a la variante de menor stock (única o múltiples)
                 $variantes->first()->increment('stock', $event->cantidad);
-            } else {
-                // Múltiples variantes: agregar a la de menor stock
-                $variantes->first()->increment('stock', $event->cantidad);
-            }
+            });
 
             \Log::info('UpdateInventarioCompraListener: variante stock updated', [
                 'producto_id' => $event->producto_id,

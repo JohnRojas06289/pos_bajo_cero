@@ -9,6 +9,7 @@ use App\Models\Presentacione;
 use App\Services\ActivityLogService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -49,6 +50,7 @@ class presentacioneController extends Controller
             $caracteristica = Caracteristica::create($request->validated());
             $caracteristica->presentacione()->create(['sigla' => $request->sigla]);
             DB::commit();
+            Cache::forget('presentaciones_activas');
             ActivityLogService::log('Creación de presentación', 'Presentaciones', $request->validated());
 
             return redirect()->route('presentaciones.index')->with('success', 'Talla registrada');
@@ -83,6 +85,7 @@ class presentacioneController extends Controller
         try {
             $presentacione->caracteristica->update($request->validated());
             $presentacione->update($request->validated());
+            Cache::forget('presentaciones_activas');
 
             ActivityLogService::log('Edición de presentación', 'Presentaciones', $request->validated());
 
@@ -104,6 +107,7 @@ class presentacioneController extends Controller
 
             $nuevoEstado = $presentacione->caracteristica->estado == 1 ? 0 : 1;
             $presentacione->caracteristica->update(['estado' => $nuevoEstado]);
+            Cache::forget('presentaciones_activas');
             $message = $nuevoEstado == 1 ? 'Talla restaurada' : 'Talla eliminada';
 
             ActivityLogService::log($message, 'Presentaciones', [

@@ -9,6 +9,7 @@ use App\Models\Marca;
 use App\Services\ActivityLogService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -49,6 +50,7 @@ class marcaController extends Controller
             $caracteristica = Caracteristica::create($request->validated());
             $caracteristica->marca()->create([]);
             DB::commit();
+            Cache::forget('marcas_activas');
 
             ActivityLogService::log('Creación de marca', 'Marcas', $request->validated());
             return redirect()->route('marcas.index')->with('success', 'Marca registrada');
@@ -82,6 +84,7 @@ class marcaController extends Controller
     {
         try {
             $marca->caracteristica->update($request->validated());
+            Cache::forget('marcas_activas');
 
             ActivityLogService::log('Edición de marca', 'Marcas', $request->validated());
 
@@ -103,6 +106,7 @@ class marcaController extends Controller
 
             $nuevoEstado = $marca->caracteristica->estado == 1 ? 0 : 1;
             $marca->caracteristica->update(['estado' => $nuevoEstado]);
+            Cache::forget('marcas_activas');
             $message = $nuevoEstado == 1 ? 'Marca restaurada' : 'Marca eliminada';
 
             ActivityLogService::log($message, 'Marcas', [
