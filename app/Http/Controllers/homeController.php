@@ -46,6 +46,7 @@ class homeController extends Controller
 
             // ── Ventas por cliente del día (con productos) ────────────────────
             $ventasPorClienteHoy = Venta::with(['cliente.persona', 'productos', 'user'])
+                ->whereBetween('created_at', [$hoyStart, $hoyEnd])
                 ->latest()
                 ->limit(50)
                 ->get();
@@ -57,7 +58,12 @@ class homeController extends Controller
             ));
 
         } catch (\Exception $e) {
-            return response("Error en Dashboard: " . $e->getMessage() . " | File: " . $e->getFile() . " | Line: " . $e->getLine());
+            \Illuminate\Support\Facades\Log::error('Error en Dashboard', [
+                'error' => $e->getMessage(),
+                'file'  => $e->getFile(),
+                'line'  => $e->getLine(),
+            ]);
+            return response()->view('errors.500', [], 500);
         }
     }
 

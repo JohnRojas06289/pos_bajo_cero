@@ -110,12 +110,12 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
     Route::post('/agente-ia/chat', [AgenteIAController::class, 'chat'])->name('agente.ia.chat');
 
     Route::get('/debug/version', function () {
+        if (!auth()->user()?->hasRole('administrador')) {
+            abort(403);
+        }
         return response()->json([
-            'app' => config('app.name'),
-            'env' => config('app.env'),
+            'app'     => config('app.name'),
             'version' => config('app.version'),
-            'laravel' => app()->version(),
-            'php' => PHP_VERSION,
         ]);
     })->name('debug.version');
 

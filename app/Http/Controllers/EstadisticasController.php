@@ -24,6 +24,12 @@ class EstadisticasController extends Controller
             $tz          = 'America/Bogota';
             $fechaInicio = $request->input('fecha_inicio', Carbon::now($tz)->format('Y-m-d'));
             $fechaFin    = $request->input('fecha_fin',    Carbon::now($tz)->format('Y-m-d'));
+
+            // Si el rango está invertido, intercambiar silenciosamente
+            if ($fechaInicio > $fechaFin) {
+                [$fechaInicio, $fechaFin] = [$fechaFin, $fechaInicio];
+            }
+
             $rangeStart  = Carbon::createFromFormat('Y-m-d', $fechaInicio, $tz)->startOfDay()->setTimezone('UTC')->format('Y-m-d H:i:s');
             $rangeEnd    = Carbon::createFromFormat('Y-m-d', $fechaFin,    $tz)->endOfDay()->setTimezone('UTC')->format('Y-m-d H:i:s');
 

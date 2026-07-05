@@ -40,7 +40,7 @@ class PublicController extends Controller
         }
 
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = substr(trim($request->search), 0, 100);
             $query->where(function ($q) use ($search) {
                 $q->where('nombre', 'like', '%' . $search . '%')
                   ->orWhere('descripcion', 'like', '%' . $search . '%');

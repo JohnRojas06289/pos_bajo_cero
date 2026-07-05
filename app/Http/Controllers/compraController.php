@@ -105,12 +105,17 @@ class compraController extends Controller
 
             //Llenar tabla compra_producto
             //1.Recuperar los arrays
-            $arrayProducto_id = $request->get('arrayidproducto');
-            $arrayCantidad = $request->get('arraycantidad');
-            $arrayPrecioCompra = $request->get('arraypreciocompra');
+            $arrayProducto_id      = $request->get('arrayidproducto');
+            $arrayCantidad         = $request->get('arraycantidad');
+            $arrayPrecioCompra     = $request->get('arraypreciocompra');
             $arrayFechaVencimiento = $request->get('arrayfechavencimiento');
-            //2.Realizar el llenado
 
+            if (empty($arrayProducto_id) || !is_array($arrayProducto_id)) {
+                DB::rollBack();
+                return redirect()->route('compras.create')->with('error', 'Debe agregar al menos un producto a la compra.');
+            }
+
+            //2.Realizar el llenado
             $siseArray = count($arrayProducto_id);
             $cont = 0;
             while ($cont < $siseArray) {
