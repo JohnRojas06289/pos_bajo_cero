@@ -13,7 +13,7 @@ use App\Http\Controllers\ExportExcelController;
 use App\Http\Controllers\ExportPDFController;
 use App\Http\Controllers\homeController;
 use App\Http\Controllers\ImportExcelController;
-use App\Http\Controllers\InventarioControlller;
+use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\KardexController;
 use App\Http\Controllers\loginController;
 use App\Http\Controllers\logoutController;
@@ -83,7 +83,7 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
     Route::resource('roles', roleController::class)->except('show');
     Route::resource('profile', profileController::class)->only('index', 'update');
     Route::resource('activityLog', ActivityLogController::class)->only('index');
-    Route::resource('inventario', InventarioControlller::class)->except('show');
+    Route::resource('inventario', InventarioController::class)->except('show');
     Route::resource('kardex', KardexController::class)->only('index');
     Route::resource('empresa', EmpresaController::class)->only('index', 'update');
     Route::resource('empleados', EmpleadoController::class)->except('show');

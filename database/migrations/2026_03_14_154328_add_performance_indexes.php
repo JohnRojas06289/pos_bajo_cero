@@ -38,6 +38,10 @@ return new class extends Migration
                 ['idx_pv_venta_id',   'venta_id'],
                 ['idx_pv_producto_id','producto_id'],
             ],
+            'compra_producto' => [
+                ['idx_cp_compra_id',   'compra_id'],
+                ['idx_cp_producto_id', 'producto_id'],
+            ],
         ];
 
         foreach ($indexes as $table => $cols) {
@@ -57,6 +61,7 @@ return new class extends Migration
             'idx_kardex_producto_id','idx_kardex_created_at',
             'idx_personas_estado','idx_personas_razon_social',
             'idx_pv_venta_id','idx_pv_producto_id',
+            'idx_cp_compra_id','idx_cp_producto_id',
         ];
 
         foreach ($names as $name) {

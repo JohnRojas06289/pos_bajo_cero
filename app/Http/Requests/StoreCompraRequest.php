@@ -31,8 +31,16 @@ class StoreCompraRequest extends FormRequest
             'metodo_pago' => ['nullable', new Enum(MetodoPagoEnum::class)],
             'fecha_hora' => 'nullable|date|date_format:Y-m-d\TH:i',
             'subtotal' => 'required|min:1',
+            'total'    => 'required|min:1',
 
-            'total' => 'required|min:1'
+            'arrayidproducto'        => 'required|array|min:1',
+            'arrayidproducto.*'      => 'required|exists:productos,id',
+            'arraycantidad'          => 'required|array|min:1',
+            'arraycantidad.*'        => 'required|integer|min:1',
+            'arraypreciocompra'      => 'required|array|min:1',
+            'arraypreciocompra.*'    => 'required|numeric|min:0',
+            'arrayfechavencimiento'  => 'nullable|array',
+            'arrayfechavencimiento.*'=> 'nullable|date',
         ];
     }
 }
