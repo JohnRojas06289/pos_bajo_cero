@@ -7,6 +7,7 @@ use App\Models\Venta;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 
 class ExportPDFController extends Controller
@@ -18,7 +19,12 @@ class ExportPDFController extends Controller
     {
         $id = Crypt::decrypt($request->id);
 
-        $venta = Venta::findOrfail($id);
+        $venta = Venta::findOrFail($id);
+
+        if ($venta->user_id !== Auth::id() && !Auth::user()->hasRole('administrador')) {
+            abort(403, 'No autorizado para exportar este comprobante.');
+        }
+
         $empresa = Empresa::first();
 
         $pdf = Pdf::loadView('pdf.comprobante-venta', [

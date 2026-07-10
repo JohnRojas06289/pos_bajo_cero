@@ -247,9 +247,15 @@ class ventaController extends Controller
                 }
 
                 // Sincronizar inventario.cantidad (con guard para no crashear si está desincronizado)
-                Inventario::where('producto_id', $arrayProducto_id[$cont])
+                $inventarioRows = Inventario::where('producto_id', $arrayProducto_id[$cont])
                     ->where('cantidad', '>=', $cantidad)
                     ->decrement('cantidad', $cantidad);
+                if (!$inventarioRows) {
+                    Log::warning('[inventario] sin filas actualizadas — posible desincronización con variantes', [
+                        'producto_id' => $arrayProducto_id[$cont],
+                        'cantidad'    => $cantidad,
+                    ]);
+                }
 
                 // Despachar evento — incluye variante_id para descontar stock correcto
                 CreateVentaDetalleEvent::dispatch(

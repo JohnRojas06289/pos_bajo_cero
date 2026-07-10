@@ -107,10 +107,15 @@ class Kardex extends Model
      */
     public function calcularPrecioVenta(string $producto_id): float
     {
-        $costoUltimoRegistro = $this->where('producto_id', $producto_id)
+        $registro = $this->where('producto_id', $producto_id)
             ->latest('id')
-            ->first()
-            ->costo_unitario;
+            ->first();
+
+        if (!$registro) {
+            return 0.0;
+        }
+
+        $costoUltimoRegistro = $registro->costo_unitario;
 
         return $costoUltimoRegistro + round($costoUltimoRegistro * self::MARGEN_GANANCIA, 2);
     }

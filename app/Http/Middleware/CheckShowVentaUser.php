@@ -20,7 +20,7 @@ class CheckShowVentaUser
         $venta = $request->route('venta');
 
         if ($venta->user_id != Auth::id()) {
-            throw new HttpException(401, 'No autorizado');
+            throw new HttpException(403, 'No autorizado');
         }
 
         return $next($request);

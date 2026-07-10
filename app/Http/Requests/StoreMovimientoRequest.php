@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\MetodoPagoEnum;
+use App\Enums\TipoMovimientoEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
@@ -27,8 +28,8 @@ class StoreMovimientoRequest extends FormRequest
             'descripcion' => 'required|max:255',
             'monto' => 'numeric|min:1|required',
             'metodo_pago' => ['required', new Enum(MetodoPagoEnum::class)],
-            'caja_id' => 'required',
-            'tipo' => 'required'
+            'caja_id' => 'required|exists:cajas,id',
+            'tipo' => ['required', new Enum(TipoMovimientoEnum::class)]
         ];
     }
 }

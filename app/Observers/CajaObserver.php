@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Enums\TipoMovimientoEnum;
 use App\Models\Caja;
 use App\Models\Movimiento;
 use Carbon\Carbon;
@@ -37,11 +38,14 @@ class CajaObserver
 
     public function updating(Caja $caja): void
     {
+        $tipoVenta  = TipoMovimientoEnum::Venta->value;
+        $tipoRetiro = TipoMovimientoEnum::Retiro->value;
+
         $movimientos = Movimiento::where('caja_id', $caja->id)
             ->selectRaw("
-            SUM(CASE WHEN tipo = 'VENTA' THEN monto ELSE 0 END) AS total_venta,
-            SUM(CASE WHEN tipo = 'RETIRO' THEN monto ELSE 0 END) AS total_retiro
-            ")->first();
+            SUM(CASE WHEN tipo = ? THEN monto ELSE 0 END) AS total_venta,
+            SUM(CASE WHEN tipo = ? THEN monto ELSE 0 END) AS total_retiro
+            ", [$tipoVenta, $tipoRetiro])->first();
 
         $caja->fecha_hora_cierre = Carbon::now()->toDateTimeString();
         $caja->saldo_final = $caja->saldo_inicial + ($movimientos->total_venta ?? 0) - ($movimientos->total_retiro ?? 0);
