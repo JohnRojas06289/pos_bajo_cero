@@ -8,7 +8,7 @@ use App\Models\Venta;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
-class VentaObsever
+class VentaObserver
 {
     /**
      * Handle the Caja "creating" event.

@@ -39,7 +39,7 @@ class StoreCompraRequest extends FormRequest
             'arraycantidad'          => 'required|array|min:1',
             'arraycantidad.*'        => 'required|integer|min:1',
             'arraypreciocompra'      => 'required|array|min:1',
-            'arraypreciocompra.*'    => 'required|numeric|min:0',
+            'arraypreciocompra.*'    => 'required|numeric|min:0.01',
             'arrayfechavencimiento'  => 'nullable|array',
             'arrayfechavencimiento.*'=> 'nullable|date',
         ];

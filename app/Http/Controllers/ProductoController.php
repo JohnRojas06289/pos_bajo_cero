@@ -112,7 +112,8 @@ class ProductoController extends Controller
                 ->get()
         );
 
-        // Get the last product code and suggest the next one (numeric sorting)
+        // LENGTH(codigo) DESC, codigo DESC: ordena strings numéricos correctamente sin CAST
+        // (compatible con MySQL y SQLite). Ejemplo: "100" > "99" por longitud antes que lexicográfico.
         $ultimoProducto = Producto::orderByRaw('LENGTH(codigo) DESC, codigo DESC')->first();
         $codigoSugerido = $ultimoProducto && $ultimoProducto->codigo ? (string)((int)$ultimoProducto->codigo + 1) : '1';
 
