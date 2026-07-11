@@ -49,8 +49,16 @@ class ReservaController extends Controller
         $total = 0;
 
         foreach ($request->items as $item) {
-            $producto = Producto::with('marca.caracteristica')->find($item['id']);
+            $producto = Producto::with(['marca.caracteristica', 'variantes'])->find($item['id']);
             if (!$producto) continue;
+
+            $stockTotal = $producto->variantes->sum('stock');
+            if ($stockTotal < $item['qty']) {
+                $disponible = $stockTotal;
+                return back()->withErrors([
+                    'items' => "Stock insuficiente para \"{$producto->nombre}\". Disponible: {$disponible}, solicitado: {$item['qty']}.",
+                ])->withInput();
+            }
 
             $subtotal = $producto->precio * $item['qty'];
             $total   += $subtotal;

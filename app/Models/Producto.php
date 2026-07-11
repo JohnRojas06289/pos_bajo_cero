@@ -108,15 +108,20 @@ class Producto extends Model
     }
 
     /**
-     * Genera un código único para el producto
+     * Genera un código único para el producto.
+     * Límite de 50 intentos para evitar bucle infinito si el espacio de códigos se satura.
      */
     private static function generateUniqueCode(): string
     {
-        do {
+        $maxAttempts = 50;
+        for ($i = 0; $i < $maxAttempts; $i++) {
             $code = str_pad(random_int(0, 9999999999), 12, '0', STR_PAD_LEFT);
-        } while (self::where('codigo', $code)->exists());
+            if (!self::where('codigo', $code)->exists()) {
+                return $code;
+            }
+        }
 
-        return $code;
+        throw new \RuntimeException('No se pudo generar un código único para el producto tras ' . $maxAttempts . ' intentos.');
     }
 
     /**

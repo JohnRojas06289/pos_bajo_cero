@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\MetodoPagoEnum;
+use App\Models\Compra;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
@@ -42,5 +43,26 @@ class StoreCompraRequest extends FormRequest
             'arrayfechavencimiento'  => 'nullable|array',
             'arrayfechavencimiento.*'=> 'nullable|date',
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $numero      = $this->input('numero_comprobante');
+            $proveedoreId = $this->input('proveedore_id');
+
+            if ($numero && $proveedoreId) {
+                $duplicado = Compra::where('proveedore_id', $proveedoreId)
+                    ->where('numero_comprobante', $numero)
+                    ->exists();
+
+                if ($duplicado) {
+                    $validator->errors()->add(
+                        'numero_comprobante',
+                        'Ya existe una compra con ese número de comprobante para este proveedor.'
+                    );
+                }
+            }
+        });
     }
 }

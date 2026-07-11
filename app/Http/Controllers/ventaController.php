@@ -209,6 +209,11 @@ class ventaController extends Controller
                     $precioFinal = $precioDb > 0 ? $precioDb : ((float)($arrayPrecioVenta[$cont] ?? 0));
                 }
 
+                if (!$esAdmin && $precioFinal <= 0) {
+                    $nombre = $productoModel->nombre ?? $arrayProducto_id[$cont];
+                    throw new \RuntimeException("El producto \"{$nombre}\" no tiene precio configurado. Contacta al administrador.");
+                }
+
                 $venta->productos()->syncWithoutDetaching([
                     $arrayProducto_id[$cont] => [
                         'id' => \Illuminate\Support\Str::uuid()->toString(),
