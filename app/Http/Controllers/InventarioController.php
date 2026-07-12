@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 class InventarioController extends Controller
@@ -29,7 +30,7 @@ class InventarioController extends Controller
     {
         $categorias = \App\Models\Categoria::with('caracteristica')->get();
         
-        $productos = Producto::with(['inventario', 'variantes', 'presentacione', 'categoria.caracteristica'])
+        $productos = Producto::with(['inventario', 'variantes', 'presentacione', 'categoria.caracteristica', 'marca'])
             ->when($request->categoria_id, function($query, $categoria_id) {
                 return $query->where('categoria_id', $categoria_id);
             })
@@ -46,7 +47,8 @@ class InventarioController extends Controller
     {
         $producto = Producto::findOrfail($request->producto_id);
         $ubicaciones = Ubicacione::all();
-        return view('inventario.create', compact('producto', 'ubicaciones'));
+        $supportsWholesalePrice = Schema::hasColumn('productos', 'precio_al_por_mayor');
+        return view('inventario.create', compact('producto', 'ubicaciones', 'supportsWholesalePrice'));
     }
 
     /**
@@ -62,7 +64,7 @@ class InventarioController extends Controller
             // Update product sale price
             $producto = Producto::findOrFail($request->producto_id);
             $producto->update(['precio' => $request->precio_venta]);
-            if ($request->filled('precio_al_por_mayor')) {
+            if ($request->filled('precio_al_por_mayor') && Schema::hasColumn('productos', 'precio_al_por_mayor')) {
                 $producto->update(['precio_al_por_mayor' => $request->precio_al_por_mayor]);
             }
 
@@ -101,8 +103,9 @@ class InventarioController extends Controller
         // Fetch last cost from Kardex
         $ultimoKardex = Kardex::where('producto_id', $producto->id)->latest('id')->first();
         $costo_unitario = $ultimoKardex ? $ultimoKardex->costo_unitario : 0;
+        $supportsWholesalePrice = Schema::hasColumn('productos', 'precio_al_por_mayor');
 
-        return view('inventario.edit', compact('inventario', 'producto', 'costo_unitario'));
+        return view('inventario.edit', compact('inventario', 'producto', 'costo_unitario', 'supportsWholesalePrice'));
     }
 
     /**
@@ -119,7 +122,7 @@ class InventarioController extends Controller
             if ($request->has('precio_venta')) {
                 $producto->update(['precio' => $request->precio_venta]);
             }
-            if ($request->filled('precio_al_por_mayor')) {
+            if ($request->filled('precio_al_por_mayor') && Schema::hasColumn('productos', 'precio_al_por_mayor')) {
                 $producto->update(['precio_al_por_mayor' => $request->precio_al_por_mayor]);
             }
 

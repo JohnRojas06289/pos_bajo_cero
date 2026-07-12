@@ -105,10 +105,31 @@
                             </td>
                             <td>
                                 <div class="table-actions justify-content-end">
+                                    {{-- Detalle extendido --}}
+                                    <button type="button"
+                                        class="btn-icon-sm btn-view"
+                                        title="Ver detalle"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#detalleModal"
+                                        data-nombre="{{ $item->nombre }}"
+                                        data-codigo="{{ $item->codigo }}"
+                                        data-categoria="{{ $item->categoria?->caracteristica?->nombre ?? 'N/A' }}"
+                                        data-marca="{{ $item->marca?->nombre ?? 'N/A' }}"
+                                        data-talla="{{ $item->presentacione?->sigla ?? 'N/A' }}"
+                                        data-precio="{{ number_format($item->precio ?? 0, 0, ',', '.') }}"
+                                        data-precio-mayor="{{ number_format($item->precio_al_por_mayor ?? 0, 0, ',', '.') }}"
+                                        data-stock="{{ $qty }}"
+                                        data-imagen="{{ $item->image_url }}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+
                                     @if($item->inventario)
+                                        {{-- Reinicializar (editar inventario) --}}
                                         <a href="{{ route('inventario.edit', $item->inventario->id) }}"
-                                           class="btn-icon-sm btn-edit" title="Editar inventario">
-                                            <i class="fas fa-edit"></i>
+                                           class="btn-icon-sm"
+                                           style="color: var(--color-primary);"
+                                           title="Reinicializar inventario">
+                                            <i class="fas fa-sync-alt"></i>
                                         </a>
 
                                         <form action="{{ route('inventario.destroy', $item->inventario->id) }}"
@@ -136,6 +157,67 @@
     </div>
 
 </div>
+
+<!-- Modal Detalle Extendido -->
+<div class="modal fade" id="detalleModal" tabindex="-1" aria-labelledby="detalleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detalleModalLabel">
+                    <i class="fas fa-box-open me-2 text-primary"></i>
+                    <span id="modal-nombre"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <img id="modal-imagen"
+                         src=""
+                         alt="Imagen del producto"
+                         class="rounded"
+                         style="max-height:220px; max-width:100%; object-fit:contain; background:#f8f9fa; border:1px solid #dee2e6; padding:8px;">
+                    <div id="modal-sin-imagen" class="text-muted py-4" style="display:none;">
+                        <i class="fas fa-image fa-3x mb-2"></i>
+                        <p class="mb-0">Sin imagen</p>
+                    </div>
+                </div>
+                <table class="table table-sm table-borderless mb-0">
+                    <tbody>
+                        <tr>
+                            <td class="text-muted fw-semibold" style="width:40%"><i class="fas fa-barcode me-1"></i>Código</td>
+                            <td id="modal-codigo"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-semibold"><i class="fas fa-tag me-1"></i>Categoría</td>
+                            <td id="modal-categoria"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-semibold"><i class="fas fa-copyright me-1"></i>Marca</td>
+                            <td id="modal-marca"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-semibold"><i class="fas fa-ruler-combined me-1"></i>Talla</td>
+                            <td id="modal-talla"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-semibold"><i class="fas fa-cubes me-1"></i>Stock</td>
+                            <td id="modal-stock"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-semibold"><i class="fas fa-dollar-sign me-1"></i>Precio venta</td>
+                            <td id="modal-precio"></td>
+                        </tr>
+                        <tr id="modal-row-precio-mayor">
+                            <td class="text-muted fw-semibold"><i class="fas fa-dollar-sign me-1"></i>Precio mayor</td>
+                            <td id="modal-precio-mayor"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('js')
@@ -170,6 +252,43 @@
                     dataTable.search(e.target.value);
                 });
             }
+        }
+
+        // Poblar modal con datos del producto
+        const detalleModal = document.getElementById('detalleModal');
+        if (detalleModal) {
+            detalleModal.addEventListener('show.bs.modal', function (event) {
+                const btn = event.relatedTarget;
+                document.getElementById('modal-nombre').textContent  = btn.dataset.nombre;
+                document.getElementById('modal-codigo').textContent  = btn.dataset.codigo;
+                document.getElementById('modal-categoria').textContent = btn.dataset.categoria;
+                document.getElementById('modal-marca').textContent   = btn.dataset.marca;
+                document.getElementById('modal-talla').textContent   = btn.dataset.talla;
+                document.getElementById('modal-stock').textContent   = btn.dataset.stock + ' uds';
+                document.getElementById('modal-precio').textContent  = '$ ' + btn.dataset.precio;
+
+                const precioMayor = btn.dataset.precioMayor;
+                const rowMayor = document.getElementById('modal-row-precio-mayor');
+                if (precioMayor && precioMayor !== '0') {
+                    document.getElementById('modal-precio-mayor').textContent = '$ ' + precioMayor;
+                    rowMayor.style.display = '';
+                } else {
+                    rowMayor.style.display = 'none';
+                }
+
+                const imagen = btn.dataset.imagen;
+                const imgEl = document.getElementById('modal-imagen');
+                const sinImagen = document.getElementById('modal-sin-imagen');
+                if (imagen) {
+                    imgEl.src = imagen;
+                    imgEl.style.display = '';
+                    sinImagen.style.display = 'none';
+                } else {
+                    imgEl.src = '';
+                    imgEl.style.display = 'none';
+                    sinImagen.style.display = '';
+                }
+            });
         }
     });
 </script>
