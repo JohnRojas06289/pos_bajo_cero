@@ -57,7 +57,7 @@ class InventarioController extends Controller
         DB::beginTransaction();
         try {
             $kardex->crearRegistro($request->validated(), TipoTransaccionEnum::Apertura);
-            Inventario::create($request->validated());
+            Inventario::create($request->safe()->except(['costo_unitario', 'precio_venta', 'precio_al_por_mayor']));
 
             // Update product sale price
             $producto = Producto::findOrFail($request->producto_id);
