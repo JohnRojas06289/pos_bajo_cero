@@ -58,37 +58,66 @@
 
     <!-- Table Card -->
     <div class="card">
-        <div class="card-header d-flex align-items-center gap-2">
-            <i class="fas fa-boxes text-primary"></i>
-            <span>Stock de productos</span>
+        <div class="card-header d-flex align-items-center justify-content-between gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-boxes text-primary"></i>
+                <span>Stock de productos</span>
+            </div>
+            <button id="btnVistaExtendida" class="btn btn-primary" onclick="toggleVistaExtendida()">
+                <i class="fas fa-expand-alt me-2"></i>Vista extendida
+            </button>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table id="datatablesSimple" class="table table-hover mb-0 fs-6">
                     <thead>
                         <tr>
+                            <th class="col-img" style="display:none;">Imagen</th>
                             <th>Código</th>
                             <th>Producto</th>
+                            <th class="col-ext" style="display:none;">Categoría / Marca</th>
+                            <th class="col-ext" style="display:none;">Precios</th>
                             <th>Stock</th>
                             <th class="text-end">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($productos as $item)
+                        @php $qty = $item->variantes->sum('stock'); @endphp
                         <tr>
-                            <td>
+                            <td class="col-img align-middle text-center" style="display:none; width:90px;">
+                                @if($item->image_url)
+                                    <img src="{{ $item->image_url }}"
+                                         alt="{{ $item->nombre }}"
+                                         style="width:70px;height:70px;object-fit:contain;border-radius:6px;border:1px solid #dee2e6;background:#f8f9fa;padding:3px;">
+                                @else
+                                    <div style="width:70px;height:70px;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid #dee2e6;background:#f8f9fa;color:#adb5bd;margin:auto;">
+                                        <i class="fas fa-image fa-lg"></i>
+                                    </div>
+                                @endif
+                            </td>
+                            <td class="align-middle">
                                 <span class="badge" style="background:var(--hover-bg);color:var(--text-secondary);font-size:0.72rem;font-weight:600;border-radius:5px;">
                                     {{ $item->codigo }}
                                 </span>
                             </td>
-                            <td>
+                            <td class="align-middle">
                                 <div class="fw-semibold text-dark" style="font-size:0.85rem;">{{ $item->nombre }}</div>
                                 <div class="text-muted" style="font-size:0.75rem;">
                                     <i class="fas fa-ruler-combined me-1"></i>Talla: {{ $item->presentacione?->sigla ?? 'N/A' }}
                                 </div>
                             </td>
-                            <td>
-                                @php $qty = $item->variantes->sum('stock'); @endphp
+                            <td class="col-ext align-middle" style="display:none; font-size:0.8rem;">
+                                <div><i class="fas fa-tag me-1 text-muted"></i>{{ $item->categoria?->caracteristica?->nombre ?? 'N/A' }}</div>
+                                <div class="text-muted"><i class="fas fa-copyright me-1"></i>{{ $item->marca?->nombre ?? 'N/A' }}</div>
+                            </td>
+                            <td class="col-ext align-middle" style="display:none; font-size:0.8rem;">
+                                <div><i class="fas fa-dollar-sign me-1 text-muted"></i>Venta: <strong>$ {{ number_format($item->precio ?? 0, 0, ',', '.') }}</strong></div>
+                                @if($item->precio_al_por_mayor)
+                                <div class="text-muted"><i class="fas fa-dollar-sign me-1"></i>Mayor: $ {{ number_format($item->precio_al_por_mayor, 0, ',', '.') }}</div>
+                                @endif
+                            </td>
+                            <td class="align-middle">
                                 @if($qty <= 0)
                                     <span class="badge bg-danger">
                                         <i class="fas fa-exclamation-triangle me-1"></i>Agotado
@@ -253,6 +282,19 @@
                 });
             }
         }
+
+        // Vista extendida toggle
+        window.toggleVistaExtendida = function() {
+            const btn = document.getElementById('btnVistaExtendida');
+            const cols = document.querySelectorAll('.col-img, .col-ext');
+            const activa = btn.classList.toggle('btn-secondary');
+            btn.classList.toggle('btn-primary', !activa);
+            const mostrar = cols.length > 0 && cols[0].style.display === 'none';
+            cols.forEach(el => el.style.display = mostrar ? '' : 'none');
+            btn.innerHTML = mostrar
+                ? '<i class="fas fa-compress-alt me-2"></i>Vista compacta'
+                : '<i class="fas fa-expand-alt me-2"></i>Vista extendida';
+        };
 
         // Poblar modal con datos del producto
         const detalleModal = document.getElementById('detalleModal');
