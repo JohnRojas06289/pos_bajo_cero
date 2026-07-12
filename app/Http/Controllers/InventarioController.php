@@ -71,7 +71,13 @@ class InventarioController extends Controller
             return redirect()->route('productos.index')->with('success', 'Producto inicializado');
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error('Error al inicializar el producto', ['error' => $e->getMessage()]);
+            Log::error('Error al inicializar el producto', [
+                'message'   => $e->getMessage(),
+                'exception' => get_class($e),
+                'file'      => $e->getFile() . ':' . $e->getLine(),
+                'trace'     => $e->getTraceAsString(),
+                'request'   => $request->validated(),
+            ]);
             return redirect()->route('productos.index')->with('error', 'Ups, algo falló');
         }
     }
@@ -154,7 +160,13 @@ class InventarioController extends Controller
             return redirect()->route('inventario.index')->with('success', 'Inventario actualizado');
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error('Error al actualizar el inventario', ['error' => $e->getMessage()]);
+            Log::error('Error al actualizar el inventario', [
+                'message'   => $e->getMessage(),
+                'exception' => get_class($e),
+                'file'      => $e->getFile() . ':' . $e->getLine(),
+                'trace'     => $e->getTraceAsString(),
+                'request'   => $request->validated(),
+            ]);
             return redirect()->route('inventario.index')->with('error', 'Ups, algo falló');
         }
     }
@@ -173,7 +185,13 @@ class InventarioController extends Controller
             return redirect()->route('inventario.index')->with('success', 'Inventario eliminado');
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error('Error al eliminar el inventario', ['error' => $e->getMessage()]);
+            Log::error('Error al eliminar el inventario', [
+                'message'   => $e->getMessage(),
+                'exception' => get_class($e),
+                'file'      => $e->getFile() . ':' . $e->getLine(),
+                'trace'     => $e->getTraceAsString(),
+                'inventario_id' => $id,
+            ]);
             return redirect()->route('inventario.index')->with('error', 'Ups, algo falló');
         }
     }
