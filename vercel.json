@@ -1,7 +1,7 @@
 {
     "version": 2,
     "framework": null,
-    "buildCommand": "php artisan migrate --force",
+    "buildCommand": "echo 'vendor pre-installed'",
     "functions": {
         "api/index.php": {
             "runtime": "vercel-php@0.7.4"
