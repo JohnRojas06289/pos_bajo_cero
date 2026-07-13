@@ -105,37 +105,6 @@
                             </div>
                         </td>
                     </tr>
-
-                    <!-- Modal para cerra la caja-->
-                    <div class="modal fade" id="confirmModal-{{$item->id}}" tabindex="-1">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h1 class="modal-title fs-5">
-                                        Mensaje de confirmación</h1>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal">
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    ¿Seguro que quieres cerrar la caja?
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                        Cancelar</button>
-
-                                    <form action="{{route('cajas.destroy',['caja' => $item->id])}}" method="post">
-                                        @method('DELETE')
-                                        @csrf
-                                        <button type="submit" class="btn btn-danger">
-                                            Confirmar</button>
-                                    </form>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
                     @endforeach
                 </tbody>
             </table>
@@ -144,6 +113,36 @@
     </div>
 
 </div>
+
+<!-- Modales para cerrar caja (fuera del table para evitar backdrop huérfano) -->
+@foreach ($cajas as $item)
+@can('cerrar-caja')
+@if ($item->estado == 1)
+<div class="modal fade" id="confirmModal-{{$item->id}}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Mensaje de confirmación</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                ¿Seguro que quieres cerrar la caja?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form action="{{route('cajas.destroy',['caja' => $item->id])}}" method="post">
+                    @method('DELETE')
+                    @csrf
+                    <button type="submit" class="btn btn-danger">Confirmar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+@endcan
+@endforeach
+
 @endsection
 
 @push('js')
